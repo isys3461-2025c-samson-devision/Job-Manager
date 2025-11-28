@@ -14,5 +14,6 @@
 1. Folder of all diagrams
 2. PDF file of the Report
 3. Excel File of Contribution Form
+4. Project Charter
 --------------------------
 
