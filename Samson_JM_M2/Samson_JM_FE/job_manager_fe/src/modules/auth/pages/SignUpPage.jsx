@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import AuthLogo from "../components/AuthLogo";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
+  const passwordInputRef = useRef(null);
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -12,21 +14,43 @@ export default function SignUpPage() {
     phoneNumber: "",
     email: "",
     password: "",
+    country: "",
     agree: false,
   });
   const [error, setError] = useState("");
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (field) => (e) => {
-    const value =
-      field === "agree" ? e.target.checked : e.target.value;
+    const value = field === "agree" ? e.target.checked : e.target.value;
     setForm({ ...form, [field]: value });
   };
 
+  const isValidPassword = (pwd) => {
+    const regex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,50}$/;
+    return regex.test(pwd);
+  };
+
   const handleSubmit = async () => {
-    if (!form.email || !form.password || !form.firstName || !form.lastName) {
+    if (
+      !form.firstName ||
+      !form.lastName ||
+      !form.email ||
+      !form.password ||
+      !form.country
+    ) {
       setError("Please fill in all required fields.");
       return;
     }
+
+    if (!isValidPassword(form.password)) {
+      setError(
+        "Password must be 8–50 characters, with at least 1 uppercase letter, 1 number, and 1 special character."
+      );
+      return;
+    }
+
     if (!form.agree) {
       setError("You must agree to the Terms and Privacy Policy.");
       return;
@@ -34,11 +58,32 @@ export default function SignUpPage() {
 
     try {
       setError("");
-      // call register API here
       console.log("Submit sign up", form);
       // navigate("/signin");
     } catch (e) {
       setError("Sign up failed. Please try again.");
+    }
+  };
+
+  const passwordChecks = {
+    hasMinLength: form.password.length >= 8 && form.password.length <= 50,
+    hasUppercase: /[A-Z]/.test(form.password),
+    hasNumber: /\d/.test(form.password),
+    hasSpecial: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(form.password),
+  };
+
+  const renderCheckItem = (ok, text) => (
+    <div className={ok ? "text-success small" : "text-muted small"}>
+      {ok ? "✔" : "•"} {text}
+    </div>
+  );
+
+  const toggleShowPassword = (e) => {
+    // prevent losing focus from input when clicking icon
+    e.preventDefault();
+    setShowPassword((prev) => !prev);
+    if (passwordInputRef.current) {
+      passwordInputRef.current.focus();
     }
   };
 
@@ -105,6 +150,21 @@ export default function SignUpPage() {
         </div>
 
         <div className="mb-3">
+          <label className="form-label small">Country</label>
+          <select
+            className="form-select"
+            value={form.country}
+            onChange={handleChange("country")}
+          >
+            <option value="">Select your country</option>
+            <option value="Vietnam">Vietnam</option>
+            <option value="Singapore">Singapore</option>
+            <option value="Australia">Australia</option>
+            <option value="United States">United States</option>
+          </select>
+        </div>
+
+        <div className="mb-3">
           <label className="form-label small">Email</label>
           <input
             className="form-control"
@@ -115,15 +175,57 @@ export default function SignUpPage() {
           />
         </div>
 
-        <div className="mb-3">
+        <div className="mb-3 position-relative">
           <label className="form-label small">Password</label>
-          <input
-            className="form-control"
-            type="password"
-            placeholder="From 6 to 50 characters, 1 uppercase letter and 1 number"
-            value={form.password}
-            onChange={handleChange("password")}
-          />
+
+          <div className="position-relative">
+            <input
+              ref={passwordInputRef}
+              className="form-control"
+              type={showPassword ? "text" : "password"}
+              placeholder="" // no text inside box
+              value={form.password}
+              onChange={handleChange("password")}
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
+              style={{ paddingRight: "2.5rem" }} // space for eye icon
+            />
+
+            <i
+              className={showPassword ? "bi bi-eye-slash" : "bi bi-eye"}
+              onMouseDown={toggleShowPassword}
+              style={{
+                position: "absolute",
+                right: "0.75rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer",
+                fontSize: "1.1rem",
+                color: "#6c757d",
+              }}
+            />
+          </div>
+
+          {(passwordFocused || form.password.length > 0) && (
+            <div
+              className="mt-1 p-2 rounded-3 shadow-sm bg-light"
+              style={{
+                fontSize: "0.75rem",
+                border: "1px solid #ddd",
+              }}
+            >
+              {renderCheckItem(passwordChecks.hasMinLength, "8–50 characters")}
+              {renderCheckItem(
+                passwordChecks.hasUppercase,
+                "At least 1 uppercase letter"
+              )}
+              {renderCheckItem(passwordChecks.hasNumber, "At least 1 number")}
+              {renderCheckItem(
+                passwordChecks.hasSpecial,
+                "At least 1 special character"
+              )}
+            </div>
+          )}
         </div>
 
         <div className="form-check mb-2">
