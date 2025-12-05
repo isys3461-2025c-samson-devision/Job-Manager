@@ -1,129 +1,165 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import AuthLayout from "../components/AuthLayout";
+import AuthLogo from "../components/AuthLogo";
 
-const SignUpForm = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    phoneNumber: '',
-    email: '',
-    password: '',
+export default function SignUpPage() {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    phoneCode: "+084",
+    phoneNumber: "",
+    email: "",
+    password: "",
+    agree: false,
   });
+  const [error, setError] = useState("");
 
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  const handleChange = (field) => (e) => {
+    const value =
+      field === "agree" ? e.target.checked : e.target.value;
+    setForm({ ...form, [field]: value });
   };
 
-  const handleCheckboxChange = () => {
-    setAgreeTerms(!agreeTerms);
-  };
+  const handleSubmit = async () => {
+    if (!form.email || !form.password || !form.firstName || !form.lastName) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+    if (!form.agree) {
+      setError("You must agree to the Terms and Privacy Policy.");
+      return;
+    }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Here you would typically send data to your backend API
-    console.log('Form data submitted:', formData);
+    try {
+      setError("");
+      // call register API here
+      console.log("Submit sign up", form);
+      // navigate("/signin");
+    } catch (e) {
+      setError("Sign up failed. Please try again.");
+    }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold text-center mb-4">Sign Up To Become a Member!</h2>
-        
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
-            <input
-              type="text"
-              name="firstName"
-              id="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label>
-            <input
-              type="text"
-              name="lastName"
-              id="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">Phone Number</label>
-            <input
-              type="tel"
-              name="phoneNumber"
-              id="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
+    <AuthLayout>
+      <AuthLogo />
 
-          <div className="mb-4 flex items-center">
-            <input
-              type="checkbox"
-              checked={agreeTerms}
-              onChange={handleCheckboxChange}
-              className="mr-2"
-            />
-            <label htmlFor="agreeTerms" className="text-sm">
-              I agree to the <a href="/terms" className="text-blue-500 hover:underline">Terms of Service</a> and <a href="/privacy" className="text-blue-500 hover:underline">Privacy Policy</a>
-            </label>
-          </div>
+      <div
+        className="bg-white rounded-4 shadow-sm p-4"
+        style={{ width: "480px", border: "1px solid #eee" }}
+      >
+        <h5 className="fw-bold text-center mb-3">
+          Sign Up To Become a Member!
+        </h5>
 
-          <button
-            type="submit"
-            disabled={!agreeTerms}
-            className={`w-full py-2 px-4 mt-4 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:bg-gray-400`}
+        <button
+          className="btn w-100 mb-3 d-flex align-items-center justify-content-center"
+          style={{ backgroundColor: "#D5FFD5" }}
+        >
+          <i className="bi bi-google me-2" />
+          Continue with Google
+        </button>
+
+        <div className="row">
+          <div className="col-6 mb-3">
+            <label className="form-label small">Last Name</label>
+            <input
+              className="form-control"
+              value={form.lastName}
+              onChange={handleChange("lastName")}
+            />
+          </div>
+          <div className="col-6 mb-3">
+            <label className="form-label small">First Name</label>
+            <input
+              className="form-control"
+              value={form.firstName}
+              onChange={handleChange("firstName")}
+            />
+          </div>
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label small">Phone Number</label>
+          <div className="row">
+            <div className="col-4">
+              <select
+                className="form-select"
+                value={form.phoneCode}
+                onChange={handleChange("phoneCode")}
+              >
+                <option value="+084">🇻🇳 +084</option>
+              </select>
+            </div>
+            <div className="col-8">
+              <input
+                className="form-control"
+                type="tel"
+                value={form.phoneNumber}
+                onChange={handleChange("phoneNumber")}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label small">Email</label>
+          <input
+            className="form-control"
+            type="email"
+            placeholder="Use a valid email to verify"
+            value={form.email}
+            onChange={handleChange("email")}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label small">Password</label>
+          <input
+            className="form-control"
+            type="password"
+            placeholder="From 6 to 50 characters, 1 uppercase letter and 1 number"
+            value={form.password}
+            onChange={handleChange("password")}
+          />
+        </div>
+
+        <div className="form-check mb-2">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id="agree"
+            checked={form.agree}
+            onChange={handleChange("agree")}
+          />
+          <label htmlFor="agree" className="form-check-label small">
+            I agree to the Terms of Service and Privacy Policy of DEVision.
+          </label>
+        </div>
+
+        {error && <p className="text-danger small mb-2">{error}</p>}
+
+        <button
+          className="btn w-100 mb-3"
+          style={{ backgroundColor: "#FF9A3C", color: "#fff" }}
+          onClick={handleSubmit}
+        >
+          Sign Up
+        </button>
+
+        <p className="text-center small mb-0">
+          Already a DEVision member?{" "}
+          <span
+            className="text-primary"
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/signin")}
           >
-            Sign Up
-          </button>
-
-          <div className="mt-4 text-center">
-            <span>Already a DEVision member? <a href="/signin" className="text-blue-500 hover:underline">Sign In</a></span>
-          </div>
-        </form>
+            Sign In
+          </span>
+        </p>
       </div>
-    </div>
+    </AuthLayout>
   );
-};
-
-export default SignUpForm;
+}
