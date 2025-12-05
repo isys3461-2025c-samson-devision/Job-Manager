@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "title": "Senior Frontend Developer",
+    "company": "Tech Innovators Vietnam",
+    "description": "We are looking for an experienced Frontend Developer to join our dynamic team.",
+    "tags": ["React", "TypeScript", "TailwindCSS"],
+    "salary": "2000 - 3000 USD",
+    "location": "Ho Chi Minh City",
+    "type": "Full-Time",
+    "timestamp": "2 hours ago"
+  }
+]
