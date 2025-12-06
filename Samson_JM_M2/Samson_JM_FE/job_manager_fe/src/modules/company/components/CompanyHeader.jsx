@@ -8,9 +8,8 @@ export default function CompanyHeader() {
   const location = useLocation();
   const { auth, logout } = useContext(AuthContext);
 
-  // Premium or free subscription logic
   const isPremium = auth?.subscription === "premium";
-  const dollarColor = isPremium ? "#FFD700" : "#0054FF"; // gold or blue
+  const dollarColor = isPremium ? "#FFD700" : "#0054FF";
 
   return (
     <div
@@ -33,15 +32,28 @@ export default function CompanyHeader() {
 
       {/* CENTER — NAVIGATION BUTTONS */}
       <div className="d-flex align-items-center gap-3">
-        <NavButton path="/dashboard" icon="bi-house-door" label="Dashboard" location={location} />
-        <NavButton path="/post-job" icon="bi-file-earmark-plus" label="Post Job" location={location} />
-        <NavButton path="/applicants" icon="bi-people" label="Applicants" location={location} />
-        <NavButton path="/profile" icon="bi-person" label="Profile" location={location} />
+        <NavButton
+          path="/dashboard"
+          icon="bi-house-door"
+          label="Dashboard"
+          location={location}
+        />
+        <NavButton
+          path="/applicants"
+          icon="bi-people"
+          label="Applicants"
+          location={location}
+        />
+        <NavButton
+          path="/profile"
+          icon="bi-person"
+          label="Profile"
+          location={location}
+        />
       </div>
 
       {/* RIGHT — ICONS */}
       <div className="d-flex align-items-center gap-3">
-
         {/* Subscription Indicator */}
         <i
           className="bi bi-currency-dollar"
@@ -51,13 +63,19 @@ export default function CompanyHeader() {
             cursor: "pointer",
           }}
           title={isPremium ? "Premium Subscription" : "Upgrade to Premium"}
-        ></i>
+        />
 
         {/* Notifications */}
-        <i className="bi bi-bell" style={{ fontSize: "20px", cursor: "pointer" }}></i>
+        <i
+          className="bi bi-bell"
+          style={{ fontSize: "20px", cursor: "pointer" }}
+        />
 
         {/* Profile Icon */}
-        <i className="bi bi-person-circle" style={{ fontSize: "22px", cursor: "pointer" }}></i>
+        <i
+          className="bi bi-person-circle"
+          style={{ fontSize: "22px", cursor: "pointer" }}
+        />
 
         {/* LOG OUT BUTTON */}
         <button
