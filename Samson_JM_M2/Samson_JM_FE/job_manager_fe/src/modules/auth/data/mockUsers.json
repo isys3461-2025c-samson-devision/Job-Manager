@@ -1,0 +1,20 @@
+[
+  {
+    "email": "devvision@gmail.com",
+    "password": "123456",
+    "companyName": "DevVision",
+    "subscription": "premium"
+  },
+  {
+    "email": "greensolutions@gmail.com",
+    "password": "123456",
+    "companyName": "Green Solutions",
+    "subscription": "freemium"
+  },
+  {
+    "email": "samsoncompany@gmail.com",
+    "password": "123456",
+    "companyName": "Samson Logistics",
+    "subscription": "premium"
+  }
+]
