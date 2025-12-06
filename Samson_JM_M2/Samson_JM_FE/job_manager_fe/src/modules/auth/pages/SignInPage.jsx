@@ -23,7 +23,7 @@ export default function SignInPage() {
     try {
       const user = await authService.login(form);
       login(user);
-      navigate("/home");
+      navigate("/dashboard");
     } catch (err) {
       setError("Invalid email or password.");
     }
