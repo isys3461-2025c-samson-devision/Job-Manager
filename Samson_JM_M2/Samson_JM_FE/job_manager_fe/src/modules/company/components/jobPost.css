@@ -1,0 +1,62 @@
+
+.job-action-btn {
+  width: 160px; /* SAME WIDTH for all */
+  padding: 10px 0;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.job-status-select {
+  width: 160px;
+  border-radius: 12px;
+  padding: 10px;
+  background: #f5f5f5;
+  border: none;
+  font-size: 15px;
+  appearance: none; /* removes default arrow */
+}
+
+.job-status-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #cce4ff;
+}
+
+.job-status-wrapper {
+  position: relative;
+}
+
+.job-status-wrapper i {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Shared badge styling */
+.status-badge {
+  padding: 4px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+/* Active = green */
+.status-active {
+  background: #d4f5d4;
+  color: #2e9d44;
+}
+
+/* Inactive = red */
+.status-inactive {
+  background: #f8d7da;
+  color: #c0392b;
+}
+
+/* Draft = grey */
+.status-draft {
+  background: #e0e0e0;
+  color: #555;
+}

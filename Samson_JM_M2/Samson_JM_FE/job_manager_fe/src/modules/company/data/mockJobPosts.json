@@ -3,11 +3,39 @@
     "id": 1,
     "title": "Senior Frontend Developer",
     "company": "Tech Innovators Vietnam",
-    "description": "We are looking for an experienced Frontend Developer to join our dynamic team.",
-    "tags": ["React", "TypeScript", "TailwindCSS"],
-    "salary": "2000 - 3000 USD",
     "location": "Ho Chi Minh City",
+    "salary": "$2000 - 3000 USD",
     "type": "Full-Time",
-    "timestamp": "2 hours ago"
+    "description": "We are looking for an experienced Frontend Developer...",
+    "applicants": 45,
+    "views": 890,
+    "postedDate": "2024-11-25",
+    "status": "active"
+  },
+  {
+    "id": 2,
+    "title": "Product Designer",
+    "company": "Tech Innovators Vietnam",
+    "location": "Hanoi",
+    "salary": "$2000 - 3000 USD",
+    "type": "Full-Time",
+    "description": "Join our design team to create amazing user experiences...",
+    "applicants": 28,
+    "views": 465,
+    "postedDate": "2024-11-28",
+    "status": "inactive"
+  },
+  {
+    "id": 3,
+    "title": "Junior Backend Developer",
+    "company": "Tech Innovators Vietnam",
+    "location": "Da Nang",
+    "salary": "$800 - 1200 USD",
+    "type": "Part-Time",
+    "description": "Assist in backend development tasks and microservices...",
+    "applicants": 12,
+    "views": 240,
+    "postedDate": "2024-11-30",
+    "status": "draft"
   }
 ]
