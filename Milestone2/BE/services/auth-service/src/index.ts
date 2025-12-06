@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import authRoutes from './router';
+import { errorHandler } from '../../../shared/middleware';
 
 
 //load environment variables
@@ -15,11 +16,16 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(helmet());
 
-app.use('/auth', authRoutes);
-
-
 app.use(express.json({limit: "10mb"}));
 app.use(express.urlencoded({ extended: true }));
+
+
+
+app.use('/auth', authRoutes);
+
+//Error handling middleware
+app.use(errorHandler)
+
 
 app.listen(PORT, () => {
     console.log(`Auth Service is running on port ${PORT}`);

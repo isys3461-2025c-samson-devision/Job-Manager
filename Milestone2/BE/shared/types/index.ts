@@ -41,3 +41,11 @@ export class ServiceError extends Error {
 
     }
 }
+export function logError(error:Error,context?:Record<string,any>) :void {
+    console.error("Error orcurred:",{
+        message : error.message,
+        stack:error.stack,
+        context,
+        timestamp: new Date().toISOString(),
+    });
+}
