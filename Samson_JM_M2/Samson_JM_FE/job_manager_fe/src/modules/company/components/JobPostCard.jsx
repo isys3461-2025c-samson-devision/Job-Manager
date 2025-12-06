@@ -1,4 +1,4 @@
-import "./jobPost.css";
+import "../styles/jobPost.css";
 
 export default function JobPostCard({ post }) {
   const statusClass =

@@ -1,4 +1,4 @@
-import "./jobFilterBar.css";
+import "../styles/jobFilterBar.css";
 
 export default function JobFilterBar({
   searchTerm,
