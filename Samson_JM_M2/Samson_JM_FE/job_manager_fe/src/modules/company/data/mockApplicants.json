@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "name": "Nguyen Van A",
+    "title": "Senior Frontend Developer",
+    "rating": 4.8,
+    "location": "Ho Chi Minh City",
+    "yearsExperience": 6,
+    "education": "B.S. Computer Science",
+    "skills": ["React", "TypeScript", "Tailwind CSS", "Next.js", "Node.js"],
+    "expectedSalary": "2500 - 3500 USD",
+    "availability": "Immediate",
+    "avatarUrl": "https://i.pravatar.cc/80?img=3"
+  },
+  {
+    "id": 2,
+    "name": "Nguyen Van A",
+    "title": "UI/UX Designer",
+    "rating": 4.9,
+    "location": "Hanoi",
+    "yearsExperience": 4,
+    "education": "B.A. Design",
+    "skills": ["Figma", "Adobe XD", "User Research", "Prototyping", "Design System"],
+    "expectedSalary": "1800 - 2800 USD",
+    "availability": "2 Weeks",
+    "avatarUrl": "https://i.pravatar.cc/80?img=5"
+  },
+  {
+    "id": 3,
+    "name": "Tran Van B",
+    "title": "Backend Engineer",
+    "rating": 4.7,
+    "location": "Da Nang",
+    "yearsExperience": 5,
+    "education": "B.S. Software Engineering",
+    "skills": ["Java", "Spring Boot", "PostgreSQL", "Docker"],
+    "expectedSalary": "2300 - 3200 USD",
+    "availability": "1 Month",
+    "avatarUrl": "https://i.pravatar.cc/80?img=8"
+  }
+]

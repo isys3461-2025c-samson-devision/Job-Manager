@@ -1,0 +1,133 @@
+import { useMemo, useState } from "react";
+import CompanyHeader from "../components/CompanyHeader";
+import ApplicantCard from "../components/ApplicantsCard";
+import mockApplicants from "../data/mockApplicants.json";
+
+export default function CompanyApplicants() {
+  const [keyword, setKeyword] = useState("");
+  const [location, setLocation] = useState("");
+
+  const filteredApplicants = useMemo(() => {
+    return mockApplicants.filter((a) => {
+      const kw = keyword.toLowerCase();
+      const loc = location.toLowerCase();
+
+      const matchKeyword =
+        !kw ||
+        a.name.toLowerCase().includes(kw) ||
+        a.title.toLowerCase().includes(kw) ||
+        a.skills.some((s) => s.toLowerCase().includes(kw));
+
+      const matchLocation =
+        !loc || a.location.toLowerCase().includes(loc);
+
+      return matchKeyword && matchLocation;
+    });
+  }, [keyword, location]);
+
+  return (
+    <>
+      <CompanyHeader />
+
+      {/* page background */}
+      <div style={{ backgroundColor: "#f3f6fb", minHeight: "100vh" }}>
+        <div
+          className="container py-4"
+          style={{ maxWidth: "1120px" }}
+        >
+          {/* Title */}
+          <h3 className="mb-1">Search Applicants</h3>
+          <p className="text-muted mb-4">
+            Find the perfect candidates for your open positions.
+          </p>
+
+          {/* Search bar card */}
+          <div
+            className="card mb-4 border-0"
+            style={{
+              borderRadius: "18px",
+              boxShadow: "0 8px 18px rgba(15, 23, 42, 0.08)",
+            }}
+          >
+            <div className="card-body py-3">
+              <div className="row g-2 align-items-center">
+                {/* Keyword */}
+                <div className="col-md-4">
+                  <div
+                    className="d-flex align-items-center px-3"
+                    style={{
+                      backgroundColor: "#f5f7fb",
+                      borderRadius: "999px",
+                      height: "44px",
+                    }}
+                  >
+                    <i className="bi bi-search me-2" />
+                    <input
+                      className="form-control border-0 bg-transparent p-0"
+                      placeholder="Search by name, title, or skills..."
+                      value={keyword}
+                      onChange={(e) => setKeyword(e.target.value)}
+                      style={{ fontSize: "0.9rem" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="col-md-4">
+                  <div
+                    className="d-flex align-items-center px-3"
+                    style={{
+                      backgroundColor: "#f5f7fb",
+                      borderRadius: "999px",
+                      height: "44px",
+                    }}
+                  >
+                    <i className="bi bi-geo-alt me-2" />
+                    <input
+                      className="form-control border-0 bg-transparent p-0"
+                      placeholder="Location"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      style={{ fontSize: "0.9rem" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Filters button – UI only */}
+                <div className="col-md-4 text-md-end">
+                  <button
+                    className="btn w-100"
+                    style={{
+                      backgroundColor: "#006BFF",
+                      borderRadius: "999px",
+                      color: "white",
+                      height: "44px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <i className="bi bi-funnel-fill me-1" />
+                    Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Result count */}
+          <div className="mb-3 text-muted">
+            {filteredApplicants.length} candidates found
+          </div>
+
+          {/* Applicant cards */}
+          <div className="row g-3">
+            {filteredApplicants.map((a) => (
+              <div className="col-lg-6 col-12" key={a.id}>
+                <ApplicantCard applicant={a} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
