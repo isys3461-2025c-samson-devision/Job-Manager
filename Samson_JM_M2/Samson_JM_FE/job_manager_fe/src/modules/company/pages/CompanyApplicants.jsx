@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import CompanyHeader from "../components/CompanyHeader";
+import ApplicantCard from "../components/ApplicantsCard";
 import mockApplicants from "../data/mockApplicants.json";
 
 export default function CompanyApplicants() {
@@ -17,7 +18,8 @@ export default function CompanyApplicants() {
         a.title.toLowerCase().includes(kw) ||
         a.skills.some((s) => s.toLowerCase().includes(kw));
 
-      const matchLocation = !loc || a.location.toLowerCase().includes(loc);
+      const matchLocation =
+        !loc || a.location.toLowerCase().includes(loc);
 
       return matchKeyword && matchLocation;
     });
@@ -27,13 +29,13 @@ export default function CompanyApplicants() {
     <>
       <CompanyHeader />
 
-      {/* light grey background like Figma */}
-      <div style={{ backgroundColor: "#f5f7fb", minHeight: "100vh" }}>
+      {/* page background */}
+      <div style={{ backgroundColor: "#f3f6fb", minHeight: "100vh" }}>
         <div
           className="container py-4"
-          style={{ maxWidth: "1120px" }} // narrower center column
+          style={{ maxWidth: "1120px" }}
         >
-          {/* Page title */}
+          {/* Title */}
           <h3 className="mb-1">Search Applicants</h3>
           <p className="text-muted mb-4">
             Find the perfect candidates for your open positions.
@@ -41,33 +43,31 @@ export default function CompanyApplicants() {
 
           {/* Search bar card */}
           <div
-            className="card mb-4 border-0 shadow-sm"
-            style={{ borderRadius: "16px" }}
+            className="card mb-4 border-0"
+            style={{
+              borderRadius: "18px",
+              boxShadow: "0 8px 18px rgba(15, 23, 42, 0.08)",
+            }}
           >
             <div className="card-body py-3">
               <div className="row g-2 align-items-center">
                 {/* Keyword */}
-                <div className="col-md-5">
+                <div className="col-md-4">
                   <div
-                    className="input-group"
-                    style={{ backgroundColor: "#f9fafb", borderRadius: "999px" }}
+                    className="d-flex align-items-center px-3"
+                    style={{
+                      backgroundColor: "#f5f7fb",
+                      borderRadius: "999px",
+                      height: "44px",
+                    }}
                   >
-                    <span
-                      className="input-group-text bg-transparent border-0"
-                      style={{ paddingLeft: "16px" }}
-                    >
-                      <i className="bi bi-search" />
-                    </span>
+                    <i className="bi bi-search me-2" />
                     <input
-                      className="form-control border-0"
-                      style={{
-                        backgroundColor: "transparent",
-                        paddingTop: "10px",
-                        paddingBottom: "10px",
-                      }}
+                      className="form-control border-0 bg-transparent p-0"
                       placeholder="Search by name, title, or skills..."
                       value={keyword}
                       onChange={(e) => setKeyword(e.target.value)}
+                      style={{ fontSize: "0.9rem" }}
                     />
                   </div>
                 </div>
@@ -75,37 +75,34 @@ export default function CompanyApplicants() {
                 {/* Location */}
                 <div className="col-md-4">
                   <div
-                    className="input-group"
-                    style={{ backgroundColor: "#f9fafb", borderRadius: "999px" }}
+                    className="d-flex align-items-center px-3"
+                    style={{
+                      backgroundColor: "#f5f7fb",
+                      borderRadius: "999px",
+                      height: "44px",
+                    }}
                   >
-                    <span
-                      className="input-group-text bg-transparent border-0"
-                      style={{ paddingLeft: "16px" }}
-                    >
-                      <i className="bi bi-geo-alt" />
-                    </span>
+                    <i className="bi bi-geo-alt me-2" />
                     <input
-                      className="form-control border-0"
-                      style={{
-                        backgroundColor: "transparent",
-                        paddingTop: "10px",
-                        paddingBottom: "10px",
-                      }}
+                      className="form-control border-0 bg-transparent p-0"
                       placeholder="Location"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
+                      style={{ fontSize: "0.9rem" }}
                     />
                   </div>
                 </div>
 
-                {/* Filters button */}
-                <div className="col-md-3 text-md-end">
+                {/* Filters button – UI only */}
+                <div className="col-md-4 text-md-end">
                   <button
-                    className="btn btn-primary w-100 w-md-auto"
+                    className="btn w-100"
                     style={{
+                      backgroundColor: "#006BFF",
                       borderRadius: "999px",
-                      paddingInline: "28px",
-                      paddingBlock: "10px",
+                      color: "white",
+                      height: "44px",
+                      fontWeight: 500,
                     }}
                   >
                     <i className="bi bi-funnel-fill me-1" />
@@ -124,93 +121,8 @@ export default function CompanyApplicants() {
           {/* Applicant cards */}
           <div className="row g-3">
             {filteredApplicants.map((a) => (
-              <div className="col-md-6" key={a.id}>
-                <div
-                  className="card h-100 border-0 shadow-sm"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <div className="card-body">
-                    {/* top row */}
-                    <div className="d-flex justify-content-between">
-                      <div className="d-flex">
-                        <img
-                          src={a.avatarUrl}
-                          alt={a.name}
-                          className="rounded-circle me-3"
-                          style={{
-                            width: "56px",
-                            height: "56px",
-                            objectFit: "cover",
-                          }}
-                        />
-                        <div>
-                          <h6 className="mb-0">{a.name}</h6>
-                          <small className="text-muted d-block">
-                            {a.title}
-                          </small>
-                          <div className="d-flex align-items-center mt-1">
-                            <i className="bi bi-star-fill text-warning me-1" />
-                            <small>{a.rating}</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <button className="btn btn-primary btn-sm align-self-start">
-                        View Profile
-                      </button>
-                    </div>
-
-                    <hr />
-
-                    <div className="row">
-                      <div className="col-sm-6 mb-2">
-                        <div className="mb-1">
-                          <i className="bi bi-geo-alt me-2" />
-                          <small>{a.location}</small>
-                        </div>
-                        <div className="mb-1">
-                          <i className="bi bi-briefcase me-2" />
-                          <small>{a.yearsExperience} years experience</small>
-                        </div>
-                        <div className="mb-1">
-                          <i className="bi bi-mortarboard me-2" />
-                          <small>{a.education}</small>
-                        </div>
-                      </div>
-
-                      <div className="col-sm-6">
-                        <div className="mb-2">
-                          <small className="text-muted d-block mb-1">
-                            Skills:
-                          </small>
-                          {a.skills.map((s) => (
-                            <span
-                              key={s}
-                              className="badge bg-light text-dark border me-1 mb-1"
-                            >
-                              {s}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="d-flex flex-wrap gap-3">
-                          <div>
-                            <small className="text-muted d-block">
-                              Expected Salary
-                            </small>
-                            <small>{a.expectedSalary}</small>
-                          </div>
-                          <div>
-                            <small className="text-muted d-block">
-                              Availability
-                            </small>
-                            <small>{a.availability}</small>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="col-lg-6 col-12" key={a.id}>
+                <ApplicantCard applicant={a} />
               </div>
             ))}
           </div>
