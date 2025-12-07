@@ -18,4 +18,7 @@ public class JobPostModel {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     private Long Id;
+    private String name;
+    private String email;
+    private String phoneNumber;
 }
