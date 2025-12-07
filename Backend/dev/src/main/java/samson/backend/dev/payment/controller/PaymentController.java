@@ -1,4 +1,4 @@
-package samson.backend.dev.payment;
+package samson.backend.dev.payment.controller;
 
 import org.springframework.stereotype.Controller;
 

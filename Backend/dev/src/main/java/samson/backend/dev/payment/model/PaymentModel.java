@@ -1,4 +1,4 @@
-package samson.backend.dev.payment;
+package samson.backend.dev.payment.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

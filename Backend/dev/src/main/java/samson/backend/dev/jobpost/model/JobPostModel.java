@@ -1,22 +1,21 @@
-package samson.backend.dev.company;
+package samson.backend.dev.jobpost.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
 @Entity
-@Table(name = "companies")
+@Table(name = "jobposts")
 @Getter
 @Setter
 @NoArgsConstructor
-public class CompanyModel {
-    
+public class JobPostModel {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
-    private Long id;
+    private Long Id;
 }

@@ -1,4 +1,4 @@
-package samson.backend.dev.jobpost;
+package samson.backend.dev.jobpost.controller;
 
 import org.springframework.stereotype.Controller;
 
