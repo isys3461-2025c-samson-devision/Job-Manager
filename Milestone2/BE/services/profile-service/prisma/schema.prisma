@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @unique
+  fullName        String?
+  birthday        DateTime?
+  phone           String?
+  email           String?
+  bio             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+ 
+  addressId       String?  @unique @db.ObjectId
+  bankId          String?  @unique @db.ObjectId
+
+  address         Address? @relation(fields: [addressId], references: [id])
+  bank            Bank?    @relation(fields: [bankId], references: [id])
+
+  skills          Skill[]
+  workExperiences WorkExperience[]
+}
+
+model Address {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  street    String?
+  city      String?
+
+  profile   Profile? @relation
+}
+
+model Bank {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  bankName        String?
+  bankNumber      String?
+  transactionTime DateTime?
+
+  profile         Profile? @relation
+}
+
+model WorkExperience {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  startDate   DateTime
+  endDate     DateTime?
+  description String?
+
+  profileId   String?  @db.ObjectId
+  profile     Profile? @relation(fields: [profileId], references: [id])
+}
+
+model Skill {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+
+  profileId   String?  @db.ObjectId
+  profile     Profile? @relation(fields: [profileId], references: [id])
+}
+
+
+
+
+
