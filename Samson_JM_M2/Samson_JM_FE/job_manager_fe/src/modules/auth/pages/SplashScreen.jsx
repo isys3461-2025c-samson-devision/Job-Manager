@@ -65,7 +65,7 @@ export default function SplashScreen() {
       {loadingDone && (
         <button
           className="btn btn-primary mt-4 px-4 py-2"
-          onClick={() => navigate("/signup")}
+          onClick={() => navigate("/signin")}
         >
           Continue
         </button>
