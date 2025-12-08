@@ -41,11 +41,12 @@ export class AuthService {
       data: {
         email,
         password: hashedPassword,
+        role:"APPLICANT",
       },
     });
 
     // generate tokens
-    return this.generateTokens(user.id, user.email);
+    return this.generateTokens(user.id, user.email, user.role);
   }
 
     async login(email: string, password: string): Promise<AuthTokens> {
@@ -65,15 +66,17 @@ export class AuthService {
         }
 
         //generate tokens
-        return this.generateTokens(user.id, user.email);
+        return this.generateTokens(user.id, user.email, user.role);
+
     }
 
     //generate tokens
   private async generateTokens(
     userId: string,
-    email: string
+    email: string,
+    role: string
   ): Promise<AuthTokens> {
-    const payload = { userId, email };
+    const payload = { userId, email, role };
 
     // Generate access token
     const accessTokenOptions: SignOptions = {

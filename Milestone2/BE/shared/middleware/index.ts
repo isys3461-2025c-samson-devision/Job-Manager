@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-
-
+import jwt from "jsonwebtoken";
+import { JwtPayload } from "../types";
 
 export function asyncHandler  (fn:(req: Request , res : Response, next: NextFunction) => Promise<any>){
     return (req: Request, res: Response, next: NextFunction): void => {
@@ -32,4 +32,25 @@ export function validateRequest(schema: any) {
 
     };
 }
+
+export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ message: "Missing Authorization header" });
+
+  const token = header.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Invalid Authorization format" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    req.user = decoded; 
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
+
+
+
+
+
     

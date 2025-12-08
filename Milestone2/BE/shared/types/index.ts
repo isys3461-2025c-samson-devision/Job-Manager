@@ -1,8 +1,16 @@
 // shared typerscript  types definitions for all mircoservices
+import "express";
+
+declare module "express" {
+  interface Request {
+    user?: JwtPayload;
+  }
+}
 
 export interface User {
     id: string;
     email: string;
+    role: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -23,6 +31,7 @@ export interface AuthTokens {
 export interface JwtPayload {
     userId: string;
     email: string;
+    role: string;
     iat: number;
     exp: number;
 }

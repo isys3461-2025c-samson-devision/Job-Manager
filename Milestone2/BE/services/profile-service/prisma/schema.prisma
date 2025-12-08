@@ -7,65 +7,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Profile {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId          String   @unique
-  fullName        String?
-  birthday        DateTime?
-  phone           String?
-  email           String?
-  bio             String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
- 
-  addressId       String?  @unique @db.ObjectId
-  bankId          String?  @unique @db.ObjectId
-
-  address         Address? @relation(fields: [addressId], references: [id])
-  bank            Bank?    @relation(fields: [bankId], references: [id])
-
-  skills          Skill[]
-  workExperiences WorkExperience[]
+type ProfileAddress {
+  city    String
+  country String
+  street  String
 }
 
-model Address {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  street    String?
-  city      String?
-
-  profile   Profile? @relation
+type ProfileBank {
+  bankName        String
+  bankNumber      String
+  transactionTime String
 }
 
-model Bank {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  bankName        String?
-  bankNumber      String?
-  transactionTime DateTime?
-
-  profile         Profile? @relation
-}
-
-model WorkExperience {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String
-  startDate   DateTime
-  endDate     DateTime?
-  description String?
-
-  profileId   String?  @db.ObjectId
-  profile     Profile? @relation(fields: [profileId], references: [id])
-}
-
-model Skill {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+type ProfileSkills {
+  description String
   name        String
-  description String?
-
-  profileId   String?  @db.ObjectId
-  profile     Profile? @relation(fields: [profileId], references: [id])
 }
 
+type ProfileWorkExperiences {
+  description String
+  endDate     String
+  startDate   String
+  title       String
+}
 
-
-
-
+model profile {
+  id              String                   @id @default(auto()) @map("_id") @db.ObjectId
+  GPA             Float
+  address         ProfileAddress
+  authId          String
+  bank            ProfileBank
+  birthday        String
+  createdAt       DateTime                 @db.Date
+  degree          String
+  email           String
+  institution     String
+  isPremium       String
+  mediaId         String
+  name            String
+  phone           String
+  salaryRange     Int
+  skills          ProfileSkills[]
+  updatedAt       DateTime                 @db.Date
+  workExperiences ProfileWorkExperiences[]
+}

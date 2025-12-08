@@ -1,39 +1,22 @@
 import { Router } from "express";
 import { ProfileController } from "./profileController";
-import { validate } from "../middlewares/validate";
-import {
-  createProfileSchema,
-  updateProfileSchema,
-} from "./validation";
-import { authenticate } from ".../middleware/index";
+import { authenticate, asyncHandler, validateRequest } from "../../../shared/middleware";
+import { updateProfileSchema } from "./validation";
 
 const router = Router();
 const controller = new ProfileController();
 
-router.post(
-  "/",
-  authenticate,
-  validate(createProfileSchema),
-  controller.createProfile.bind(controller)
-);
-
 router.get(
-  "/",
+  "/:authId",
   authenticate,
-  controller.getProfile.bind(controller)
+  asyncHandler(controller.getProfile)
 );
 
 router.put(
-  "/",
+  "/:authId",
   authenticate,
-  validate(updateProfileSchema),
-  controller.updateProfile.bind(controller)
-);
-
-router.delete(
-  "/",
-  authenticate,
-  controller.deleteProfile.bind(controller)
+  validateRequest(updateProfileSchema),
+  asyncHandler(controller.updateProfile)
 );
 
 export default router;

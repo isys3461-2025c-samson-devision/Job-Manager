@@ -2,30 +2,29 @@ import prisma from "./database";
 import { createServiceError } from "../../../shared/utils";
 
 export class ProfileService {
-  async createProfile(userId: string, data: any) {
-    const existing = await prisma.profile.findUnique({ where: { userId } });
-    if (existing) throw createServiceError("Profile already exists", 400);
-
-    return prisma.profile.create({
-      data: {
-        userId,
-        ...data,
-      },
+  async getProfileByAuthId(authId: string) {
+    const profile = await prisma.profile.findFirst({
+      where: { authId },
     });
+
+    if (!profile) {
+      throw createServiceError("Profile not found", 404);
+    }
+
+    return profile;
   }
 
-  async getProfile(userId: string) {
-    return prisma.profile.findUnique({ where: { userId } });
-  }
+  async updateProfileByAuthId(authId: string, data: any) {
+    const profile = await prisma.profile.findFirst({ where: { authId } });
 
-  async updateProfile(userId: string, data: any) {
+    if (!profile) {
+      throw createServiceError("Profile not found", 404);
+    }
+
     return prisma.profile.update({
-      where: { userId },
+      where: { id: profile.id }, // must use `id` here
       data,
     });
   }
-
-  async deleteProfile(userId: string) {
-    return prisma.profile.delete({ where: { userId } });
-  }
 }
+

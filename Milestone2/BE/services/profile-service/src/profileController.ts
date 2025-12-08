@@ -1,52 +1,31 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { ProfileService } from "./profileService";
 import { createServiceError } from "../../../shared/utils";
 
-const profileService = new ProfileService();
-
 export class ProfileController {
-  async createProfile(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user.userId; // extracted by auth middleware
-      const profile = await profileService.createProfile(userId, req.body);
-      return res.status(201).json(profile);
-    } catch (error) {
-      next(error);
+  private profileService = new ProfileService();
+
+  getProfile = async (req: Request, res: Response) => {
+    const { authId } = req.params;
+    const requester = req.user!;
+
+    if (requester.role === "APPLICANT" && requester.userId !== authId) {
+      throw createServiceError("Forbidden: Cannot access another user's profile", 403);
     }
-  }
 
-  async getProfile(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user.userId;
-      const profile = await profileService.getProfile(userId);
+    const profile = await this.profileService.getProfileByAuthId(authId);
+    return res.json({ success: true, data: profile });
+  };
 
-      if (!profile) {
-        throw createServiceError("Profile not found", 404);
-      }
+  updateProfile = async (req: Request, res: Response) => {
+    const { authId } = req.params;
+    const requester = req.user!;
 
-      return res.json(profile);
-    } catch (error) {
-      next(error);
+    if (requester.role === "APPLICANT" && requester.userId !== authId) {
+      throw createServiceError("Forbidden: Cannot update another user's profile", 403);
     }
-  }
 
-  async updateProfile(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user.userId;
-      const updated = await profileService.updateProfile(userId, req.body);
-      return res.json(updated);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async deleteProfile(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user.userId;
-      await profileService.deleteProfile(userId);
-      return res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
-  }
+    const profile = await this.profileService.updateProfileByAuthId(authId, req.body);
+    return res.json({ success: true, data: profile });
+  };
 }
