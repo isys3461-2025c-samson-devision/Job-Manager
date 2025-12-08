@@ -1,4 +1,4 @@
-export default function ApplicantCard({ applicant: a }) {
+export default function ApplicantCard({ applicant: a, onViewProfile }) {
   return (
     <div
       className="card border-0 h-100"
@@ -50,6 +50,7 @@ export default function ApplicantCard({ applicant: a }) {
             </div>
           </div>
 
+          {/* "View Profile" Button inside the Card */}
           <button
             className="btn btn-primary btn-sm"
             style={{
@@ -59,6 +60,7 @@ export default function ApplicantCard({ applicant: a }) {
               fontSize: "0.8rem",
               fontWeight: 600,
             }}
+            onClick={() => onViewProfile(a)} // Trigger modal in the parent component
           >
             View Profile
           </button>
@@ -80,7 +82,7 @@ export default function ApplicantCard({ applicant: a }) {
             {a.education}
           </div>
 
-          {/* Skills – mb-2 */}
+          {/* Skills */}
           <div className="mb-2">
             <div
               style={{
