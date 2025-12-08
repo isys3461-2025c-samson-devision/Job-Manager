@@ -1,16 +1,11 @@
 package samson.backend.dev.payment.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
 
-@Entity
-@Table
+@Document(collection = "payments")
 public class PaymentModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long Id;
     
 } 

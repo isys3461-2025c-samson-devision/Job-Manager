@@ -1,22 +1,20 @@
 package samson.backend.dev.company.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
-@Entity
-@Table(name = "companies")
+
+@Document(collection = "companies")
 @Getter
 @Setter
 @NoArgsConstructor
 public class CompanyModel {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
 }

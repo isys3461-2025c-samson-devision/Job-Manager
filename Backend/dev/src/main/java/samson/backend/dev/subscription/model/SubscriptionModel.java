@@ -1,5 +1,10 @@
 package samson.backend.dev.subscription.model;
 
-public class SubscriptionModel {
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document(collection = "subscriptions")
+public class SubscriptionModel {
+    @Id
+    private Long Id;
 }
