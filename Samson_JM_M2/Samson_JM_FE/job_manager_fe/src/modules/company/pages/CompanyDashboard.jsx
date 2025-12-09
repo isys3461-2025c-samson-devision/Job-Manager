@@ -3,6 +3,7 @@ import WelcomeBanner from "../components/WelcomeBanner";
 import StatCard from "../components/StatCard";
 import JobPostCard from "../components/JobPostCard";
 import JobFilterBar from "../components/JobFilterBar";
+import CreateJobPostModal from "../components/CreateJobPostModal";
 
 import mockPosts from "../data/mockJobPosts.json";
 
@@ -17,6 +18,9 @@ export default function CompanyDashboard() {
 
   // SIMPLE FILTER DROPDOWN
   const [filterStatus, setFilterStatus] = useState("all");
+
+  // JOB POST MODAL
+  const [showCreateJobModal, setShowCreateJobModal] = useState(false);
 
   useEffect(() => {
     companyService.getCompanyStats().then(setStats);
@@ -90,7 +94,20 @@ export default function CompanyDashboard() {
             <h4 className="fw-bold">Job Posting</h4>
             <p className="text-muted small">Create new jobs</p>
           </div>
-          <button className="btn btn-primary">+ Post New Job</button>
+          <CreateJobPostModal
+            show={showCreateJobModal}
+            onClose={() => setShowCreateJobModal(false)}
+            onSubmit={(jobPost) => {
+              console.log("Created job:", jobPost);
+
+              // Later: call backend here
+              // axios.post('/api/jobpost', jobPost)
+            }}
+          />
+
+          <button className="btn btn-primary" onClick={() => setShowCreateJobModal(true)}>
+            + Create Job Post
+          </button>
         </div>
 
         {/* YOUR JOB LIST */}
