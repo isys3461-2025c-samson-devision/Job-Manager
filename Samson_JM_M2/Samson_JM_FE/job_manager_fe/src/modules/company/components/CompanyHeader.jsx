@@ -72,9 +72,9 @@ export default function CompanyHeader() {
           style={{ fontSize: "20px", cursor: "pointer" }}
         />
 
-        {/* Profile Icon */}
+        {/* LightMode/DarkMode Icon */}
         <i
-          className="bi bi-person-circle"
+          className="bi bi-sun-fill"
           style={{ fontSize: "22px", cursor: "pointer" }}
         />
 
