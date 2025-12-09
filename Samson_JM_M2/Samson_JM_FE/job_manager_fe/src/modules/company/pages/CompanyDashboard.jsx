@@ -51,8 +51,8 @@ export default function CompanyDashboard() {
             <StatCard
               icon="bi-briefcase"
               iconColor="#2d68ff"
-              value={stats.activeJobs}
-              label="Active Jobs"
+              value={stats.publishedJobs}
+              label="Published Jobs"
             />
           </div>
 

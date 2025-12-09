@@ -44,13 +44,13 @@
 }
 
 /* Active = green */
-.status-active {
+.status-public {
   background: #d4f5d4;
   color: #2e9d44;
 }
 
 /* Inactive = red */
-.status-inactive {
+.status-private {
   background: #f8d7da;
   color: #c0392b;
 }

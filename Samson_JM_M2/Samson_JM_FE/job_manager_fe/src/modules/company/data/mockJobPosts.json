@@ -10,7 +10,7 @@
     "applicants": 45,
     "views": 890,
     "postedDate": "2024-11-25",
-    "status": "active"
+    "status": "public"
   },
   {
     "id": 2,
@@ -23,7 +23,7 @@
     "applicants": 28,
     "views": 465,
     "postedDate": "2024-11-28",
-    "status": "inactive"
+    "status": "private"
   },
   {
     "id": 3,
