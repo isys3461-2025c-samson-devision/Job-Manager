@@ -5,7 +5,10 @@ import SplashScreen from "../../modules/auth/pages/SplashScreen";
 import CompanyDashboard from "../../modules/company/pages/CompanyDashboard";
 import CompanyApplicants from "../../modules/company/pages/CompanyApplicants";
 import CompanyProfile from "../../modules/company/pages/CompanyProfile";
-import SubscriptionPage from "../../modules/company/pages/SubscriptionPage";
+import SubscriptionPage from "../../modules/subscription/pages/SubscriptionPage";
+import PaymentPage from "../../modules/subscription/pages/PaymentPage";
+import SuccessPaymentPage from "../../modules/subscription/pages/SuccessPaymentPage";
+import CancelPaymentPage from "../../modules/subscription/pages/CancelPaymentPage";
 
 export default function AppRouter() {
   return (
@@ -18,6 +21,11 @@ export default function AppRouter() {
         <Route path="/applicants" element={<CompanyApplicants />} /> 
         <Route path="/profile" element={<CompanyProfile />} />
         <Route path="/subscription" element={<SubscriptionPage />} />
+        <Route path="/subscription/payment" element={<PaymentPage />} />
+        <Route path="/subscription/payment/success" element={<SuccessPaymentPage />} />
+        <Route path="/subscription/payment/cancel" element={<CancelPaymentPage />} />
+        
+
       </Routes>
     </BrowserRouter>
   );

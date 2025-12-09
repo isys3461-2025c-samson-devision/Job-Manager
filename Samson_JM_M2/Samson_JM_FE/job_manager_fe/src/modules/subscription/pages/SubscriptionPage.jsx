@@ -1,11 +1,13 @@
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../auth/context/AuthContext";
-import CompanyHeader from "../components/CompanyHeader";
+import CompanyHeader from "../../company/components/CompanyHeader";
 import SubscriptionPlanCard from "../components/SubscriptionPlanCard";
 
 export default function SubscriptionPage() {
   const { auth, login } = useContext(AuthContext);
   const isPremium = auth?.subscription === "premium";
+  const navigate = useNavigate();
 
   const FEATURES = [
     { label: "Post up to 3 job listings", free: true, premium: true },
@@ -20,10 +22,10 @@ export default function SubscriptionPage() {
     { label: "Education, salary, employment filters", free: false, premium: true }
   ];
 
-  const handleUpgrade = () => {
-    login({ ...auth, subscription: "premium" });
-    alert("You are now subscribed to Premium!");
-  };
+  // const handleUpgrade = () => {
+  //   login({ ...auth, subscription: "premium" });
+  //   alert("You are now subscribed to Premium!");
+  // };
 
   const handleCancel = () => {
     login({ ...auth, subscription: "free" });
@@ -67,7 +69,11 @@ export default function SubscriptionPage() {
               isCurrent={isPremium}
               buttonLabel={isPremium ? "Cancel Subscription" : "Upgrade to Premium"}
               buttonDisabled={false}
-              onButtonClick={isPremium ? handleCancel : handleUpgrade}
+              onButtonClick={
+                isPremium
+                  ? () => {}                          // do nothing for now
+                  : () => navigate("/subscription/payment") // go to payment page
+              }
             />
           </div>
 
