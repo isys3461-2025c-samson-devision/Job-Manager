@@ -27,7 +27,7 @@ export default function CompanyHeader() {
         style={{ fontSize: "20px", cursor: "pointer" }}
         onClick={() => navigate("/dashboard")}
       >
-        Dev<span style={{ color: "#0054FF" }}>Vision</span>
+        DEV<span style={{ color: "#0054FF" }}>ision</span>
       </div>
 
       {/* CENTER — NAVIGATION BUTTONS */}

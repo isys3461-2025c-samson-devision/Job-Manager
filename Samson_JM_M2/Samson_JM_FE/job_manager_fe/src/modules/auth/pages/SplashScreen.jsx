@@ -27,7 +27,7 @@ export default function SplashScreen() {
       {/* Logo */}
       <img
         src={devvisionLogo}
-        alt="DevVision Logo"
+        alt="DEVision Logo"
         style={{ width: "160px", marginBottom: "20px" }}
       />
 
