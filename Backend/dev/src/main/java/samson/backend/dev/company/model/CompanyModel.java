@@ -16,5 +16,5 @@ import lombok.Setter;
 public class CompanyModel {
     
     @Id
-    private Long id;
+    private String id;
 }

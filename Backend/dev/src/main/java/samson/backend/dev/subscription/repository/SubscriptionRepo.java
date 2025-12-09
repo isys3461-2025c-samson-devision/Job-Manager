@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import samson.backend.dev.subscription.model.SubscriptionModel;
 
 @Repository
-public interface SubscriptionRepo extends MongoRepository<SubscriptionModel, Long>{
+public interface SubscriptionRepo extends MongoRepository<SubscriptionModel, String>{
 
 }

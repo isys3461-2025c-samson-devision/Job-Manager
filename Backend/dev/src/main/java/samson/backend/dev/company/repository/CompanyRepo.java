@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import samson.backend.dev.company.model.CompanyModel;
 
 @Repository
-public interface CompanyRepo extends MongoRepository<CompanyModel, Long>{
+public interface CompanyRepo extends MongoRepository<CompanyModel, String>{
     
 }

@@ -6,5 +6,5 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "subscriptions")
 public class SubscriptionModel {
     @Id
-    private Long Id;
+    private String Id;
 }

@@ -6,6 +6,6 @@ import org.springframework.data.annotation.Id;
 @Document(collection = "payments")
 public class PaymentModel {
     @Id
-    private Long Id;
+    private String Id;
     
 } 

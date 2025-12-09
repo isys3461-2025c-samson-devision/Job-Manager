@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import samson.backend.dev.payment.model.PaymentModel;
 
 @Repository
-public interface PaymentRepo extends MongoRepository<PaymentModel, Long>{
+public interface PaymentRepo extends MongoRepository<PaymentModel, String>{
 
     
 } 
