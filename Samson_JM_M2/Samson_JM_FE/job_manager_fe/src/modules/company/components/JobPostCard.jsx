@@ -3,8 +3,8 @@ import "../styles/jobPost.css";
 export default function JobPostCard({ post }) {
   const statusClass =
     {
-      active: "status-active",
-      inactive: "status-inactive",
+      public: "status-public",
+      private: "status-private",
       draft: "status-draft",
     }[post.status.toLowerCase()] || "status-draft";
 

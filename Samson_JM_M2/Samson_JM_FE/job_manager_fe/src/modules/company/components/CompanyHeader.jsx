@@ -54,7 +54,7 @@ export default function CompanyHeader() {
 
       {/* RIGHT — ICONS */}
       <div className="d-flex align-items-center gap-3">
-        {/* Subscription Indicator */}
+        {/* Subscription Indicator → now a navigation button */}
         <i
           className="bi bi-currency-dollar"
           style={{
@@ -63,7 +63,8 @@ export default function CompanyHeader() {
             cursor: "pointer",
           }}
           title={isPremium ? "Premium Subscription" : "Upgrade to Premium"}
-        />
+          onClick={() => navigate("/subscription")}
+        ></i>
 
         {/* Notifications */}
         <i
@@ -71,9 +72,9 @@ export default function CompanyHeader() {
           style={{ fontSize: "20px", cursor: "pointer" }}
         />
 
-        {/* Profile Icon */}
+        {/* LightMode/DarkMode Icon */}
         <i
-          className="bi bi-person-circle"
+          className="bi bi-sun-fill"
           style={{ fontSize: "22px", cursor: "pointer" }}
         />
 
