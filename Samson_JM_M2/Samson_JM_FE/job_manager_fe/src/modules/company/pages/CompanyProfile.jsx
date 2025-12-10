@@ -1,45 +1,55 @@
+import { useState } from "react";
 import CompanyHeader from "../components/CompanyHeader";
-
-const mockProfile = {
-  name: "User Name",
-  title: "Job Seeker",
-  email: "test@gmail.com",
-  phone: "+084 123 456 789",
-  location: "Ho Chi Minh City, Vietnam",
-  about:
-    "Passionate professional with 5+ year of experience in technology and innovation. Specialized in building scalable solutions and leading cross-functional teams. Always eager to learn new technologies and contribute to meaningful projects.",
-  experience: {
-    role: "Senior Developer",
-    company: "Tech Company Ltd",
-    period: "2021 - Present",
-    description:
-      "Leading development of web applications using modern technologies. Managing a team of 5 developers and driving technical decisions.",
-  },
-  skills: [
-    "React",
-    "TypeScript",
-    "Tailwind CSS",
-    "Next.js",
-    "Node.js",
-    "AWS",
-    "Python",
-    "Docker",
-    "PostgreSQL",
-  ],
-  certificates: [
-    {
-      title: "AWS Solutions Architect",
-      issuer: "Amazon Web Services",
-    },
-    {
-      title: "Professional Scrum Master",
-      issuer: "Scrum.org",
-    },
-  ],
-};
+import mockProfile from "../data/profile";
 
 export default function CompanyProfile() {
-  const p = mockProfile;
+  // dữ liệu mock tách riêng
+  const [profile, setProfile] = useState(mockProfile);
+  // trạng thái bật/tắt edit mode
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  const p = profile;
+
+  const toggleEditMode = () => {
+    setIsEditMode((prev) => !prev);
+  };
+
+  // ví dụ: edit About Us bằng window.prompt
+  const handleEditAbout = () => {
+    if (!isEditMode) return;
+    const newAbout = window.prompt("Edit About Us", p.about);
+    if (newAbout !== null) {
+      setProfile({ ...p, about: newAbout });
+    }
+  };
+
+  // ví dụ: edit Skills Needed (nhập comma-separated)
+  const handleEditSkills = () => {
+    if (!isEditMode) return;
+    const current = p.skillsNeeded.join(", ");
+    const input = window.prompt(
+      "Edit skills (separate by comma):",
+      current
+    );
+    if (input !== null) {
+      const skills = input
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      setProfile({ ...p, skillsNeeded: skills });
+    }
+  };
+
+  // tạm thời cho Images & Achievements chỉ alert
+  const handleEditMedia = () => {
+    if (!isEditMode) return;
+    alert("Media editing not implemented yet (demo only).");
+  };
+
+  const handleEditAchievements = () => {
+    if (!isEditMode) return;
+    alert("Achievements editing not implemented yet (demo only).");
+  };
 
   return (
     <>
@@ -80,10 +90,15 @@ export default function CompanyProfile() {
                       border: "3px solid #ffffff",
                     }}
                   >
-                    <i
-                      className="bi bi-person fs-3"
-                      style={{ color: "#6b7280" }}
-                    />
+                    <span
+                      style={{
+                        fontSize: "1.4rem",
+                        fontWeight: 600,
+                        color: "#4b5563",
+                      }}
+                    >
+                      {p.name.charAt(0)}
+                    </span>
                   </div>
                   <div>
                     <div style={{ fontSize: "1rem", fontWeight: 600 }}>
@@ -103,9 +118,14 @@ export default function CompanyProfile() {
                     fontSize: "0.85rem",
                     fontWeight: 500,
                   }}
+                  onClick={toggleEditMode}
                 >
-                  <i className="bi bi-pencil me-1" />
-                  Edit Profile
+                  <i
+                    className={`bi ${
+                      isEditMode ? "bi-check-lg" : "bi-pencil"
+                    } me-1`}
+                  />
+                  {isEditMode ? "Done" : "Edit Profile"}
                 </button>
               </div>
 
@@ -134,7 +154,7 @@ export default function CompanyProfile() {
           <div className="row g-3">
             {/* LEFT COLUMN */}
             <div className="col-lg-8">
-              {/* About Me */}
+              {/* About Us */}
               <div
                 className="card border-0 mb-3"
                 style={{
@@ -147,11 +167,19 @@ export default function CompanyProfile() {
                     className="d-flex justify-content-between align-items-center mb-2"
                     style={{ fontSize: "0.95rem", fontWeight: 600 }}
                   >
-                    <span>About Me</span>
-                    <i
-                      className="bi bi-pencil"
-                      style={{ fontSize: "0.9rem", cursor: "pointer" }}
-                    />
+                    <span>About Us</span>
+                    {isEditMode && (
+                      <button
+                        type="button"
+                        className="btn btn-link p-0 ms-1"
+                        onClick={handleEditAbout}
+                      >
+                        <i
+                          className="bi bi-pencil"
+                          style={{ fontSize: "0.9rem" }}
+                        />
+                      </button>
+                    )}
                   </div>
                   <p
                     className="mb-0"
@@ -162,7 +190,7 @@ export default function CompanyProfile() {
                 </div>
               </div>
 
-              {/* Work Experience */}
+              {/* Images & Video */}
               <div
                 className="card border-0"
                 style={{
@@ -175,58 +203,82 @@ export default function CompanyProfile() {
                     className="d-flex justify-content-between align-items-center mb-3"
                     style={{ fontSize: "0.95rem", fontWeight: 600 }}
                   >
-                    <span>Work Experience</span>
-                    <i
-                      className="bi bi-pencil"
-                      style={{ fontSize: "0.9rem", cursor: "pointer" }}
-                    />
+                    <span>Images &amp; Video</span>
+                    {isEditMode && (
+                      <button
+                        type="button"
+                        className="btn btn-link p-0 ms-1"
+                        onClick={handleEditMedia}
+                      >
+                        <i
+                          className="bi bi-pencil"
+                          style={{ fontSize: "0.9rem" }}
+                        />
+                      </button>
+                    )}
                   </div>
 
-                  <div className="d-flex">
-                    <div
-                      className="d-flex align-items-start justify-content-center me-3"
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "10px",
-                        backgroundColor: "#e0edff",
-                      }}
-                    >
-                      <i
-                        className="bi bi-briefcase"
-                        style={{
-                          color: "#006BFF",
-                          fontSize: "1.1rem",
-                          marginTop: 8,
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <div
-                        style={{ fontSize: "0.9rem", fontWeight: 600 }}
-                        className="mb-1"
-                      >
-                        {p.experience.role}
-                      </div>
-                      <div
-                        style={{ fontSize: "0.82rem", color: "#6b7280" }}
-                        className="mb-1"
-                      >
-                        {p.experience.company}
-                      </div>
-                      <div
-                        style={{ fontSize: "0.8rem", color: "#9ca3af" }}
-                        className="mb-2"
-                      >
-                        {p.experience.period}
-                      </div>
-                      <p
-                        className="mb-0"
-                        style={{ fontSize: "0.85rem", color: "#4b5563" }}
-                      >
-                        {p.experience.description}
-                      </p>
-                    </div>
+                  <div className="d-flex flex-wrap gap-3">
+                    {p.media.map((m) =>
+                      m.type === "image" ? (
+                        <div
+                          key={m.id}
+                          className="position-relative"
+                          style={{
+                            width: 220,
+                            height: 130,
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            backgroundColor: "#e5e7eb",
+                          }}
+                        >
+                          <img
+                            src={m.url}
+                            alt={m.label}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                          <div
+                            className="position-absolute bottom-0 start-0 end-0 px-2 py-1"
+                            style={{
+                              background:
+                                "linear-gradient(to top, rgba(0,0,0,0.55), transparent)",
+                              fontSize: "0.75rem",
+                              color: "#f9fafb",
+                            }}
+                          >
+                            {m.label}
+                          </div>
+                        </div>
+                      ) : (
+                        <div key={m.id} style={{ flex: "1 1 100%" }}>
+                          <div
+                            className="ratio ratio-16x9"
+                            style={{
+                              borderRadius: "12px",
+                              overflow: "hidden",
+                              backgroundColor: "#000",
+                            }}
+                          >
+                            <iframe
+                              src={m.url}
+                              title={m.label}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                          <div
+                            className="mt-1"
+                            style={{ fontSize: "0.8rem", color: "#6b7280" }}
+                          >
+                            {m.label}
+                          </div>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
               </div>
@@ -234,7 +286,7 @@ export default function CompanyProfile() {
 
             {/* RIGHT COLUMN */}
             <div className="col-lg-4">
-              {/* Skills */}
+              {/* Skills Needed */}
               <div
                 className="card border-0 mb-3"
                 style={{
@@ -247,14 +299,22 @@ export default function CompanyProfile() {
                     className="d-flex justify-content-between align-items-center mb-2"
                     style={{ fontSize: "0.95rem", fontWeight: 600 }}
                   >
-                    <span>Skills</span>
-                    <i
-                      className="bi bi-pencil"
-                      style={{ fontSize: "0.9rem", cursor: "pointer" }}
-                    />
+                    <span>Skills Needed</span>
+                    {isEditMode && (
+                      <button
+                        type="button"
+                        className="btn btn-link p-0 ms-1"
+                        onClick={handleEditSkills}
+                      >
+                        <i
+                          className="bi bi-pencil"
+                          style={{ fontSize: "0.9rem" }}
+                        />
+                      </button>
+                    )}
                   </div>
                   <div>
-                    {p.skills.map((s) => (
+                    {p.skillsNeeded.map((s) => (
                       <span
                         key={s}
                         className="badge me-1 mb-1"
@@ -274,7 +334,7 @@ export default function CompanyProfile() {
                 </div>
               </div>
 
-              {/* Certificate */}
+              {/* Achievements */}
               <div
                 className="card border-0"
                 style={{
@@ -287,31 +347,39 @@ export default function CompanyProfile() {
                     className="d-flex justify-content-between align-items-center mb-3"
                     style={{ fontSize: "0.95rem", fontWeight: 600 }}
                   >
-                    <span>Certificate</span>
-                    <i
-                      className="bi bi-pencil"
-                      style={{ fontSize: "0.9rem", cursor: "pointer" }}
-                    />
+                    <span>Achievements</span>
+                    {isEditMode && (
+                      <button
+                        type="button"
+                        className="btn btn-link p-0 ms-1"
+                        onClick={handleEditAchievements}
+                      >
+                        <i
+                          className="bi bi-pencil"
+                          style={{ fontSize: "0.9rem" }}
+                        />
+                      </button>
+                    )}
                   </div>
 
-                  {p.certificates.map((c, idx) => (
+                  {p.achievements.map((a, idx) => (
                     <div key={idx} className="mb-3">
                       <div className="d-flex align-items-start">
                         <i
-                          className="bi bi-award me-2"
-                          style={{ color: "#F97316", fontSize: "1.1rem" }}
+                          className="bi bi-trophy me-2"
+                          style={{ color: "#F59E0B", fontSize: "1.1rem" }}
                         />
                         <div>
                           <div
                             style={{ fontSize: "0.85rem", fontWeight: 600 }}
                             className="mb-1"
                           >
-                            {c.title}
+                            {a.title}
                           </div>
                           <div
                             style={{ fontSize: "0.8rem", color: "#6b7280" }}
                           >
-                            {c.issuer}
+                            {a.description}
                           </div>
                         </div>
                       </div>
