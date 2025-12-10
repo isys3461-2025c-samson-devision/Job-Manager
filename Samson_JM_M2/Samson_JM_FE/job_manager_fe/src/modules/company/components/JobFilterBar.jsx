@@ -31,8 +31,8 @@ export default function JobFilterBar({
             onChange={(e) => setFilterStatus(e.target.value)}
           >
             <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="public">public</option>
+            <option value="private">private</option>
             <option value="draft">Draft</option>
           </select>
         </div>

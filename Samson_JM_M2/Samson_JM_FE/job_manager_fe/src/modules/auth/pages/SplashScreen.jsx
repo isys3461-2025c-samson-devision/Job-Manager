@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import devvisionLogo from "../../../assets/devvision-logo.png"; // add your image file here
+import devisionLogo from "../../../assets/devision-logo.png"; // add your image file here
 
 export default function SplashScreen() {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ export default function SplashScreen() {
     >
       {/* Logo */}
       <img
-        src={devvisionLogo}
+        src={devisionLogo}
         alt="DEVision Logo"
         style={{ width: "160px", marginBottom: "20px" }}
       />
