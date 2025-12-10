@@ -7,7 +7,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import samson.backend.dev.jobpost.repository.JobPostRepo;
+import samson.backend.dev.jobpost.model.EmploymentType;
 import samson.backend.dev.jobpost.model.JobPostModel;
+import samson.backend.dev.jobpost.model.SalaryType;
 
 @Component
 public class DataGenerator implements CommandLineRunner {
@@ -20,17 +22,17 @@ public class DataGenerator implements CommandLineRunner {
         repo.deleteAll();
 
         JobPostModel job1 = new JobPostModel();
-        job1.setId("1");
+        job1.setId( "1");
         job1.setCompanyId("1");
         job1.setTitle("Senior Frontend Developer");
         job1.setDescription("We are looking for an experienced Frontend Developer...");
         job1.setPostedDate(LocalDate.of(2024, 11, 25));
         job1.setLocation("Ho Chi Minh City");
-        job1.setEmploymentType("Full-Time");
-        job1.setSalaryType("Range");;
-        job1.setSalaryMin(2000);
-        job1.setSalaryMax(3000);
-        job1.setPublished(true);
+        job1.setEmploymentType(EmploymentType.FULLTIME);
+        job1.setSalaryType(SalaryType.RANGE);;
+        job1.setSalaryAmountMin((double) 2000);
+        job1.setSalaryAmountMax((double) 3000);
+        job1.setIsPublished(true);
         repo.save(job1);
 
         JobPostModel job2 = new JobPostModel();
@@ -40,11 +42,11 @@ public class DataGenerator implements CommandLineRunner {
         job2.setDescription("Join our design team to create amazing user experiences...");
         job2.setPostedDate(LocalDate.of(2024, 11, 28));
         job2.setLocation("Hanoi");
-        job2.setEmploymentType("Full-Time");
-        job2.setSalaryType("Range");
-        job2.setSalaryMin(2000);
-        job2.setSalaryMax(3000);
-        job2.setPublished(false);
+        job2.setEmploymentType(EmploymentType.FULLTIME);
+        job2.setSalaryType(SalaryType.RANGE);
+        job2.setSalaryAmountMin((double)2000);
+        job2.setSalaryAmountMax((double)3000);
+        job2.setIsPublished(false);
         repo.save(job2);
 
         JobPostModel job3 = new JobPostModel();
@@ -54,11 +56,11 @@ public class DataGenerator implements CommandLineRunner {
         job3.setDescription("Assist in backend development tasks and microservices...");
         job3.setPostedDate(LocalDate.of(2024, 11, 30));
         job3.setLocation("Da Nang");
-        job3.setEmploymentType("Part-Time");
-        job3.setSalaryType("Range");
-        job3.setSalaryMin(800);
-        job3.setSalaryMax(1200);
-        job3.setPublished(false);
+        job3.setEmploymentType(EmploymentType.PARTTIME);
+        job3.setSalaryType(SalaryType.RANGE);
+        job3.setSalaryAmountMin((double)800);
+        job3.setSalaryAmountMax((double)1200);
+        job3.setIsPublished(false);
         repo.save(job3);
     }
 }

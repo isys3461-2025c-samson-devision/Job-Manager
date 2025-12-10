@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 import org.springframework.data.annotation.Id;
 
@@ -20,10 +20,11 @@ import lombok.Setter;
 public class JobPostModel {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long Id;
+    private String Id;
+    private String companyId;
     private String title;
     private String description;
-    private Date postedDate;
+    private LocalDate postedDate;
     private String location;
     private JobSkillTag skillTag;
     private EmploymentType employmentType;
@@ -32,7 +33,7 @@ public class JobPostModel {
     private Double salaryAmountMax;
     private Boolean isPublished;
 
-    public JobPostModel(String title, String description, Date postedDate, String location,
+    public JobPostModel(String title, String description, LocalDate postedDate, String location,
                         JobSkillTag skillTag, EmploymentType employmentType, SalaryType salaryType,
                         Double salaryAmountMin, Double salaryAmountMax, Boolean isPublished) {
         this.title = title;
@@ -47,6 +48,19 @@ public class JobPostModel {
         this.isPublished = isPublished;
     }
 
+    public String getId() {
+         return Id;
+    }
+    public void setId(String id) {
+        Id = id;
+    }
+
+    public String getCompanyId() {
+        return companyId;
+    }
+    public void setCompanyId(String companyId) {
+        this.companyId = companyId;
+    }
     public String getTitle() {
         return title;
     }
@@ -59,10 +73,10 @@ public class JobPostModel {
     public void setDescription(String description) {
         this.description = description;
     }
-    public Date getPostedDate() {
+    public LocalDate getPostedDate() {
         return postedDate;
     }
-    public void setPostedDate(Date postedDate) {
+    public void setPostedDate(LocalDate postedDate) {
         this.postedDate = postedDate;
     }
 
@@ -109,5 +123,4 @@ public class JobPostModel {
     public void setIsPublished(Boolean isPublished) {
         this.isPublished = isPublished;
     }
-
 }

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import samson.backend.dev.jobpost.model.JobPostModel;
 
 @Repository
-public interface JobPostRepo extends MongoRepository<JobPostModel, String> {
+public interface JobPostRepo extends MongoRepository<JobPostModel, Long> {
     
 }

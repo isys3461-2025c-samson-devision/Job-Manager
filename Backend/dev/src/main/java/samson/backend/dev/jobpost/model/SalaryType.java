@@ -7,5 +7,6 @@ public enum SalaryType {
     BONUS,
     PROFIT_SHARING,
     STOCK_OPTIONS,
+    RANGE,
     OTHER
 }
