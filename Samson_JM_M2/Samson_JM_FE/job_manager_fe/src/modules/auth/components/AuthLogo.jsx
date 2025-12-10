@@ -1,12 +1,12 @@
-import devvisionLogo from "../../../assets/devvision-logo.png";
+import devisionLogo from "../../../assets/devision-logo.png";
 
 export default function AuthLogo() {
   return (
     <div className="text-center mb-4">
       {/* Logo */}
       <img
-        src={devvisionLogo}
-        alt="DevVision Logo"
+        src={devisionLogo}
+        alt="DEVision Logo"
         style={{
           width: "170px",
           height: "170px",
