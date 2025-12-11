@@ -9,7 +9,7 @@ export default function DashboardPage() {
     <MainLayout>
       <Header
         title="Dashboard"
-        subtitle={`Welcome back, ${user?.email || 'User'}`}
+        subtitle={`Welcome back, ${user?.email || 'User'}!`}
       />
 
       <div className="max-w-7xl mx-auto px-4 py-8">

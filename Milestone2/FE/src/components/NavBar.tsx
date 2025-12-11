@@ -18,7 +18,7 @@ export default function NavBar() {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo/Brand */}
                     <Link to="/" className="text-2xl font-bold">
-                        JobApp
+                        JobApplicant
                     </Link>
 
                     {/* Navigation Links */}

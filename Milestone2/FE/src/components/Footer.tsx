@@ -10,9 +10,9 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                     {/* Company Info */}
                     <div>
-                        <h3 className="text-white font-bold mb-4">JobApp</h3>
+                        <h3 className="text-white font-bold mb-4">JobApplicant</h3>
                         <p className="text-sm text-gray-400">
-                            Find your next opportunity with JobApp.
+                            Find your next opportunity with JobApplicant.
                         </p>
                     </div>
 
@@ -64,7 +64,7 @@ export default function Footer() {
                     <div>
                         <h4 className="text-white font-semibold mb-4">Contact</h4>
                         <p className="text-sm text-gray-400">
-                            Email: info@jobapp.com
+                            Email: info@jobapplicant.com
                         </p>
                     </div>
                 </div>
@@ -74,7 +74,7 @@ export default function Footer() {
 
                 {/* Copyright */}
                 <div className="pt-8 text-center text-sm text-gray-400">
-                    <p>&copy; {currentYear} JobApp. All rights reserved.</p>
+                    <p>&copy; {currentYear} JobApplicant. All rights reserved.</p>
                 </div>
             </div>
         </footer>
