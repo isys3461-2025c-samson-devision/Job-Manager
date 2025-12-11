@@ -9,8 +9,6 @@ import samson.backend.dev.company.model.CompanyModel;
 
 @Repository
 public interface CompanyRepo extends MongoRepository<CompanyModel, String> {
-    CompanyModel findByCompanyId(String companyId);
-
     CompanyModel findByCompanyEmail(String companyEmail);
 
     CompanyModel findByCompanyPhone(String companyPhone);

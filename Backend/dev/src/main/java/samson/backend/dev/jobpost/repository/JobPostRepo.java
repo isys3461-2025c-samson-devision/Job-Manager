@@ -1,7 +1,6 @@
 package samson.backend.dev.jobpost.repository;
 
 import java.util.List;
-
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,11 +12,9 @@ import samson.backend.dev.jobpost.model.SalaryType;
 
 @Repository
 public interface JobPostRepo extends MongoRepository<JobPostModel, String> {
-    JobPostModel findByJobPostId(String jobPostId);
-    JobPostModel findByJobPostTitle(String jobPostTitle);
-
+    JobPostModel findByTitle(String jobPostTitle);
     List<JobPostModel> findByCompanyId(String companyId);
-    List<JobPostModel> findByJobPostLocation(String jobPostLocation);
+    List<JobPostModel> findByLocation(String jobPostLocation);
     List<JobPostModel> findByIsPublished(Boolean isPublished);
     List<JobPostModel> findBySalaryType(SalaryType salaryType);
     List<JobPostModel> findBySalaryAmountMinGreaterThanEqual(Double salaryAmountMin);
