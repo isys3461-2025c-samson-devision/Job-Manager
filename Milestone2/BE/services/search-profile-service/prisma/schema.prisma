@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model search_profile {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  authId           String @unique
+  country          String
+  createdAt        DateTime @db.Date
+  employmentStatus String[]
+  jobTitles        String[]
+  salaryMax        Int
+  salaryMin        Int
+  technicalTags    String[]
+  updatedAt        DateTime @db.Date
+}
