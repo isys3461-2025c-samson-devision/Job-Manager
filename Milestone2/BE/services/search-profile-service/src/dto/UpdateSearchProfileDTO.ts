@@ -1,8 +1,8 @@
 export class UpdateSearchProfileDTO {
-  tags?: string[];
+  technicalTags?: string[];
   employmentStatus?: string[];
   country?: string;
   salaryMin?: number;
   salaryMax?: number;
-  titles?: string[];
+  jobTitles?: string[];
 }
