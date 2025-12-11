@@ -11,11 +11,11 @@ model search_profile {
   id               String   @id @default(auto()) @map("_id") @db.ObjectId
   authId           String @unique
   country          String
-  createdAt        DateTime @db.Date
+  createdAt        DateTime @default(now()) @db.Date
   employmentStatus String[]
   jobTitles        String[]
-  salaryMax        Int
-  salaryMin        Int
+  salaryMax        Int?
+  salaryMin        Int?
   technicalTags    String[]
-  updatedAt        DateTime @db.Date
+  updatedAt        DateTime @updatedAt @db.Date
 }
