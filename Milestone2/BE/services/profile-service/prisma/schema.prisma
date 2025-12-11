@@ -7,21 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-type ProfileAddress {
-  city    String
-  country String
-  street  String
-}
-
-type ProfileBank {
-  bankName        String
-  bankNumber      String
-  transactionTime String
-}
-
-type ProfileSkills {
-  description String
-  name        String
+type ProfileEducation {
+  GPA         Float
+  degree      String
+  from        String
+  institution String
+  to          String
 }
 
 type ProfileWorkExperiences {
@@ -33,21 +24,21 @@ type ProfileWorkExperiences {
 
 model profile {
   id              String                   @id @default(auto()) @map("_id") @db.ObjectId
-  GPA             Float
-  address         ProfileAddress
   authId          String
-  bank            ProfileBank
   birthday        String
+  city            String
+  country         String
   createdAt       DateTime                 @db.Date
-  degree          String
+  education       ProfileEducation[]
   email           String
-  institution     String
   isPremium       String
   mediaId         String
   name            String
   phone           String
   salaryRange     Int
-  skills          ProfileSkills[]
+  skills          String[]
+  street          String
+  summary         String
   updatedAt       DateTime                 @db.Date
   workExperiences ProfileWorkExperiences[]
 }
