@@ -21,7 +21,7 @@ public class CompanyModel {
     
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+    private String id;
     private String companyName;
     private String companyAddress;
     private String companyEmail;
@@ -40,6 +40,12 @@ public class CompanyModel {
         this.companyCity = companyCity;
         this.companySubscriptionStatus = companySubscriptionStatus;
         this.companyLogo = companyLogo;
+    }
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getCompanyLogo() {
