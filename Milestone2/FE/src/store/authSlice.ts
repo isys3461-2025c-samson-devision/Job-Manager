@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { AuthState, ProfileFormData, Skill } from "../types";
+import type { AuthState, ProfileFormData, Skill, User } from "../types";
 
 const initialState: AuthState = {
   user: null,
@@ -23,7 +23,7 @@ const authSlice = createSlice({
       state.token = action.payload;
       localStorage.setItem('token', action.payload);
     },
-    setUser: (state, action: PayloadAction<any>) => {
+    setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {

@@ -1,4 +1,4 @@
-import MainLayout from '../../layouts/MainLayout';
+
 import Header from '../../components/Header';
 import { useAppSelector } from '../../store/hooks.ts';
 
@@ -6,13 +6,10 @@ export default function DashboardPage() {
   const { user } = useAppSelector((state) => state.auth);
 
   return (
-    <MainLayout>
-      <Header
-        title="Dashboard"
-        subtitle={`Welcome back, ${user?.email || 'User'}!`}
-      />
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
+   
+      <><Header
+      title="Dashboard"
+      subtitle={`Welcome back, ${user?.email || 'User'}!`} /><div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1 */}
           <div className="bg-white p-6 rounded-lg shadow">
@@ -32,7 +29,7 @@ export default function DashboardPage() {
             <p className="text-gray-600 mt-2">Explore job opportunities</p>
           </div>
         </div>
-      </div>
-    </MainLayout>
+      </div></>
+
   );
 }
