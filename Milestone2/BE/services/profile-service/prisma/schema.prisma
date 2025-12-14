@@ -8,37 +8,35 @@ datasource db {
 }
 
 type ProfileEducation {
-  GPA         Float
+  GPA         Float?
   degree      String
   from        String
   institution String
-  to          String
+  to          String?
 }
 
 type ProfileWorkExperiences {
-  description String
-  endDate     String
+  description String?
+  endDate     String?
   startDate   String
   title       String
 }
 
 model profile {
   id              String                   @id @default(auto()) @map("_id") @db.ObjectId
-  authId          String
-  birthday        String
-  city            String
+  address         String?
+  authId          String @unique
+  birthday        String?
+  city            String?
   country         String
-  createdAt       DateTime                 @db.Date
+  createdAt       DateTime                 @default(now()) @db.Date
   education       ProfileEducation[]
-  email           String
-  isPremium       String
-  mediaId         String
-  name            String
-  phone           String
-  salaryRange     Int
+  isPremium       Boolean?
+  mediaId         String?
+  name            String?
+  phone           String?
   skills          String[]
-  street          String
-  summary         String
+  summary         String?
   updatedAt       DateTime                 @db.Date
   workExperiences ProfileWorkExperiences[]
 }

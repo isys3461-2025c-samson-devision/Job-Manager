@@ -26,6 +26,7 @@ export interface ApiResponse<T = any> {
 export interface AuthTokens {
     accessToken: string;
     refreshToken: string;
+    userId?: string; 
 }
 
 export interface JwtPayload {
@@ -49,4 +50,8 @@ export class ServiceError extends Error {
         this.details = details;
 
     }
+}
+
+export interface LoginResponse extends AuthTokens {
+  userId: string; 
 }

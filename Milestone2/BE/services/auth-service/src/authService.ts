@@ -1,4 +1,4 @@
-import { AuthTokens } from "../../../shared/types";
+import { AuthTokens, LoginResponse } from "../../../shared/types";
 import prisma from "./database";
 import { createServiceError } from "../../../shared/utils";
 import bcrypt from "bcryptjs";
@@ -49,26 +49,31 @@ export class AuthService {
     return this.generateTokens(user.id, user.email, user.role);
   }
 
-    async login(email: string, password: string): Promise<AuthTokens> {
-        //find the user
-        const user = await prisma.user.findUnique({
-            where: { email },
-        });
-        if (!user) {
-            throw createServiceError("Invalid email or password", 401);
-        }
-
-        //verify password
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordValid) {
-            throw createServiceError("Invalid email or password", 401);
-        }
-
-        //generate tokens
-        return this.generateTokens(user.id, user.email, user.role);
-
+  async login(email: string, password: string): Promise<LoginResponse> {
+    //find the user
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+    
+    if (!user) {
+      throw createServiceError("Invalid email or password", 401);
     }
+
+    //verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw createServiceError("Invalid email or password", 401);
+    }
+
+    //generate tokens
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    
+    return {
+      ...tokens,
+      userId: user.id
+    };
+  }
 
     //generate tokens
   private async generateTokens(

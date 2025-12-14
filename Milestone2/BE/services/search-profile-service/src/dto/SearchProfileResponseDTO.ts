@@ -1,5 +1,4 @@
 export class SearchProfileResponseDTO {
-  id: string;
   authId: string;
   technicalTags: string[];
   employmentStatus: string[];
@@ -7,10 +6,8 @@ export class SearchProfileResponseDTO {
   salaryMin?: number;
   salaryMax?: number;
   jobTitles: string[];
-  updatedAt: Date;
 
   constructor(entity: any) {
-    this.id = entity.id;
     this.authId = entity.authId;
     this.technicalTags = entity.tags;
     this.employmentStatus = entity.employmentStatus;
@@ -18,6 +15,5 @@ export class SearchProfileResponseDTO {
     this.salaryMin = entity.salaryMin;
     this.salaryMax = entity.salaryMax;
     this.jobTitles = entity.titles;
-    this.updatedAt = entity.updatedAt;
   }
 }

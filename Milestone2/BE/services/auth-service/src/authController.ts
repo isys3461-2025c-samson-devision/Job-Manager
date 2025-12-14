@@ -13,7 +13,13 @@ export const register = asyncHandler(async (req : Request, res: Response) => {
 
 export const login = asyncHandler(async (req : Request, res: Response) => {
     const{email, password} = req.body;
-    const tokens = await authService.login(email, password);
+    const result = await authService.login(email, password);
 
-    res.status(200).json( createSuccessResponse(tokens,"User logged in successfully") );
+    res.status(200).json(
+    createSuccessResponse({
+      userId: result.userId,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken
+    }, "User logged in successfully")
+  );
 });

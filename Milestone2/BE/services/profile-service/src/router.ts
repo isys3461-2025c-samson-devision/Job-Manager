@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { ProfileController } from "./profileController";
 import { authenticate, asyncHandler, validateRequest } from "../../../shared/middleware";
-import { updateProfileSchema } from "./validation";
+import { updateProfileSchema, updateBasicTextProfileSchema } from "./validation";
+
 
 const router = Router();
 const controller = new ProfileController();
@@ -18,5 +19,19 @@ router.put(
   validateRequest(updateProfileSchema),
   asyncHandler(controller.updateProfile)
 );
+
+router.get(
+  "/:authId/basic-text-profile",
+  authenticate,
+  asyncHandler(controller.getBasicTextProfile)
+);
+
+router.put(
+  "/:authId/basic-text-profile",
+  authenticate,
+  validateRequest(updateBasicTextProfileSchema),
+  asyncHandler(controller.updateBasicTextProfile)
+);
+
 
 export default router;
