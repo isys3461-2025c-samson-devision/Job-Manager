@@ -1,15 +1,15 @@
 import { AuthTokens, LoginResponse } from "../../../shared/types";
+import {  ServiceError } from "../../../shared/types";
 import prisma from "./database";
 import { createServiceError } from "../../../shared/utils";
 import bcrypt from "bcryptjs";
-import jwt,{SignOptions} from "jsonwebtoken";
-import{StringValue} from "ms"; 
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 
 export class AuthService {
   private readonly jwtSecret: string;
   private readonly jwtRefreshSecret: string;
-  private readonly jwtExpiresIn: string;
-  private readonly jwtRefeshExpiresIn: string;
+  private readonly jwtExpiresIn: string | number;
+  private readonly jwtRefeshExpiresIn: string | number;
   private readonly bcryptRounds: number;
 
   constructor() {
@@ -74,8 +74,70 @@ export class AuthService {
       userId: user.id
     };
   }
+  
 
-    //generate tokens
+  async refreshtoken(refreshToken: string): Promise<AuthTokens> {
+    try {
+      //verify refresh token
+      const decoded = jwt.verify(
+        refreshToken,
+        this.jwtRefreshSecret
+      ) as JwtPayload;
+
+      const storedToken = await prisma.refreshToken.findUnique({
+        where: { token: refreshToken },
+        include: { user: true },
+      });
+      if (!storedToken || storedToken.expiresAt < new Date()) {
+        throw createServiceError("Invalid or expired refresh token", 401);
+      }
+
+      const tokens = await this.generateTokens(
+        storedToken.userId,
+        storedToken.user.email,
+        storedToken.user.role
+      );
+
+      await prisma.refreshToken.delete({
+        where: { id: storedToken.id },
+      });
+
+      return tokens;
+    } catch (error) {
+      if (error instanceof ServiceError) {
+        throw error;
+      }
+      throw createServiceError("Invalid or expired refresh token", 401, error);
+    }
+  }
+  async logout(refreshToken: string): Promise<void> {
+    //delete the refresh token from database
+    await prisma.refreshToken.deleteMany({
+      where: { token: refreshToken },
+    });
+  }
+
+  async validateToken(token: string): Promise<JwtPayload> {
+    try {
+      const decoded = jwt.verify(token, this.jwtSecret) as JwtPayload;
+
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+      });
+
+      if (!user) {
+        throw createServiceError("Invalid token: user not found", 401);
+      }
+      return decoded;
+    } catch (error) {
+      if (error instanceof jwt.JsonWebTokenError) {
+        throw createServiceError("Invalid token", 401);
+      }
+      throw createServiceError("Invalid or expired token", 401, error);
+    }
+  }
+
+  //generate tokens
   private async generateTokens(
     userId: string,
     email: string,
@@ -85,7 +147,7 @@ export class AuthService {
 
     // Generate access token
     const accessTokenOptions: SignOptions = {
-      expiresIn: this.jwtExpiresIn as StringValue,
+      expiresIn: this.jwtExpiresIn as SignOptions["expiresIn"],
     };
 
     const accessToken = jwt.sign(
@@ -96,7 +158,7 @@ export class AuthService {
 
     // Generate refresh token
     const refreshTokenOptions: SignOptions = {
-      expiresIn: this.jwtRefeshExpiresIn as StringValue,
+      expiresIn: this.jwtRefeshExpiresIn as SignOptions["expiresIn"],
     };
     const refreshToken = jwt.sign(
       payload,
@@ -122,4 +184,24 @@ export class AuthService {
     };
   }
 
+  async getUserById(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    if (!user) {
+      throw createServiceError("User not found", 404);
+    }
+    return user;
+  }
+  async deleteUser(userId: string): Promise<void> {
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+  }
 }

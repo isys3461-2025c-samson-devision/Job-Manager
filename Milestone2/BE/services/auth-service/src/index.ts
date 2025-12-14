@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 import authRoutes from './router';
+import { errorHandler } from '../../../shared/middleware';
 
 
 //load environment variables
@@ -12,11 +14,15 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 //middlewares
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_ORIGIN || true, // set FE origin in env for production
+    credentials: true,
+}));
 app.use(helmet());
 
 app.use(express.json({limit: "10mb"}));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 
 app.use('/auth', authRoutes);
@@ -24,6 +30,11 @@ app.use('/auth', authRoutes);
 
 // app.use(express.json({limit: "10mb"}));
 // app.use(express.urlencoded({ extended: true }));
+
+
+//Error handling middleware
+app.use(errorHandler)
+
 
 app.listen(PORT, () => {
     console.log(`Auth Service is running on port ${PORT}`);
