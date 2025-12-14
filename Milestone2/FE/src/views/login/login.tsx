@@ -20,8 +20,9 @@ const Login = () => {
 		setError("");
 		try {
 			const data = await login(email, password);
+			// Backend returns accessToken in response.data.data and refreshToken via httpOnly cookie
+			// Only store accessToken in Redux
 			dispatch(setToken(data.data?.accessToken));
-			dispatch(setToken(data.data?.refreshToken));
 			navigate("/dashboard");
 		} catch (err) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any

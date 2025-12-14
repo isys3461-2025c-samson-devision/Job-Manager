@@ -4,7 +4,7 @@ import type { AuthState, ProfileFormData, Skill, User } from "../types";
 
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('token'),
+  token: null, // keep access token in memory only
   loading: false,
   error: null,
   profile: {
@@ -19,9 +19,12 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setToken: (state, action: PayloadAction<string>) => {
-      state.token = action.payload;
-      localStorage.setItem('token', action.payload);
+    setToken: (state, action: PayloadAction<string | null | undefined>) => {
+      const next = action.payload ?? '';
+      if (typeof next === 'string' && next.length > 0) {
+        state.token = next;
+      }
+      // ignore empty/undefined payload to avoid accidentally wiping token
     },
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
@@ -35,7 +38,6 @@ const authSlice = createSlice({
     logout: (state) => {
       state.token = null;
       state.user = null;
-      localStorage.removeItem('token');
     },
     clearError: (state) => {
       state.error = null;

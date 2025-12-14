@@ -1,9 +1,10 @@
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from '../views/login/login';
 import Register from '../views/login/register';
 import MainLayout from '../layouts/MainLayout';
 import ProfileCreatePage from '../views/profile/create';
 import DashboardPage from '../views/dashboard/index';
+import ProtectedRoute from './ProtectedRoute';
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -12,8 +13,8 @@ const AppRouter = () => (
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* All other routes use MainLayout */}
-      <Route element={<MainLayout><Outlet /></MainLayout>}>
+      {/* Protected routes use MainLayout and require token */}
+      <Route element={<MainLayout><ProtectedRoute /></MainLayout>}>
         <Route path="/profile/create" element={<ProfileCreatePage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
       </Route>

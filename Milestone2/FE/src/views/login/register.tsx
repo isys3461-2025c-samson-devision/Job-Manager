@@ -19,8 +19,8 @@ const Register = () => {
 		setError("");
 		try {
 			const data = await register(email, password);
+			// Backend returns accessToken in response.data.data and sets refreshToken via httpOnly cookie
 			dispatch(setToken(data.data?.accessToken));
-			dispatch(setToken(data.data?.refreshToken));
 			navigate("/dashboard");
 		} catch (err) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
