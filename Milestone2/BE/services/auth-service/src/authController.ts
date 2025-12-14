@@ -9,8 +9,14 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   const tokens = await authService.register(email, password);
 
   res
+    .cookie("refreshToken", tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
     .status(201)
-    .json(createSuccessResponse(tokens, "User registered successfully"));
+    .json(createSuccessResponse({ accessToken: tokens.accessToken }, "User registered successfully"));
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
@@ -18,23 +24,50 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const tokens = await authService.login(email, password);
 
   res
+    .cookie("refreshToken", tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
     .status(200)
-    .json(createSuccessResponse(tokens, "User logged in successfully"));
+    .json(createSuccessResponse({ accessToken: tokens.accessToken }, "User logged in successfully"));
 });
 
 export const refreshToken = asyncHandler(
   async (req: Request, res: Response) => {
-    const { refreshToken } = req.body;
-    const tokens = await authService.refreshtoken(refreshToken);
+    // Ưu tiên lấy refreshToken từ cookie, fallback body
+    const cookieRefresh = (req as any).cookies?.refreshToken;
+    const bodyRefresh = req.body?.refreshToken;
+    const incomingRefreshToken = cookieRefresh || bodyRefresh;
+    const tokens = await authService.refreshtoken(incomingRefreshToken);
+    // Set refreshToken vào httpOnly cookie
     res
+      .cookie("refreshToken", tokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // chỉ bật secure ở production
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      })
       .status(200)
-      .json(createSuccessResponse(tokens, "Token refreshed successfully"));
+      .json(createSuccessResponse({ accessToken: tokens.accessToken }, "Token refreshed successfully"));
   }
 );
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
-  const { refreshToken } = req.body;
-  await authService.logout(refreshToken);
+  const cookieRefresh = (req as any).cookies?.refreshToken;
+  const bodyRefresh = req.body?.refreshToken;
+  const incomingRefreshToken = cookieRefresh || bodyRefresh;
+
+  if (incomingRefreshToken) {
+    await authService.logout(incomingRefreshToken);
+  }
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
   return res.status(200).json(createSuccessResponse(null, "User logged out successfully"));
 });
 

@@ -21,6 +21,7 @@ const Login = () => {
 		try {
 			const data = await login(email, password);
 			dispatch(setToken(data.data?.accessToken));
+			dispatch(setToken(data.data?.refreshToken));
 			navigate("/dashboard");
 		} catch (err) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any

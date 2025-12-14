@@ -1,4 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+
+import cookieParser from "cookie-parser";
+
 import { JWTPayload, logError, ServiceError } from "../types";
 import { createErrorResponse } from "../utils";
 import jwt from "jsonwebtoken";
