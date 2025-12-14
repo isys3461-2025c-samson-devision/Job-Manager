@@ -1,8 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-
-import cookieParser from "cookie-parser";
-
-import { JWTPayload, logError, ServiceError } from "../types";
+import { JwtPayload, logError, ServiceError } from "../types";
 import { createErrorResponse } from "../utils";
 import jwt from "jsonwebtoken";
 
@@ -11,7 +8,7 @@ import jwt from "jsonwebtoken";
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: JwtPayload;
     }
   }
 }
@@ -39,7 +36,7 @@ export function authenticateToken(
       return res.status(403).json(createErrorResponse("Invalid token"));
     }
 
-    req.user = decoded as JWTPayload; // Attach user info to request
+    req.user = decoded as JwtPayload; // Attach user info to request
     next();
   });
 }
@@ -95,3 +92,25 @@ export function errorHandler(
 
   next();
 }
+
+export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ message: "Missing Authorization header" });
+
+  const token = header.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Invalid Authorization format" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    req.user = decoded; 
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
+
+
+
+
+
+    

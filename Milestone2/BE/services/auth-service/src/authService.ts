@@ -1,15 +1,15 @@
-import { AuthTokens, ServiceError } from "../../../shared/types";
+import { AuthTokens, LoginResponse } from "../../../shared/types";
+import {  ServiceError } from "../../../shared/types";
 import prisma from "./database";
 import { createServiceError } from "../../../shared/utils";
 import bcrypt from "bcryptjs";
 import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
-import { StringValue } from "ms";
 
 export class AuthService {
   private readonly jwtSecret: string;
   private readonly jwtRefreshSecret: string;
-  private readonly jwtExpiresIn: string;
-  private readonly jwtRefeshExpiresIn: string;
+  private readonly jwtExpiresIn: string | number;
+  private readonly jwtRefeshExpiresIn: string | number;
   private readonly bcryptRounds: number;
 
   constructor() {
@@ -41,18 +41,20 @@ export class AuthService {
       data: {
         email,
         password: hashedPassword,
+        role:"APPLICANT",
       },
     });
 
     // generate tokens
-    return this.generateTokens(user.id, user.email);
+    return this.generateTokens(user.id, user.email, user.role);
   }
 
-  async login(email: string, password: string): Promise<AuthTokens> {
+  async login(email: string, password: string): Promise<LoginResponse> {
     //find the user
     const user = await prisma.user.findUnique({
       where: { email },
     });
+    
     if (!user) {
       throw createServiceError("Invalid email or password", 401);
     }
@@ -65,8 +67,14 @@ export class AuthService {
     }
 
     //generate tokens
-    return this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    
+    return {
+      ...tokens,
+      userId: user.id
+    };
   }
+  
 
   async refreshtoken(refreshToken: string): Promise<AuthTokens> {
     try {
@@ -86,7 +94,8 @@ export class AuthService {
 
       const tokens = await this.generateTokens(
         storedToken.userId,
-        storedToken.user.email
+        storedToken.user.email,
+        storedToken.user.role
       );
 
       await prisma.refreshToken.delete({
@@ -131,13 +140,14 @@ export class AuthService {
   //generate tokens
   private async generateTokens(
     userId: string,
-    email: string
+    email: string,
+    role: string
   ): Promise<AuthTokens> {
-    const payload = { userId, email };
+    const payload = { userId, email, role };
 
     // Generate access token
     const accessTokenOptions: SignOptions = {
-      expiresIn: this.jwtExpiresIn as StringValue,
+      expiresIn: this.jwtExpiresIn as SignOptions["expiresIn"],
     };
 
     const accessToken = jwt.sign(
@@ -148,7 +158,7 @@ export class AuthService {
 
     // Generate refresh token
     const refreshTokenOptions: SignOptions = {
-      expiresIn: this.jwtRefeshExpiresIn as StringValue,
+      expiresIn: this.jwtRefeshExpiresIn as SignOptions["expiresIn"],
     };
     const refreshToken = jwt.sign(
       payload,

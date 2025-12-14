@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+type ProfileEducation {
+  GPA         Float?
+  degree      String
+  from        String
+  institution String
+  to          String?
+}
+
+type ProfileWorkExperiences {
+  description String?
+  endDate     String?
+  startDate   String
+  title       String
+}
+
+model profile {
+  id              String                   @id @default(auto()) @map("_id") @db.ObjectId
+  address         String?
+  authId          String @unique
+  birthday        String?
+  city            String?
+  country         String
+  createdAt       DateTime                 @default(now()) @db.Date
+  education       ProfileEducation[]
+  isPremium       Boolean?
+  mediaId         String?
+  name            String?
+  phone           String?
+  skills          String[]
+  summary         String?
+  updatedAt       DateTime                 @db.Date
+  workExperiences ProfileWorkExperiences[]
+}

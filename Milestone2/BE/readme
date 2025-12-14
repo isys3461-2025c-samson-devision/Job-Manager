@@ -1,5 +1,0 @@
-npm i for both auth-service and share 
-npm run dev in auth-service
-
-http://localhost:3001/auth/login
-http://localhost:3001/auth/register 

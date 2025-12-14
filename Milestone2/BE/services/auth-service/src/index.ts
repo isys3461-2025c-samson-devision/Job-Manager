@@ -19,14 +19,18 @@ app.use(cors({
     credentials: true,
 }));
 app.use(helmet());
-app.use(cookieParser());
 
 app.use(express.json({limit: "10mb"}));
 app.use(express.urlencoded({ extended: true }));
-
+app.use(cookieParser());
 
 
 app.use('/auth', authRoutes);
+
+
+// app.use(express.json({limit: "10mb"}));
+// app.use(express.urlencoded({ extended: true }));
+
 
 //Error handling middleware
 app.use(errorHandler)

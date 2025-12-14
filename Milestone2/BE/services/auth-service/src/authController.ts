@@ -19,6 +19,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     .json(createSuccessResponse({ accessToken: tokens.accessToken }, "User registered successfully"));
 });
 
+
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const tokens = await authService.login(email, password);
@@ -31,15 +32,20 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     .status(200)
-    .json(createSuccessResponse({ accessToken: tokens.accessToken }, "User logged in successfully"));
+    .json(createSuccessResponse({ accessToken: tokens.accessToken,userId: tokens.userId }, "User logged in successfully"));
 });
 
 export const refreshToken = asyncHandler(
   async (req: Request, res: Response) => {
     // Ưu tiên lấy refreshToken từ cookie, fallback body
-    const cookieRefresh = (req as any).cookies?.refreshToken;
+    const cookieRefresh = req.cookies?.refreshToken;
     const bodyRefresh = req.body?.refreshToken;
     const incomingRefreshToken = cookieRefresh || bodyRefresh;
+    if (!incomingRefreshToken) {
+      return res
+        .status(400)
+        .json(createErrorResponse("Missing refresh token"));
+    }
     const tokens = await authService.refreshtoken(incomingRefreshToken);
     // Set refreshToken vào httpOnly cookie
     res
@@ -55,13 +61,22 @@ export const refreshToken = asyncHandler(
 );
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
-  const cookieRefresh = (req as any).cookies?.refreshToken;
+  const cookieRefresh = req.cookies?.refreshToken;
   const bodyRefresh = req.body?.refreshToken;
   const incomingRefreshToken = cookieRefresh || bodyRefresh;
 
-  if (incomingRefreshToken) {
-    await authService.logout(incomingRefreshToken);
+  if (!incomingRefreshToken) {
+    // still clear cookie to logout client-side
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    return res
+      .status(200)
+      .json(createSuccessResponse(null, "User logged out successfully"));
   }
+  await authService.logout(incomingRefreshToken);
 
   res.clearCookie("refreshToken", {
     httpOnly: true,
