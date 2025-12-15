@@ -1,8 +1,10 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../auth/context/AuthContext";
 import NavButton from "./NavButtons";
 import NotificationModal from "./NotificationModal";
+import mockNotifications from "../data/mockNotification";
+
 
 export default function CompanyHeader() {
 const navigate = useNavigate();
@@ -14,24 +16,8 @@ const dollarColor = isPremium ? "#FFD700" : "#0054FF";
 
 const [openNotif, setOpenNotif] = useState(false);
 
-const notifications = useMemo(() => {
-return [
-{
-id: 1,
-title: "New applicant applied",
-message: "Nguyen Van A applied for Senior Frontend Developer.",
-time: "2 mins ago",
-unread: true,
-},
-{
-id: 2,
-title: "Interview reminder",
-message: "You have an interview schedule tomorrow 9:00 AM.",
-time: "1 hour ago",
-unread: false,
-},
-];
-}, []);
+const notifications = mockNotifications;
+
 
 const unreadCount = notifications.filter((n) => n.unread).length;
 
