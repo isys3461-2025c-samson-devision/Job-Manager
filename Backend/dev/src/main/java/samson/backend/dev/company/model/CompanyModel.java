@@ -68,37 +68,37 @@ public class CompanyModel {
         this.companyAddress = companyAddress;
     }
 
-    public String getcompanyEmail() {
+    public String getCompanyEmail() {
         return companyEmail;
     }
-    public void setcompanyEmail(String companyEmail) {
+    public void setCompanyEmail(String companyEmail) {
         this.companyEmail = companyEmail;
     }
-    public String companyPhone() {
+    public String getCompanyPhone() {
         return companyPhone;
     }
 
-    public void setcompanyPhoneo(String companyPhone) {
+    public void setCompanyPhone(String companyPhone) {
         this.companyPhone = companyPhone;
     }
-    public String companyCountry() {
+    public String getCompanyCountry() {
         return companyCountry;
     }
 
-    public void setcompanyCountry(String companyCountry) {
+    public void setCompanyCountry(String companyCountry) {
         this.companyCountry = companyCountry;
     }
-    public String companyCity() {
-        return companyLogo;
+    public String getCompanyCity() {
+        return companyCity;
     }
-    public void setcompanyCity(String companyCity) {
+    public void setCompanyCity(String companyCity) {
         this.companyCity = companyCity;
     }
 
-    public String getcompanySubscriptionStatus() {
+    public String getCompanySubscriptionStatus() {
         return companySubscriptionStatus;
     }
-    public void setcompanySubscriptionStatus(String companySubscriptionStatus) {
+    public void setCompanySubscriptionStatus(String companySubscriptionStatus) {
         this.companySubscriptionStatus = companySubscriptionStatus;
     }
 }
