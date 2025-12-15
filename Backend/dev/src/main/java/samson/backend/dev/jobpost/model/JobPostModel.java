@@ -2,11 +2,6 @@ package samson.backend.dev.jobpost.model;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-
 import java.time.LocalDate;
 
 import org.springframework.data.annotation.Id;
@@ -27,11 +22,8 @@ public class JobPostModel {
     private String description;
     private LocalDate postedDate;
     private String location;// change into map obj later
-    @Enumerated(EnumType.STRING)
     private JobSkillTag skillTag;
-    @Enumerated(EnumType.STRING)
     private EmploymentType employmentType;
-    @Enumerated(EnumType.STRING)
     private SalaryType salaryType;
     private Double salaryAmountMin;
     private Double salaryAmountMax;
