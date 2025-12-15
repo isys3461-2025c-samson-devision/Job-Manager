@@ -105,7 +105,10 @@ export default function CompanyDashboard() {
             }}
           />
 
-          <button className="btn btn-primary" onClick={() => setShowCreateJobModal(true)}>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowCreateJobModal(true)}
+          >
             + Create Job Post
           </button>
         </div>
