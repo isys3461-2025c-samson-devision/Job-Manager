@@ -1,12 +1,25 @@
 import "../styles/jobPost.css";
+import { useNavigate } from "react-router-dom";
 
 export default function JobPostCard({ post }) {
+  const navigate = useNavigate();
+
   const statusClass =
     {
       public: "status-public",
       private: "status-private",
       draft: "status-draft",
     }[post.status.toLowerCase()] || "status-draft";
+
+  // Go to Applicants page with job context
+  const handleViewApplicants = () => {
+    navigate("/applicants", {
+      state: {
+        jobId: post.id,       // id of this job post
+        jobTitle: post.title, // title shown on Applicants page
+      },
+    });
+  };
 
   return (
     <div className="p-4 mb-4 bg-white rounded-4 shadow-sm border">
@@ -58,7 +71,10 @@ export default function JobPostCard({ post }) {
         {/* RIGHT COLUMN — BUTTONS */}
         <div className="col-12 col-lg-3 d-flex flex-column align-items-end gap-3 mt-3 mt-lg-0">
           {/* VIEW APPLICANTS */}
-          <button className="btn btn-primary job-action-btn">
+          <button
+            className="btn btn-primary job-action-btn"
+            onClick={handleViewApplicants}
+          >
             View Applicants
           </button>
 
