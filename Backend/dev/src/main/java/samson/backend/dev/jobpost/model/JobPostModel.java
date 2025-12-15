@@ -21,7 +21,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class JobPostModel {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     private String Id;
     private String companyId;
     private String title;

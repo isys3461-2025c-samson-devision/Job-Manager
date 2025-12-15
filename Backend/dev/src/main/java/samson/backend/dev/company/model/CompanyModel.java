@@ -20,7 +20,6 @@ import lombok.Setter;
 public class CompanyModel {
     
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     private String id;
     private String companyName;
     private String companyAddress;

@@ -9,7 +9,6 @@ import org.springframework.data.annotation.Id;
 @Document(collection = "payments")
 public class PaymentModel {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long Id;
     private Long CompanyId;
     private String CompanyName;
