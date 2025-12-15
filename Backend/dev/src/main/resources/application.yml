@@ -1,4 +1,3 @@
 spring:
   mongodb:
-     uri: mongodb://localhost:27017/JobManager
-     database: JobManager
+     uri: mongodb+srv://tnduyy2k3_db_user:u9lTThDjH81cVi0s@managerdb.xadcgas.mongodb.net/
