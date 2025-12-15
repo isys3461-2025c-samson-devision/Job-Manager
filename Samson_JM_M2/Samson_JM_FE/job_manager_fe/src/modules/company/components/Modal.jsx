@@ -1,7 +1,7 @@
 // src/modules/company/components/Modal.jsx
 import React, { useState } from "react";
 
-const Modal = ({ applicant, onClose }) => {
+const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHire }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isWarning, setIsWarning] = useState(false);
 
@@ -11,7 +11,12 @@ const Modal = ({ applicant, onClose }) => {
     applicant.summary ||
     `${applicant.name} is a ${applicant.title} with ${applicant.yearsExperience}+ years of experience in modern development and collaboration with cross-functional teams.`;
 
-  const pink = "#ec4899"; // trái tim hồng
+  const pink = "#ec4899";
+
+  // Handle Hire click (optional callback)
+  const handleHire = () => {
+    if (typeof onHire === "function") onHire(applicant);
+  };
 
   return (
     <div
@@ -39,7 +44,7 @@ const Modal = ({ applicant, onClose }) => {
           position: "relative",
         }}
       >
-        {/* nút đóng */}
+        {/* Close button */}
         <button
           className="btn-close"
           onClick={onClose}
@@ -53,80 +58,99 @@ const Modal = ({ applicant, onClose }) => {
           }}
         ></button>
 
-        {/* 2 nút Warning + Favorite */}
+        {/* Top-right action buttons */}
         <div
           style={{
             position: "absolute",
             top: 56,
             right: 24,
             display: "flex",
-            gap: 8,
+            flexDirection: "column",
+            gap: 10,
             zIndex: 10,
+            alignItems: "flex-end",
           }}
         >
-          {/* Warning (đỏ) */}
-          <button
-            type="button"
-            title="Warning"
-            onClick={() => setIsWarning((p) => !p)}
-            style={{
-              borderRadius: "999px",
-              width: 36,
-              height: 36,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 0,
-              border: "1.5px solid #ef4444",
-              backgroundColor: isWarning ? "#fef2f2" : "transparent",
-              color: "#ef4444",
-            }}
-          >
-            <i
-              className={`bi ${
-                isWarning ? "bi-x-circle-fill" : "bi-x-lg"
-              }`}
-            />
-          </button>
+          {/* Row: Warning + Favorite */}
+          <div style={{ display: "flex", gap: 8 }}>
+            {/* Warning */}
+            <button
+              type="button"
+              title="Warning"
+              onClick={() => setIsWarning((p) => !p)}
+              style={{
+                borderRadius: "999px",
+                width: 36,
+                height: 36,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 0,
+                border: "1.5px solid #ef4444",
+                backgroundColor: isWarning ? "#fef2f2" : "transparent",
+                color: "#ef4444",
+              }}
+            >
+              <i className={`bi ${isWarning ? "bi-x-circle-fill" : "bi-x-lg"}`} />
+            </button>
 
-          {/* Favorite (hồng) */}
-          <button
-            type="button"
-            title="Favorite"
-            onClick={() => setIsFavorite((p) => !p)}
-            style={{
-              borderRadius: "999px",
-              width: 36,
-              height: 36,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 0,
-              border: `1.5px solid ${pink}`,
-              backgroundColor: isFavorite ? "#fdf2f8" : "transparent",
-              color: pink,
-            }}
-          >
-            <i
-              className={`bi ${
-                isFavorite ? "bi-heart-fill" : "bi-heart"
-              }`}
-            />
-          </button>
+            {/* Favorite */}
+            <button
+              type="button"
+              title="Favorite"
+              onClick={() => setIsFavorite((p) => !p)}
+              style={{
+                borderRadius: "999px",
+                width: 36,
+                height: 36,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 0,
+                border: `1.5px solid ${pink}`,
+                backgroundColor: isFavorite ? "#fdf2f8" : "transparent",
+                color: pink,
+              }}
+            >
+              <i className={`bi ${isFavorite ? "bi-heart-fill" : "bi-heart"}`} />
+            </button>
+          </div>
+
+          {/* Hire button (only in job context) */}
+          {showHireButton && (
+            <button
+              type="button"
+              onClick={handleHire}
+              className="btn btn-success btn-sm"
+              style={{
+                borderRadius: 10,
+                paddingInline: 16,
+                height: 36,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+              title={jobTitle ? `Hire for ${jobTitle}` : "Hire"}
+            >
+              <i className="bi bi-check2-circle" />
+              Hire
+            </button>
+          )}
         </div>
 
-        {/* CV layout giống hình */}
+        {/* CV layout */}
         <div className="row g-0">
-          {/* SIDEBAR BÊN TRÁI */}
+          {/* LEFT SIDEBAR */}
           <div
             className="col-md-4"
             style={{
-              backgroundColor: "#0b2540", // xanh đậm giống mẫu
+              backgroundColor: "#0b2540",
               color: "#e5e7eb",
               padding: "28px 22px",
             }}
           >
-            {/* avatar */}
+            {/* Avatar */}
             <div className="text-center mb-4">
               <img
                 src={applicant.avatarUrl}
@@ -143,7 +167,7 @@ const Modal = ({ applicant, onClose }) => {
               />
             </div>
 
-            {/* LIÊN LẠC / CONTACT */}
+            {/* CONTACT */}
             <div
               className="mb-3 pb-3"
               style={{
@@ -175,16 +199,13 @@ const Modal = ({ applicant, onClose }) => {
               </div>
               {applicant.rating && (
                 <div className="d-flex align-items-center mb-1">
-                  <i
-                    className="bi bi-star-fill me-2"
-                    style={{ color: "#FDBA3C" }}
-                  />
+                  <i className="bi bi-star-fill me-2" style={{ color: "#FDBA3C" }} />
                   <span>Rating: {applicant.rating}</span>
                 </div>
               )}
             </div>
 
-            {/* HỌC VẤN / EDUCATION */}
+            {/* EDUCATION */}
             <div
               className="mb-3 pb-3"
               style={{
@@ -205,7 +226,7 @@ const Modal = ({ applicant, onClose }) => {
               <div style={{ lineHeight: 1.5 }}>{applicant.education}</div>
             </div>
 
-            {/* KỸ NĂNG / SKILLS */}
+            {/* SKILLS */}
             <div style={{ fontSize: "0.82rem" }}>
               <div
                 className="mb-2"
@@ -238,7 +259,7 @@ const Modal = ({ applicant, onClose }) => {
             </div>
           </div>
 
-          {/* NỘI DUNG BÊN PHẢI */}
+          {/* RIGHT CONTENT */}
           <div
             className="col-md-8"
             style={{
@@ -247,12 +268,8 @@ const Modal = ({ applicant, onClose }) => {
               backgroundColor: "#ffffff",
             }}
           >
-            {/* TÊN + CHỨC DANH */}
             <section className="mb-4">
-              <h3
-                className="mb-1"
-                style={{ fontWeight: 700, letterSpacing: "0.03em" }}
-              >
+              <h3 className="mb-1" style={{ fontWeight: 700, letterSpacing: "0.03em" }}>
                 {applicant.name}
               </h3>
               <div
@@ -265,9 +282,15 @@ const Modal = ({ applicant, onClose }) => {
               >
                 {applicant.title}
               </div>
+
+              {/* Optional: show job title context */}
+              {showHireButton && jobTitle && (
+                <div style={{ marginTop: 10, color: "#334155", fontSize: "0.86rem" }}>
+                  Applied for: <strong>{jobTitle}</strong>
+                </div>
+              )}
             </section>
 
-            {/* MỤC TIÊU / PROFILE */}
             <section className="mb-4">
               <h6
                 className="mb-2"
@@ -283,7 +306,6 @@ const Modal = ({ applicant, onClose }) => {
               <p style={{ color: "#4b5563", marginBottom: 0 }}>{summaryText}</p>
             </section>
 
-            {/* KINH NGHIỆM / EXPERIENCE */}
             <section className="mb-4">
               <h6
                 className="mb-2"
@@ -297,17 +319,12 @@ const Modal = ({ applicant, onClose }) => {
                 Work Experience
               </h6>
 
-              {Array.isArray(applicant.experiences) &&
-              applicant.experiences.length > 0 ? (
+              {Array.isArray(applicant.experiences) && applicant.experiences.length > 0 ? (
                 applicant.experiences.map((exp, idx) => (
                   <div key={idx} className="mb-3">
                     <div className="d-flex justify-content-between">
                       <strong>{exp.company}</strong>
-                      <span
-                        style={{ color: "#6b7280", fontSize: "0.8rem" }}
-                      >
-                        {exp.period}
-                      </span>
+                      <span style={{ color: "#6b7280", fontSize: "0.8rem" }}>{exp.period}</span>
                     </div>
                     <div
                       style={{
@@ -334,14 +351,12 @@ const Modal = ({ applicant, onClose }) => {
                 ))
               ) : (
                 <p style={{ color: "#4b5563", fontSize: "0.85rem" }}>
-                  {applicant.yearsExperience}+ years of experience building and
-                  maintaining web applications, collaborating closely with
-                  designers, product owners and backend teams.
+                  {applicant.yearsExperience}+ years of experience building and maintaining web
+                  applications, collaborating closely with designers, product owners and backend teams.
                 </p>
               )}
             </section>
 
-            {/* KỸ NĂNG KHÁC / HIGHLIGHTS */}
             <section>
               <h6
                 className="mb-2"
@@ -363,17 +378,11 @@ const Modal = ({ applicant, onClose }) => {
                 }}
               >
                 <li>
-                  Strong hands-on experience with{" "}
-                  {applicant.skills.slice(0, 3).join(", ")} and other modern
-                  technologies.
+                  Strong hands-on experience with {applicant.skills.slice(0, 3).join(", ")} and other
+                  modern technologies.
                 </li>
-                <li>
-                  Comfortable working in agile teams and communicating with
-                  stakeholders.
-                </li>
-                <li>
-                  Open to opportunities in {applicant.location}.
-                </li>
+                <li>Comfortable working in agile teams and communicating with stakeholders.</li>
+                <li>Open to opportunities in {applicant.location}.</li>
               </ul>
             </section>
           </div>
