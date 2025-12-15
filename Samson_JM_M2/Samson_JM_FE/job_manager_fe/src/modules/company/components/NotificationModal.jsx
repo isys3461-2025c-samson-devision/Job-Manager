@@ -1,6 +1,9 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 export default function NotificationModal({ open, onClose, items = [] }) {
+      const navigate = useNavigate();  
 useEffect(() => {
 if (!open) return;
 const prev = document.body.style.overflow;
@@ -111,23 +114,22 @@ Notification for apply jobs
     </div>
 
     <button
-      className="btn w-100"
-      style={{
+    className="btn w-100"
+    style={{
         backgroundColor: "#f97316",
         color: "white",
         borderRadius: 10,
         height: 42,
         fontWeight: 600,
-      }}
-      onClick={() => {
+    }}
+    onClick={() => {
         onClose();
-      }}
+        navigate("/signin");
+    }}
     >
-      Sign in
+    Sign in
     </button>
   </div>
 </div>
-
-
 );
 }
