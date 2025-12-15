@@ -1,94 +1,157 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useMemo, useState } from "react";
 import { AuthContext } from "../../auth/context/AuthContext";
 import NavButton from "./NavButtons";
+import NotificationModal from "./NotificationModal";
 
 export default function CompanyHeader() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { auth, logout } = useContext(AuthContext);
+const navigate = useNavigate();
+const location = useLocation();
+const { auth, logout } = useContext(AuthContext);
 
-  const isPremium = auth?.subscription === "premium";
-  const dollarColor = isPremium ? "#FFD700" : "#0054FF";
+const isPremium = auth?.subscription === "premium";
+const dollarColor = isPremium ? "#FFD700" : "#0054FF";
 
-  return (
-    <div
-      className="d-flex justify-content-between align-items-center px-4 py-2 bg-white"
-      style={{
-        borderBottom: "1px solid #e5e5e5",
-        position: "sticky",
-        top: 0,
-        zIndex: 1000,
-      }}
-    >
-      {/* LEFT — LOGO */}
-      <div
-        className="fw-bold"
-        style={{ fontSize: "20px", cursor: "pointer" }}
-        onClick={() => navigate("/dashboard")}
-      >
-        DEV<span style={{ color: "#0054FF" }}>ision</span>
-      </div>
+const [openNotif, setOpenNotif] = useState(false);
 
-      {/* CENTER — NAVIGATION BUTTONS */}
-      <div className="d-flex align-items-center gap-3">
-        <NavButton
-          path="/dashboard"
-          icon="bi-house-door"
-          label="Dashboard"
-          location={location}
-        />
-        <NavButton
-          path="/applicants"
-          icon="bi-people"
-          label="Applicants"
-          location={location}
-        />
-        <NavButton
-          path="/profile"
-          icon="bi-person"
-          label="Profile"
-          location={location}
-        />
-      </div>
+const notifications = useMemo(() => {
+return [
+{
+id: 1,
+title: "New applicant applied",
+message: "Nguyen Van A applied for Senior Frontend Developer.",
+time: "2 mins ago",
+unread: true,
+},
+{
+id: 2,
+title: "Interview reminder",
+message: "You have an interview schedule tomorrow 9:00 AM.",
+time: "1 hour ago",
+unread: false,
+},
+];
+}, []);
 
-      {/* RIGHT — ICONS */}
-      <div className="d-flex align-items-center gap-3">
-        {/* Subscription Indicator → now a navigation button */}
-        <i
-          className="bi bi-currency-dollar"
-          style={{
-            fontSize: "22px",
-            color: dollarColor,
-            cursor: "pointer",
-          }}
-          title={isPremium ? "Premium Subscription" : "Upgrade to Premium"}
-          onClick={() => navigate("/subscription")}
-        ></i>
+const unreadCount = notifications.filter((n) => n.unread).length;
 
-        {/* Notifications */}
+return (
+<>
+<div
+className="d-flex justify-content-between align-items-center px-4 py-2 bg-white"
+style={{
+borderBottom: "1px solid #e5e5e5",
+position: "sticky",
+top: 0,
+zIndex: 1000,
+}}
+>
+{/* LEFT — LOGO */}
+<div
+className="fw-bold"
+style={{ fontSize: "20px", cursor: "pointer" }}
+onClick={() => navigate("/dashboard")}
+>
+DEV<span style={{ color: "#0054FF" }}>ision</span>
+</div>
+
+    {/* CENTER — NAVIGATION BUTTONS */}
+    <div className="d-flex align-items-center gap-3">
+      <NavButton
+        path="/dashboard"
+        icon="bi-house-door"
+        label="Dashboard"
+        location={location}
+      />
+      <NavButton
+        path="/applicants"
+        icon="bi-people"
+        label="Applicants"
+        location={location}
+      />
+      <NavButton
+        path="/profile"
+        icon="bi-person"
+        label="Profile"
+        location={location}
+      />
+    </div>
+
+    {/* RIGHT — ICONS */}
+    <div className="d-flex align-items-center gap-3">
+      {/* Subscription Indicator */}
+      <i
+        className="bi bi-currency-dollar"
+        style={{
+          fontSize: "22px",
+          color: dollarColor,
+          cursor: "pointer",
+        }}
+        title={isPremium ? "Premium Subscription" : "Upgrade to Premium"}
+        onClick={() => navigate("/subscription")}
+      ></i>
+
+      {/* Notifications (click to open modal) */}
+      <div style={{ position: "relative" }}>
         <i
           className="bi bi-bell"
           style={{ fontSize: "20px", cursor: "pointer" }}
+          onClick={() => setOpenNotif(true)}
+          title="Notifications"
         />
 
-        {/* LightMode/DarkMode Icon */}
-        <i
-          className="bi bi-sun-fill"
-          style={{ fontSize: "22px", cursor: "pointer" }}
-        />
-
-        {/* LOG OUT BUTTON */}
-        <button
-          className="btn btn-outline-secondary btn-sm"
-          onClick={() => {
-            logout();
-            navigate("/signin");
-          }}
-        >
-          <i className="bi bi-box-arrow-right me-1"></i> Log Out
-        </button>
+        {unreadCount > 0 ? (
+          <span
+            style={{
+              position: "absolute",
+              top: -6,
+              right: -8,
+              minWidth: 16,
+              height: 16,
+              borderRadius: 999,
+              backgroundColor: "#ef4444",
+              color: "white",
+              fontSize: 10,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingInline: 4,
+              fontWeight: 800,
+              lineHeight: 1,
+            }}
+          >
+            {unreadCount}
+          </span>
+        ) : null}
       </div>
+
+      {/* LightMode/DarkMode Icon */}
+      <i
+        className="bi bi-sun-fill"
+        style={{ fontSize: "22px", cursor: "pointer" }}
+      />
+
+      {/* LOG OUT BUTTON */}
+      <button
+        className="btn btn-outline-secondary btn-sm"
+        onClick={() => {
+          logout();
+          navigate("/signin");
+        }}
+      >
+        <i className="bi bi-box-arrow-right me-1"></i> Log Out
+      </button>
     </div>
-  );
+  </div>
+
+  {/* Notification Modal */}
+  <NotificationModal
+    open={openNotif}
+    onClose={() => setOpenNotif(false)}
+    items={notifications}
+  />
+</>
+
+
+);
 }
