@@ -1,5 +1,5 @@
 
-import { API_BASE_URL_AUTH } from "../config";
+
 import api from "./http";
 
 export const register = async (email: string, password: string) => {

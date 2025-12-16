@@ -71,7 +71,8 @@ export class AuthService {
     
     return {
       ...tokens,
-      userId: user.id
+      userId: user.id,
+      email: user.email,
     };
   }
   

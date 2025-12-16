@@ -4,11 +4,6 @@ import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from './authSlice';
 
-// Root reducer
-const rootReducer = combineReducers({
-  auth: authReducer,
-});
-
 // Persist configuration: persist auth slice but blacklist token (memory-only)
 const authPersistConfig = {
   key: 'auth',

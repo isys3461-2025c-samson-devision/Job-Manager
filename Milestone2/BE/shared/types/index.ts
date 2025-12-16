@@ -64,5 +64,6 @@ export function logError(error: Error, context?: Record<string, any>): void {
 
 export interface LoginResponse extends AuthTokens {
   userId: string; 
+  email: string;
 }
 // Removed redundant JWTPayload alias; use JwtPayload consistently

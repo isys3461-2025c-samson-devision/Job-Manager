@@ -11,10 +11,12 @@ const AppRouter = () => (
     <Routes>
       {/* Auth routes without layout */}
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/register" element={<Register />
+    } />
 
       {/* Protected routes use MainLayout and require token */}
       <Route element={<MainLayout><ProtectedRoute /></MainLayout>}>
+        <Route path="/profile" element={<ProfileCreatePage />} />
         <Route path="/profile/create" element={<ProfileCreatePage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
       </Route>

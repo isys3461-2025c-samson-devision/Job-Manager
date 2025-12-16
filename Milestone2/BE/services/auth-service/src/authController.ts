@@ -32,7 +32,12 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     .status(200)
-    .json(createSuccessResponse({ accessToken: tokens.accessToken,userId: tokens.userId }, "User logged in successfully"));
+    .json(
+      createSuccessResponse(
+        { accessToken: tokens.accessToken, userId: tokens.userId, email: tokens.email },
+        "User logged in successfully"
+      )
+    );
 });
 
 export const refreshToken = asyncHandler(

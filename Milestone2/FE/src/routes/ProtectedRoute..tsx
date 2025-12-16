@@ -1,1 +1,0 @@
-console.log("ProtectedRoute module loaded");
