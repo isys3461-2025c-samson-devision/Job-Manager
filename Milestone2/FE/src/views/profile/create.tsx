@@ -9,8 +9,24 @@ import {
 } from '../../store/authSlice';
 import { profileService } from '../../services/profileServices';
 import type { ProfileFormData } from '../../types';
-import MainLayout from '../../layouts/MainLayout';
 import Header from '../../components/Header';
+
+// Mock data for testing
+const MOCK_SKILLS = [
+  { id: '1', name: 'JavaScript' },
+  { id: '2', name: 'TypeScript' },
+  { id: '3', name: 'React' },
+  { id: '4', name: 'Node.js' },
+  { id: '5', name: 'Python' },
+  { id: '6', name: 'SQL' },
+  { id: '7', name: 'MongoDB' },
+  { id: '8', name: 'AWS' },
+  { id: '9', name: 'Docker' },
+  { id: '10', name: 'Git' },
+];
+
+
+const USE_MOCK_DATA = true; // Set to false to use real API
 
 export default function ProfileCreatePage() {
   const dispatch = useAppDispatch();
@@ -29,14 +45,22 @@ export default function ProfileCreatePage() {
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch skills on mount
+  // Fetch skills
   useEffect(() => {
     const fetchSkills = async () => {
       try {
         dispatch(setProfileLoading(true));
-        const skillsData = await profileService.getSkills();
-        dispatch(setSkills(skillsData));
+
+        if (USE_MOCK_DATA) {
+          // Simulate API delay
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          dispatch(setSkills(MOCK_SKILLS));
+        } else {
+          const skillsData = await profileService.getSkills();
+          dispatch(setSkills(skillsData));
+        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load skills';
         dispatch(setProfileError(errorMessage));
@@ -47,6 +71,10 @@ export default function ProfileCreatePage() {
 
     fetchSkills();
   }, [dispatch]);
+
+  const filteredSkills = skills.filter((skill) =>
+    skill.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Form validation
   const validateForm = (): boolean => {
@@ -111,17 +139,25 @@ export default function ProfileCreatePage() {
 
   if (loading) {
     return (
-      <MainLayout>
-        <Header title="Loading..." />
+      <>
+        <Header
+          title="Complete Your Profile"
+          subtitle="Add your personal information and select your coding skills"
+          breadcrumbs={[
+            { label: 'Home', href: '/' },
+            { label: 'Profile' },
+          ]}
+        />
+
         <div className="flex justify-center items-center min-h-screen">
-          <p>Loading skills...</p>
+          <p>Loading profile creation form...</p>
         </div>
-      </MainLayout>
+      </>
     );
   }
 
   return (
-    <MainLayout>
+    <>
       <Header
         title="Complete Your Profile"
         subtitle="Add your personal information and select your coding skills"
@@ -132,13 +168,8 @@ export default function ProfileCreatePage() {
       />
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded text-red-800">
-            {error}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-6">
+
           {/* Personal Information Section */}
           <fieldset className="border border-gray-300 rounded-lg p-6">
             <legend className="text-lg font-semibold text-gray-900 px-2">
@@ -156,42 +187,12 @@ export default function ProfileCreatePage() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`mt-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  validationErrors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`mt-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="you@example.com"
               />
               {validationErrors.email && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
-              )}
-            </div>
-
-            {/* Country */}
-            <div className="mt-4">
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-                Country <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="country"
-                name="country"
-                value={formData.country}
-                onChange={handleInputChange}
-                className={`mt-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  validationErrors.country ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">-- Select Country --</option>
-                <option value="United States">United States</option>
-                <option value="Canada">Canada</option>
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="Australia">Australia</option>
-                <option value="Germany">Germany</option>
-                <option value="France">France</option>
-                <option value="India">India</option>
-                <option value="Other">Other</option>
-              </select>
-              {validationErrors.country && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.country}</p>
               )}
             </div>
 
@@ -250,30 +251,82 @@ export default function ProfileCreatePage() {
               Coding Skills
             </legend>
 
-            <p className="mt-4 text-sm text-gray-600 mb-4">
+            {validationErrors.skills && (
+              <p className="mt-4 mb-4 text-sm text-red-600">{validationErrors.skills}</p>
+            )}
+
+            {/* Selected Skills Tags */}
+            {formData.skills.length > 0 && (
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm font-medium text-gray-700 mb-3">Selected Skills:</p>
+                <div className="flex flex-wrap gap-2">
+                  {formData.skills.map((skillId) => {
+                    const skill = skills.find((s) => s.id === skillId);
+                    return skill ? (
+                      <div
+                        key={skillId}
+                        className="flex items-center gap-2 px-3 py-2 bg-blue-200 text-blue-900 rounded-full text-sm font-medium"
+                      >
+                        <span>{skill.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleSkillToggle(skillId)}
+                          className="ml-1 font-bold text-blue-900 hover:text-blue-700 focus:outline-none"
+                          aria-label={`Remove ${skill.name}`}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
+
+            <p className="text-sm text-gray-600 mb-4">
               Select your coding skills <span className="text-red-500">*</span>
             </p>
 
-            {validationErrors.skills && (
-              <p className="mb-4 text-sm text-red-600">{validationErrors.skills}</p>
-            )}
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {skills.map((skill) => (
-                <label
-                  key={skill.id}
-                  className="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50"
-                >
-                  <input
-                    type="checkbox"
-                    checked={formData.skills.includes(skill.id)}
-                    onChange={() => handleSkillToggle(skill.id)}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-sm text-gray-700">{skill.name}</span>
-                </label>
-              ))}
+            {/* Search Input */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search skills..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
+
+            {/* Skills Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {filteredSkills.length > 0 ? (
+                filteredSkills.map((skill) => {
+                  const isSelected = formData.skills.includes(skill.id);
+                  return (
+                    <button
+                      key={skill.id}
+                      type="button"
+                      onClick={() => handleSkillToggle(skill.id)}
+                      className={`p-3 py-2 border rounded-full font-medium text-sm transition-colors ${isSelected
+                          ? 'bg-blue-100 border-blue-400 text-blue-900 cursor-pointer hover:bg-blue-200'
+                          : 'bg-white border-gray-300 text-gray-700 cursor-pointer hover:border-blue-400 hover:bg-blue-50'
+                        }`}
+                    >
+                      {skill.name}
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="col-span-2 md:col-span-3 text-sm text-gray-500">
+                  No skills found matching "{searchQuery}"
+                </p>
+              )}
+            </div>
+
+            <p className="mt-4 text-xs text-gray-500">
+              Selected: {formData.skills.length} skill(s) | Showing {filteredSkills.length} of {skills.length}
+            </p>
           </fieldset>
 
           {/* Submit Button */}
@@ -295,6 +348,6 @@ export default function ProfileCreatePage() {
           </div>
         </form>
       </div>
-    </MainLayout>
+    </>
   );
 }
