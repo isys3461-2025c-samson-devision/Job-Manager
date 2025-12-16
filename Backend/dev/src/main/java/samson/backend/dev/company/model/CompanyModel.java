@@ -2,8 +2,7 @@ package samson.backend.dev.company.model;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 
@@ -27,16 +26,26 @@ public class CompanyModel {
     private String companyPhone;
     private String companyCountry;
     private String companyCity;
+    private String companyAbout;
+    private String companyTitle;
+    private List<CompanyMedia> companyMedia;
+    private List<String> companySkillsNeeded;
+    private List<CompanyAchievements> companyAchievements;
     private String companySubscriptionStatus;
     private String companyLogo;
 
-    public CompanyModel(String companyName, String companyAddress, String companyEmail, String companyPhone, String companyCountry, String companyCity, String companySubscriptionStatus, String companyLogo) {
+    public CompanyModel(String companyName, String companyAddress, String companyEmail, String companyPhone, String companyCountry, String companyCity, String companyAbout, String companyTitle, List<CompanyMedia> companyMedia, List<String> companySkillsNeeded, List<CompanyAchievements> companyAchievements, String companySubscriptionStatus, String companyLogo) {
         this.companyName = companyName;
         this.companyAddress = companyAddress;
         this.companyEmail = companyEmail;
         this.companyPhone = companyPhone;
         this.companyCountry = companyCountry;
         this.companyCity = companyCity;
+        this.companyAbout = companyAbout;
+        this.companyTitle = companyTitle;
+        this.companyMedia = companyMedia;
+        this.companySkillsNeeded = companySkillsNeeded;
+        this.companyAchievements = companyAchievements;
         this.companySubscriptionStatus = companySubscriptionStatus;
         this.companyLogo = companyLogo;
     }
@@ -93,6 +102,46 @@ public class CompanyModel {
     }
     public void setCompanyCity(String companyCity) {
         this.companyCity = companyCity;
+    }
+
+    public String getCompanyAbout() {
+        return companyAbout;
+    }
+
+    public void setCompanyAbout(String companyAbout) {
+        this.companyAbout = companyAbout;
+    }
+
+    public String getCompanyTitle() {
+        return companyTitle;
+    }
+
+    public void setCompanyTitle(String companyTitle) {
+        this.companyTitle = companyTitle;
+    }
+
+    public List<CompanyMedia> getCompanyMedia() {
+        return companyMedia;
+    }
+
+    public void setCompanyMedia(List<CompanyMedia> companyMedia) {
+        this.companyMedia = companyMedia;
+    }
+
+    public List<String> getCompanySkillsNeeded() {
+        return companySkillsNeeded;
+    }
+
+    public void setCompanySkillsNeeded(List<String> companySkillsNeeded) {
+        this.companySkillsNeeded = companySkillsNeeded;
+    }
+
+    public List<CompanyAchievements> getCompanyAchievements() {
+        return companyAchievements;
+    }
+
+    public void setCompanyAchievements(List<CompanyAchievements> companyAchievements) {
+        this.companyAchievements = companyAchievements;
     }
 
     public String getCompanySubscriptionStatus() {
