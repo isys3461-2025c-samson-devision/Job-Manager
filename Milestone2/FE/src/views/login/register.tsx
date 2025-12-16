@@ -1,31 +1,92 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
 import { setToken } from '../../store/authSlice';
 import { register } from '../../services/authService';
 import shibaImg from '../../assets/shiba_find_job.png';
+import CountrySelect from '../../components/CountrySelect';
+
+/* ================= TYPES ================= */
+
+interface Country {
+  code: string;
+  name: string;
+}
+
+/* ================= COMPONENT ================= */
 
 export default function Register() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  /* -------- Auth fields -------- */
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  /* -------- Country -------- */
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [country, setCountry] = useState('');
+
+  /* -------- UI states -------- */
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [countryError, setCountryError] = useState('');
+
+  /* ================= FETCH COUNTRIES ================= */
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await axios.get(
+          'https://restcountries.com/v3.1/all?fields=name,cca2'
+        );
+
+        const data: Country[] = res.data
+          .filter((c: any) => c.cca2)
+          .map((c: any) => ({
+            name: c.name.common,
+            code: c.cca2,
+          }))
+          .sort((a: Country, b: Country) =>
+            a.name.localeCompare(b.name)
+          );
+
+        setCountries(data);
+      } catch (err) {
+        console.error('Failed to load countries');
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+  /* ================= SUBMIT ================= */
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setCountryError('');
+
+    if (!country) {
+      setCountryError('Country is required');
+      return;
+    }
+
+    setLoading(true);
 
     try {
+      // NOTE: register API vẫn chỉ nhận email + password
       const data = await register(email, password);
-      dispatch(setToken(data.data?.accessToken));
-      navigate('/profile/create');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any ) {
+      dispatch(setToken(data.data?.accessToken));
+
+      // Country có thể lưu tạm nếu muốn
+      localStorage.setItem('registerCountry', country);
+
+      navigate('/profile/create');
+    } catch (err: any) {
       const apiError = err?.response?.data;
 
       if (apiError) {
@@ -52,6 +113,8 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  /* ================= RENDER ================= */
 
   return (
     <div
@@ -117,6 +180,26 @@ export default function Register() {
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2
                 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          {/* COUNTRY */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700">
+              Country
+            </label>
+
+            <CountrySelect
+              countries={countries}
+              value={country}
+              onChange={setCountry}
+              error={!!countryError}
+            />
+
+            {countryError && (
+              <p className="text-sm text-red-600 mt-1">
+                {countryError}
+              </p>
+            )}
           </div>
 
           {/* BUTTON */}

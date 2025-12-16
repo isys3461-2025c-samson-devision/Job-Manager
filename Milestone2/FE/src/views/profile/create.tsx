@@ -22,6 +22,20 @@ interface Country {
   code: string; // ISO alpha-2 (VN, US...)
 }
 
+type RestCountry = {
+  cca2?: string;
+  name?: {
+    common?: string;
+  };
+};
+
+type RestCountryWithFields = {
+  cca2: string;
+  name: {
+    common: string;
+  };
+};
+
 /* ================= COMPONENT ================= */
 
 export default function ProfileCreatePage() {
@@ -90,17 +104,24 @@ export default function ProfileCreatePage() {
           "https://restcountries.com/v3.1/all?fields=name,cca2"
         );
 
-        const data: Country[] = res.data
-          .filter((c: any) => c.cca2)
-          .map((c: any) => ({
+        const raw = res.data as RestCountry[];
+        const data: Country[] = raw
+          .filter(
+            (c): c is RestCountryWithFields =>
+              typeof c.cca2 === "string" &&
+              typeof c.name?.common === "string" &&
+              c.cca2.length > 0 &&
+              c.name.common.length > 0
+          )
+          .map((c) => ({
             name: c.name.common,
             code: c.cca2,
           }))
-          .sort((a: Country, b: Country) => a.name.localeCompare(b.name));
+          .sort((a, b) => a.name.localeCompare(b.name));
 
         setCountries(data);
-      } catch (err) {
-        console.error("Failed to load countries");
+      } catch (err: unknown) {
+        console.error("Failed to load countries", err);
       }
     };
 
@@ -131,13 +152,6 @@ export default function ProfileCreatePage() {
   };
 
   /* ================= HANDLERS ================= */
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleSkillToggle = (skillId: string) => {
     setFormData((prev) => ({
