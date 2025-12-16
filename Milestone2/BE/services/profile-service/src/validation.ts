@@ -278,3 +278,39 @@ function datesOverlap(start1: string, end1: string, start2: string, end2: string
   
   return (date1 <= date4 && date2 >= date3);
 }
+
+
+
+export const updateSkillsSchema = Joi.object({
+  skills: Joi.array()
+    .items(
+      Joi.string()
+        .min(1)
+        .max(50)
+        .pattern(/^[A-Za-z0-9+#.\s-]+$/)
+        .custom((value, helpers) => {
+          // Capitalize first letter of each word for consistency
+          const sanitized = value.trim()
+            .split(' ')
+            .map((word :any) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+          return sanitized;
+        }, 'Skill formatting')
+    )
+    .max(30)
+    .unique()
+    .required()
+    .messages({
+      'array.base': 'Skills must be an array',
+      'array.max': 'Maximum 30 skills allowed',
+      'array.unique': 'Duplicate skills are not allowed',
+      'string.min': 'Skill name must be at least 1 character',
+      'string.max': 'Skill name cannot exceed 50 characters',
+      'string.pattern.base': 'Skill name can only contain letters, numbers, spaces, and: + # . -',
+      'any.required': 'Skills field is required'
+    })
+})
+.options({
+  stripUnknown: true,
+  abortEarly: false,
+});
