@@ -2,3 +2,11 @@ spring:
   mongodb:
      uri: mongodb+srv://tnduyy2k3_db_user:u9lTThDjH81cVi0s@managerdb.xadcgas.mongodb.net/ #Replace with ${MONGODB_URI} later on for better security
      database: managerdb
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 1090022950012-lftms8nu7qf33nqi9bcsg5pa384m4aek.apps.googleusercontent.com
+            client-secret: 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
+            scope: profile, email
