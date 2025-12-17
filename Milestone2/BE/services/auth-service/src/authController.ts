@@ -8,7 +8,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const tokens = await authService.register(email, password);
 
-  res
+  return res
     .cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -24,7 +24,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const tokens = await authService.login(email, password);
 
-  res
+  return res
     .cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -34,7 +34,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     .status(200)
     .json(
       createSuccessResponse(
-        { accessToken: tokens.accessToken, userId: tokens.userId, email: tokens.email },
+        { accessToken: tokens.accessToken },
         "User logged in successfully"
       )
     );
@@ -53,7 +53,7 @@ export const refreshToken = asyncHandler(
     }
     const tokens = await authService.refreshtoken(incomingRefreshToken);
     // Set refreshToken vào httpOnly cookie
-    res
+    return res
       .cookie("refreshToken", tokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production", // chỉ bật secure ở production

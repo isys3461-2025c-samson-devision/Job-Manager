@@ -11,13 +11,38 @@ export interface Skill {
   category?: string;
 }
 
+export interface EducationEntry {
+  degree: string;
+  institution: string;
+  from: string;
+  to?: string;
+  GPA?: number;
+}
+
+export interface WorkExperienceEntry {
+  title: string;
+  startDate: string;
+  endDate?: string;
+  description?: string;
+}
+
 export interface ProfileFormData {
+  name?: string;
   email: string;
   country: string;
   phone?: string;
   street?: string;
   city?: string;
   skills: string[];
+
+
+  birthday?: string;
+  isPremium?: boolean;
+  mediaId?: string;
+
+  summary?: string;
+  education?: EducationEntry[];
+  workExperiences?: WorkExperienceEntry[];
 }
 
 export interface ProfileState {

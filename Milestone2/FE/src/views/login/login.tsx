@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { setToken, setUser } from '../../store/authSlice';
+import { setToken } from '../../store/authSlice';
 import { login } from '../../services/authService';
 import shibaImg from '../../assets/shiba_find_job.png';
 
@@ -22,16 +22,8 @@ export default function Login() {
     try {
       const data = await login(email, password);
 
-      dispatch(setToken(data.data?.accessToken));
-
-      const userId = data?.data?.userId;
-      const emailFromResp = data?.data?.email;
-
-      if (userId) localStorage.setItem('userId', userId);
-      if (emailFromResp && userId) {
-        dispatch(setUser({ id: userId, email: emailFromResp }));
-        localStorage.setItem('userEmail', emailFromResp);
-      }
+      const accessToken = data?.data?.accessToken;
+      dispatch(setToken(accessToken));
 
       navigate('/dashboard');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

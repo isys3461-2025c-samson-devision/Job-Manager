@@ -1,12 +1,5 @@
 import Joi from "joi";
 
-export const updateProfileSchema = Joi.object({
-  phone: Joi.string().optional(),
-  address: Joi.string().optional(),
-  city: Joi.string().optional(),
-  country: Joi.string().optional()
-});
-
 const yearRegex = /^\d{4}$/;
 const monthYearRegex = /^(0[1-9]|1[0-2])-\d{4}$/;
 const currentYear = new Date().getFullYear();
@@ -166,6 +159,27 @@ const workExperienceEntrySchema = Joi.object({
     .messages({
       'string.max': 'Job description cannot exceed 1000 characters'
     })
+});
+
+export const updateProfileSchema = Joi.object({
+  phone: Joi.string().optional().allow(''),
+  address: Joi.string().optional().allow(''),
+  city: Joi.string().optional().allow(''),
+  country: Joi.string().optional(),
+  skills: Joi.array().items(Joi.string()).optional(),
+
+  name: Joi.string().min(1).max(200).optional().allow(''),
+  birthday: Joi.string().optional().allow(''),
+  isPremium: Joi.boolean().optional(),
+  mediaId: Joi.string().optional().allow(''),
+
+  summary: Joi.string().max(500).optional().allow(''),
+  education: Joi.array().items(educationEntrySchema).optional().max(10),
+  workExperiences: Joi.array().items(workExperienceEntrySchema).optional().max(20),
+})
+.options({
+  stripUnknown: true,
+  abortEarly: false,
 });
 
 export const updateBasicTextProfileSchema = Joi.object({

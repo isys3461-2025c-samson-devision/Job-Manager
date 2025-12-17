@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { AuthState, ProfileFormData, Skill, User } from "../types";
+import { decodeJwtPayload } from '../utils/jwt';
 
 const initialState: AuthState = {
   user: null,
@@ -23,6 +24,14 @@ const authSlice = createSlice({
       const next = action.payload ?? '';
       if (typeof next === 'string' && next.length > 0) {
         state.token = next;
+
+        const decoded = decodeJwtPayload(next);
+        const userId = decoded?.userId;
+        const email = decoded?.email;
+        if (typeof userId === 'string' && userId.length > 0 && typeof email === 'string' && email.length > 0) {
+          const nextUser: User = { id: userId, email };
+          state.user = nextUser;
+        }
       }
       // ignore empty/undefined payload to avoid accidentally wiping token
     },

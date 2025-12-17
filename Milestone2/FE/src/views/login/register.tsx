@@ -15,6 +15,26 @@ interface Country {
   name: string;
 }
 
+type RestCountry = {
+  cca2?: string;
+  name?: {
+    common?: string;
+  };
+};
+
+type RestCountryWithFields = {
+  cca2: string;
+  name: {
+    common: string;
+  };
+};
+
+type ApiErrorObject = {
+  error?: string;
+  message?: string;
+  errors?: Record<string, string[] | string>;
+};
+
 /* ================= COMPONENT ================= */
 
 export default function Register() {
@@ -43,9 +63,16 @@ export default function Register() {
           'https://restcountries.com/v3.1/all?fields=name,cca2'
         );
 
-        const data: Country[] = res.data
-          .filter((c: any) => c.cca2)
-          .map((c: any) => ({
+        const raw = res.data as RestCountry[];
+        const data: Country[] = raw
+          .filter(
+            (c): c is RestCountryWithFields =>
+              typeof c.cca2 === 'string' &&
+              typeof c.name?.common === 'string' &&
+              c.cca2.length > 0 &&
+              c.name.common.length > 0
+          )
+          .map((c) => ({
             name: c.name.common,
             code: c.cca2,
           }))
@@ -54,7 +81,7 @@ export default function Register() {
           );
 
         setCountries(data);
-      } catch (err) {
+      } catch {
         console.error('Failed to load countries');
       }
     };
@@ -80,25 +107,27 @@ export default function Register() {
       // NOTE: register API vẫn chỉ nhận email + password
       const data = await register(email, password);
 
-      dispatch(setToken(data.data?.accessToken));
+      const accessToken = data?.data?.accessToken;
+      dispatch(setToken(accessToken));
 
       // Country có thể lưu tạm nếu muốn
       localStorage.setItem('registerCountry', country);
 
       navigate('/profile/create');
-    } catch (err: any) {
-      const apiError = err?.response?.data;
+    } catch (err: unknown) {
+      const apiError = (err as { response?: { data?: unknown } })?.response?.data;
 
       if (apiError) {
         const messages: string[] = [];
 
         if (typeof apiError === 'string') {
           messages.push(apiError);
-        } else {
-          if (apiError.error) messages.push(apiError.error);
-          if (apiError.message) messages.push(apiError.message);
-          if (apiError.errors && typeof apiError.errors === 'object') {
-            Object.values(apiError.errors).forEach((val) => {
+        } else if (typeof apiError === 'object' && apiError !== null) {
+          const obj = apiError as ApiErrorObject;
+          if (typeof obj.error === 'string') messages.push(obj.error);
+          if (typeof obj.message === 'string') messages.push(obj.message);
+          if (obj.errors && typeof obj.errors === 'object') {
+            Object.values(obj.errors).forEach((val) => {
               if (Array.isArray(val)) messages.push(...val);
               else if (typeof val === 'string') messages.push(val);
             });
