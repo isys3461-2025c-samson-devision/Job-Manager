@@ -14,6 +14,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .cors(Customizer.withDefaults())
             .authorizeHttpRequests((authz) -> authz
                 .anyRequest().authenticated()
             )
