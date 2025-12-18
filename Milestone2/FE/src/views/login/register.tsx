@@ -1,147 +1,24 @@
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-import { setToken } from '../../store/authSlice';
-import { register } from '../../services/authService';
+import { Link } from 'react-router-dom';
 import shibaImg from '../../assets/shiba_find_job.png';
 import CountrySelect from '../../components/CountrySelect';
-
-/* ================= TYPES ================= */
-
-interface Country {
-  code: string;
-  name: string;
-}
-
-type RestCountry = {
-  cca2?: string;
-  name?: {
-    common?: string;
-  };
-};
-
-type RestCountryWithFields = {
-  cca2: string;
-  name: {
-    common: string;
-  };
-};
-
-type ApiErrorObject = {
-  error?: string;
-  message?: string;
-  errors?: Record<string, string[] | string>;
-};
+import { useRegister } from '../../hooks/useRegister';
 
 /* ================= COMPONENT ================= */
 
 export default function Register() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  /* -------- Auth fields -------- */
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  /* -------- Country -------- */
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [country, setCountry] = useState('');
-
-  /* -------- UI states -------- */
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [countryError, setCountryError] = useState('');
-
-  /* ================= FETCH COUNTRIES ================= */
-
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const res = await axios.get(
-          'https://restcountries.com/v3.1/all?fields=name,cca2'
-        );
-
-        const raw = res.data as RestCountry[];
-        const data: Country[] = raw
-          .filter(
-            (c): c is RestCountryWithFields =>
-              typeof c.cca2 === 'string' &&
-              typeof c.name?.common === 'string' &&
-              c.cca2.length > 0 &&
-              c.name.common.length > 0
-          )
-          .map((c) => ({
-            name: c.name.common,
-            code: c.cca2,
-          }))
-          .sort((a: Country, b: Country) =>
-            a.name.localeCompare(b.name)
-          );
-
-        setCountries(data);
-      } catch {
-        console.error('Failed to load countries');
-      }
-    };
-
-    fetchCountries();
-  }, []);
-
-  /* ================= SUBMIT ================= */
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setCountryError('');
-
-    if (!country) {
-      setCountryError('Country is required');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // NOTE: register API vẫn chỉ nhận email + password
-      const data = await register(email, password);
-
-      const accessToken = data?.data?.accessToken;
-      dispatch(setToken(accessToken));
-
-      // Country có thể lưu tạm nếu muốn
-      localStorage.setItem('registerCountry', country);
-
-      navigate('/profile/create');
-    } catch (err: unknown) {
-      const apiError = (err as { response?: { data?: unknown } })?.response?.data;
-
-      if (apiError) {
-        const messages: string[] = [];
-
-        if (typeof apiError === 'string') {
-          messages.push(apiError);
-        } else if (typeof apiError === 'object' && apiError !== null) {
-          const obj = apiError as ApiErrorObject;
-          if (typeof obj.error === 'string') messages.push(obj.error);
-          if (typeof obj.message === 'string') messages.push(obj.message);
-          if (obj.errors && typeof obj.errors === 'object') {
-            Object.values(obj.errors).forEach((val) => {
-              if (Array.isArray(val)) messages.push(...val);
-              else if (typeof val === 'string') messages.push(val);
-            });
-          }
-        }
-
-        setError(messages.length ? messages.join(' | ') : 'Register failed');
-      } else {
-        setError('Register failed');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    countries,
+    country,
+    handleCountryChange,
+    loading,
+    error,
+    countryError,
+    handleSubmit,
+  } = useRegister('/profile/create');
 
   /* ================= RENDER ================= */
 
@@ -220,7 +97,7 @@ export default function Register() {
             <CountrySelect
               countries={countries}
               value={country}
-              onChange={setCountry}
+              onChange={handleCountryChange}
               error={!!countryError}
             />
 

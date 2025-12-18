@@ -1,43 +1,17 @@
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
-import { setToken } from '../../store/authSlice';
-import { login } from '../../services/authService';
+import { Link } from 'react-router-dom';
 import shibaImg from '../../assets/shiba_find_job.png';
+import { useLogin } from '../../hooks/useLogin';
 
 export default function Login() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const data = await login(email, password);
-
-      const accessToken = data?.data?.accessToken;
-      dispatch(setToken(accessToken));
-
-      navigate('/dashboard');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      const apiError = err?.response?.data;
-      if (apiError?.message) {
-        setError(apiError.message);
-      } else {
-        setError('Login failed');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    loading,
+    error,
+    handleSubmit,
+  } = useLogin('/dashboard');
 
   return (
     <div className="flex min-h-screen">

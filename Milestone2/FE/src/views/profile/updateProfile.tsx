@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import CountrySelect from "../../components/CountrySelect";
+import { useCountries } from "../../hooks/useCountries";
 
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
@@ -31,27 +32,6 @@ const MOCK_SKILLS = [
 
 const USE_MOCK_DATA = true;
 
-/* ================= TYPES ================= */
-
-interface Country {
-  name: string;
-  code: string; // ISO alpha-2 (VN, US...)
-}
-
-type RestCountry = {
-  cca2?: string;
-  name?: {
-    common?: string;
-  };
-};
-
-type RestCountryWithFields = {
-  cca2: string;
-  name: {
-    common: string;
-  };
-};
-
 /* ================= COMPONENT ================= */
 
 export default function ProfileCreatePage() {
@@ -64,7 +44,7 @@ export default function ProfileCreatePage() {
 
   /* ---------- Local State ---------- */
 
-  const [countries, setCountries] = useState<Country[]>([]);
+  const { countries } = useCountries();
   const [isEmailLocked, setIsEmailLocked] = useState(false);
 
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -154,38 +134,6 @@ export default function ProfileCreatePage() {
 
     fetchExisting();
   }, [authId, dispatch, reduxEmail]);
-
-  // Fetch countries
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const res = await axios.get(
-          "https://restcountries.com/v3.1/all?fields=name,cca2"
-        );
-
-        const raw = res.data as RestCountry[];
-        const data: Country[] = raw
-          .filter(
-            (c): c is RestCountryWithFields =>
-              typeof c.cca2 === "string" &&
-              typeof c.name?.common === "string" &&
-              c.cca2.length > 0 &&
-              c.name.common.length > 0
-          )
-          .map((c) => ({
-            name: c.name.common,
-            code: c.cca2,
-          }))
-          .sort((a, b) => a.name.localeCompare(b.name));
-
-        setCountries(data);
-      } catch (err: unknown) {
-        console.error("Failed to load countries", err);
-      }
-    };
-
-    fetchCountries();
-  }, []);
 
   /* ================= VALIDATION ================= */
 
