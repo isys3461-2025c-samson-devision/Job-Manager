@@ -1,4 +1,4 @@
-package samson.backend.dev.backend_config;
+package samson.backend.dev.auth.security;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

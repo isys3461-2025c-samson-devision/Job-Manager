@@ -1,12 +1,12 @@
-package samson.backend.dev.backend_config;
+package samson.backend.dev.auth.model;
 
-public enum RoleConfig {
+public enum Role {
     COMPANY("COMPANY"),
     ADMIN("ADMIN");
 
     private final String roleName;
 
-    RoleConfig(String roleName) {
+    Role(String roleName) {
         this.roleName = roleName;
     }
 

@@ -1,4 +1,4 @@
-package samson.backend.dev.backend_config;
+package samson.backend.dev.auth.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,15 +17,11 @@ public class SecurityConfiguration {
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests((authz) -> authz
+                .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .httpBasic(withDefaults());
+            .httpBasic(Customizer.withDefaults());
         return http.build();
-    }
-
-    private Customizer<HttpBasicConfigurer<HttpSecurity>> withDefaults() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'withDefaults'");
     }
 
     @Bean
