@@ -1,12 +1,9 @@
-export function saveToStorage(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
+export const localStorageUtil = {
+  setToken: (token) => localStorage.setItem("accessToken", token),
+  getToken: () => localStorage.getItem("accessToken"),
+  removeToken: () => localStorage.removeItem("accessToken"),
 
-export function loadFromStorage(key) {
-  const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : null;
-}
-
-export function removeFromStorage(key) {
-  localStorage.removeItem(key);
-}
+  setRole: (role) => localStorage.setItem("role", role),
+  getRole: () => localStorage.getItem("role"),
+  removeRole: () => localStorage.removeItem("role"),
+};

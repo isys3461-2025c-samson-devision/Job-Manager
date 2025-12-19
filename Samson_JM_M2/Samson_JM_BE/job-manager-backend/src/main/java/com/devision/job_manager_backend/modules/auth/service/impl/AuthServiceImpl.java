@@ -27,15 +27,17 @@ public class AuthServiceImpl implements AuthInternalService {
         }
 
         CompanyAuth auth = new CompanyAuth();
-        auth.setEmail(request.getEmail());
         auth.setCompanyName(request.getCompanyName());
+        auth.setEmail(request.getEmail());
+        auth.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         auth.setRole("COMPANY");
-        auth.setPasswordHash(
-                passwordEncoder.encode(request.getPassword())
-        );
+
+        auth.setPhoneNumber(request.getPhoneNumber());
+        auth.setCountry(request.getCountry());
 
         authRepository.save(auth);
     }
+
 
     @Override
     public AuthResponse login(LoginRequest request) {

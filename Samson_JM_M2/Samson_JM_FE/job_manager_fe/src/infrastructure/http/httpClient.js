@@ -1,16 +1,21 @@
+import { localStorageUtil } from "../storage/localStorageUtil";
+
+
 const BASE_URL = "http://localhost:8080"; // Change for deployment
 
-function getAuthToken() {
-  return localStorage.getItem("authToken");
-}
-
-async function request(method, path, body) {
+async function request(method, path, body, options = {}) {
   const headers = {
     "Content-Type": "application/json",
+    ...options.headers,
   };
 
-  const token = getAuthToken();
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  // ✅ DO NOT attach token to auth endpoints
+  if (!path.startsWith("/api/auth")) {
+    const token = localStorageUtil.getToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
 
   const response = await fetch(`${BASE_URL}${path}`, {
     method,
@@ -19,11 +24,12 @@ async function request(method, path, body) {
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP error: ${response.status}`);
+    throw new Error(`HTTP error ${response.status}`);
   }
 
   return response.json();
 }
+
 
 export const httpClient = {
   get: (path) => request("GET", path),

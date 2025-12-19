@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import AuthLogo from "../components/AuthLogo";
 import AuthInput from "../components/AuthInput";
 import AuthLayout from "../components/AuthLayout";
-import { authService } from "../service/authService";
 import { AuthContext } from "../context/AuthContext";
 import { LoginRequest } from "../models/LoginRequest";
 
@@ -21,9 +20,8 @@ export default function SignInPage() {
     }
 
     try {
-      const user = await authService.login(form);
-      login(user);
-      navigate("/dashboard");
+      await login(form); // ✅ ONLY call context
+      navigate("/dashboard"); // ✅ redirect
     } catch (err) {
       setError("Invalid email or password.");
     }
@@ -34,7 +32,7 @@ export default function SignInPage() {
       <AuthLogo />
 
       {/* CARD */}
-      <div 
+      <div
         className="p-4 shadow-sm bg-white rounded-4"
         style={{ width: "420px", border: "1px solid #eee" }}
       >
@@ -62,10 +60,7 @@ export default function SignInPage() {
             <input type="checkbox" className="me-2" />
             <small>Remember Me</small>
           </div>
-          <small 
-            className="text-primary"
-            style={{ cursor: "pointer" }}
-          >
+          <small className="text-primary" style={{ cursor: "pointer" }}>
             Forgot Password?
           </small>
         </div>
@@ -76,17 +71,15 @@ export default function SignInPage() {
 
         <div className="text-center text-muted mb-3">Or</div>
 
-        <button 
-          className="btn btn-light border w-100 d-flex justify-content-center align-items-center"
-        >
+        <button className="btn btn-light border w-100 d-flex justify-content-center align-items-center">
           <i className="bi bi-google me-2"></i>
           Continue with Google
         </button>
 
         <p className="text-center mt-3">
           Don’t have an account?{" "}
-          <span 
-            className="text-primary" 
+          <span
+            className="text-primary"
             style={{ cursor: "pointer" }}
             onClick={() => navigate("/signup")}
           >
@@ -97,4 +90,3 @@ export default function SignInPage() {
     </AuthLayout>
   );
 }
-

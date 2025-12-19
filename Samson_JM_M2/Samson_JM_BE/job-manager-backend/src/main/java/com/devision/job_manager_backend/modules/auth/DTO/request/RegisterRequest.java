@@ -10,14 +10,19 @@ import lombok.Setter;
 @Setter
 public class RegisterRequest {
 
+    @NotBlank
+    private String companyName;
+
+    @NotBlank
+    private String phoneNumber;
+
+    @NotBlank
+    private String country;
+
     @Email
     @NotBlank
     private String email;
 
     @NotBlank
-    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
-
-    @NotBlank
-    private String companyName;
 }

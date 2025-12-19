@@ -1,24 +1,21 @@
-// import { httpClient } from "../../../infrastructure/http/httpClient";
-// import { API } from "../../../infrastructure/http/endpoints";
-import mockUsers from "../data/mockUsers.json";
+import { httpClient } from "../../../infrastructure/http/httpClient";
+import { AUTH_ENDPOINTS } from "../../../infrastructure/http/endpoints";
 import AuthUser from "../models/AuthUser";
 
 export const authService = {
-  async login({ email, password }) {
-    // FIND USER IN JSON FILE
-    const user = mockUsers.find(
-      (u) => u.email === email && u.password === password
+  async login(loginRequest) {
+    const res = await httpClient.post(
+      AUTH_ENDPOINTS.AUTH.LOGIN,
+      loginRequest
     );
 
-    // If no match → return error
-    if (!user) {
-      throw new Error("Invalid email or password.");
-    }
+    return new AuthUser(res.accessToken, res.role);
+  },
 
-    // Return AuthUser formatted model
-    return new AuthUser({
-      ...user,
-      token: "mock-token"
-    });
-  }
+  async signup(signupRequest) {
+    await httpClient.post(
+      AUTH_ENDPOINTS.AUTH.REGISTER,
+      signupRequest
+    );
+  },
 };

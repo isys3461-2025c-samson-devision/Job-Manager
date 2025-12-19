@@ -1,8 +1,6 @@
 export default class AuthUser {
-  constructor(data) {
-    this.email = data.email || null;
-    this.companyName = data.companyName;
-    this.subscription = data.subscription;
-    this.token = data.token;
+  constructor(accessToken, role) {
+    this.accessToken = accessToken;
+    this.role = role;
   }
 }

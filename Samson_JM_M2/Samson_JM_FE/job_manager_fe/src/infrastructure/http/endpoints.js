@@ -1,16 +1,16 @@
-export const API = {
+export const AUTH_ENDPOINTS = {
   AUTH: {
-    LOGIN: "/auth/company/login",
-    REGISTER: "/auth/company/signup",
+    LOGIN: "/api/auth/login",
+    REGISTER: "/api/auth/register",
   },
   COMPANY: {
-    PROFILE: "/company/profile",
-    UPDATE_PROFILE: "/company/profile/update",
+    PROFILE: "/api/company/profile",
+    UPDATE_PROFILE: "/api/company/profile/update",
   },
   JOBPOST: {
-    ALL: "/company/jobs",
-    CREATE: "/company/jobs/create",
-    BY_ID: (id) => `/company/jobs/${id}`,
+    ALL: "/api/company/jobs",
+    CREATE: "/api/company/jobs/create",
+    BY_ID: (id) => `/api/company/jobs/${id}`,
     APPLICANTS: (id) => `/company/jobs/${id}/applicants`,
   },
 };

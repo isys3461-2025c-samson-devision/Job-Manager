@@ -3,6 +3,7 @@ package com.devision.job_manager_backend.config;
 import com.devision.job_manager_backend.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +25,7 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf.disable())
+            .cors(cors -> {})
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
@@ -32,10 +34,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
 
                 // PROTECTED endpoints
-                .requestMatchers("/api/test/**").authenticated()
+                // .requestMatchers("/api/test/**").authenticated()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // ✅ PRE-FLIGHT
 
                 // Everything else
-                .anyRequest().denyAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .formLogin(form -> form.disable())

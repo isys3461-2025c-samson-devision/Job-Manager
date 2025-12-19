@@ -17,6 +17,8 @@ public class CompanyAuth {
 
     private String phoneNumber;
 
+    private String country;
+
     private String email;
 
     private String passwordHash;

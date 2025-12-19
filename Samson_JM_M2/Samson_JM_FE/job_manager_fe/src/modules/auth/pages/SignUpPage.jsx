@@ -8,8 +8,7 @@ export default function SignUpPage() {
   const passwordInputRef = useRef(null);
 
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
+    companyName: "",
     phoneCode: "+084",
     phoneNumber: "",
     email: "",
@@ -34,8 +33,8 @@ export default function SignUpPage() {
 
   const handleSubmit = async () => {
     if (
-      !form.firstName ||
-      !form.lastName ||
+      !form.companyName ||
+      !form.phoneNumber ||
       !form.email ||
       !form.password ||
       !form.country
@@ -59,7 +58,7 @@ export default function SignUpPage() {
     try {
       setError("");
       console.log("Submit sign up", form);
-      // navigate("/signin");
+      navigate("/signin");
     } catch (e) {
       setError("Sign up failed. Please try again.");
     }
@@ -107,23 +106,13 @@ export default function SignUpPage() {
           Continue with Google
         </button>
 
-        <div className="row">
-          <div className="col-6 mb-3">
-            <label className="form-label small">Last Name</label>
+        <div className="mb-3">
+            <label className="form-label small">Company Name</label>
             <input
               className="form-control"
-              value={form.lastName}
-              onChange={handleChange("lastName")}
+              value={form.companyName}
+              onChange={handleChange("companyName")}
             />
-          </div>
-          <div className="col-6 mb-3">
-            <label className="form-label small">First Name</label>
-            <input
-              className="form-control"
-              value={form.firstName}
-              onChange={handleChange("firstName")}
-            />
-          </div>
         </div>
 
         <div className="mb-3">
