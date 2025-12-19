@@ -1,3 +1,11 @@
 spring:
   application:
     name: job-manager-backend
+  data:
+    mongodb:
+      uri: mongodb+srv://jasonais99_db_user:jasontran2004@managerdb.xadcgas.mongodb.net/
+      database: JobManagerBackend
+      
+jwt:
+  secret: devision-super-secret-key-change-later
+  expiration: 86400000 # 24 hours
