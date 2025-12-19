@@ -7,6 +7,7 @@ export const updateProfileSchema = Joi.object({
   country: Joi.string().optional()
 });
 
+///////////////Bacsic Text Profile Validation Schema/////////////////////
 const yearRegex = /^\d{4}$/;
 const monthYearRegex = /^(0[1-9]|1[0-2])-\d{4}$/;
 const currentYear = new Date().getFullYear();
@@ -313,4 +314,77 @@ export const updateSkillsSchema = Joi.object({
 .options({
   stripUnknown: true,
   abortEarly: false,
+});
+
+////////////////////Profile Creation Validation Schema/////////////////////
+const phoneSchema = Joi.string()
+  .pattern(/^(\+84|0)[1-9][0-9]{8}$/)
+  .messages({
+    'string.pattern.base': 'Phone must be a valid Vietnamese phone number'
+  });
+
+const dateSchema = Joi.string()
+  .pattern(/^\d{4}-\d{2}-\d{2}$/)
+  .messages({
+    'string.pattern.base': 'Date must be in YYYY-MM-DD format'
+  });
+
+// Create Profile Schema
+export const createProfileSchema = Joi.object({
+  country: Joi.string()
+    .length(2)
+    .uppercase()
+    .default('VN')
+    .messages({
+      'string.length': 'Country must be a 2-letter ISO code',
+      'string.uppercase': 'Country code must be uppercase'
+    }),
+    
+  name: Joi.string()
+    .min(2)
+    .max(100)
+    .optional(),
+    
+  phone: phoneSchema.optional(),
+  
+  address: Joi.string()
+    .max(200)
+    .optional(),
+    
+  city: Joi.string()
+    .max(100)
+    .optional(),
+    
+  birthday: dateSchema.optional()
+})
+.options({
+  abortEarly: false,
+  stripUnknown: true,
+});
+
+// Create Basic Text Profile Schema
+export const createBasicTextProfileSchema = Joi.object({
+  summary: Joi.string()
+    .min(10)
+    .max(500)
+    .required()
+    .messages({
+      'string.min': 'Summary must be at least 10 characters',
+      'string.max': 'Summary cannot exceed 500 characters',
+      'any.required': 'Summary is required'
+    }),
+    
+  workExperiences: Joi.array()
+    .items(workExperienceEntrySchema)
+    .optional()
+    .max(5),
+    
+  education: Joi.array()
+    .items(educationEntrySchema)
+    .optional()
+    .max(5)
+})
+.options({
+  abortEarly: false,
+  stripUnknown: true,
 });

@@ -4,8 +4,36 @@ import { UpdateProfileDTO } from "./dto/UpdateProfileDTO";
 import { BasicTextProfileResponseDTO } from "./dto/BasicTextResponseDTO";
 import { UpdateBasicTextProfileDTO } from "./dto/UpdateBasicTextProfileDTO";
 import { UpdateSkillsDTO } from "./dto/UpdateSkillDTO";
+import { CreateProfileDTO } from "./dto/CreateProfileDTO";
 
 export class ProfileService {
+
+  async createProfileByAuthId(authId: string, data: CreateProfileDTO) {
+    const profile = await prisma.profile.findFirst({ where: { authId } });
+
+    if (!profile) {
+      throw createServiceError("Profile already exists, please update", 404);
+    }
+
+    return prisma.profile.create({
+      data:{
+        authId: authId,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        country: data.country,
+        birthday: data.birthday,
+        isPremium: data.ispremium,
+        name: data.name,
+        skills: data.skills,
+        summary: data.summary,
+        workExperiences: data.workExperiences,
+        education: data.education,
+        updatedAt: new Date()
+      }
+    });
+  }
+
   async getProfileByAuthId(authId: string) {
     const profile = await prisma.profile.findFirst({
       where: { authId },
@@ -70,7 +98,7 @@ export class ProfileService {
     });
   }
 
-    async updateSkillsByAuthId(authId: string, data: UpdateSkillsDTO) {
+  async updateSkillsByAuthId(authId: string, data: UpdateSkillsDTO) {
     const profile = await prisma.profile.findFirst({ 
       where: { authId } 
     });
