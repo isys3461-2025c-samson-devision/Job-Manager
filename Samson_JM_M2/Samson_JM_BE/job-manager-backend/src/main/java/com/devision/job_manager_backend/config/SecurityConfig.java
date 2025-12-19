@@ -31,12 +31,10 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
             // PUBLIC endpoints
-                .requestMatchers("/api/auth/**").permitAll()
-
-                // PROTECTED endpoints
-                // .requestMatchers("/api/test/**").authenticated()
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // ✅ PRE-FLIGHT
-
+                // ✅ AUTH endpoints
+            .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Everything else
                 .anyRequest().authenticated()
             )

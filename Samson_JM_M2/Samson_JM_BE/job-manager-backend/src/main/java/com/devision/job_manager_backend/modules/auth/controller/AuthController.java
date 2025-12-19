@@ -5,6 +5,8 @@ import com.devision.job_manager_backend.modules.auth.dto.request.RegisterRequest
 import com.devision.job_manager_backend.modules.auth.dto.response.AuthResponse;
 import com.devision.job_manager_backend.modules.auth.service.internal.AuthInternalService;
 import jakarta.validation.Valid;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +19,13 @@ public class AuthController {
     private final AuthInternalService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(
+    public ResponseEntity<Map<String, String>> register(
             @Valid @RequestBody RegisterRequest request
     ) {
         authService.registerCompany(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(
+            Map.of("message", "Registered successfully")
+        );
     }
 
     @PostMapping("/login")

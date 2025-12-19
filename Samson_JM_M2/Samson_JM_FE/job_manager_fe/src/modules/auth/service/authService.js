@@ -8,14 +8,13 @@ export const authService = {
       AUTH_ENDPOINTS.AUTH.LOGIN,
       loginRequest
     );
-
     return new AuthUser(res.accessToken, res.role);
   },
 
   async signup(signupRequest) {
-    await httpClient.post(
+    return httpClient.post(
       AUTH_ENDPOINTS.AUTH.REGISTER,
       signupRequest
     );
-  },
+  }
 };

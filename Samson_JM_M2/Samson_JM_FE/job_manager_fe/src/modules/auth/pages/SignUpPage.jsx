@@ -1,9 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import AuthLogo from "../components/AuthLogo";
+import { AuthContext } from "../context/AuthContext";
 
 export default function SignUpPage() {
+  const {signup} = useContext(AuthContext)
   const navigate = useNavigate();
   const passwordInputRef = useRef(null);
 
@@ -58,8 +60,12 @@ export default function SignUpPage() {
     try {
       setError("");
       console.log("Submit sign up", form);
+
+      await signup(form);
       navigate("/signin");
+
     } catch (e) {
+      console.error(e);
       setError("Sign up failed. Please try again.");
     }
   };
