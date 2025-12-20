@@ -23,6 +23,7 @@ export const navItems: Array<{ label: string; href: string }> = [
 ];
 
 export const testimonials: Array<{
+  avatar: string;
   user: string;
   company: string;
   position: string;
@@ -30,6 +31,7 @@ export const testimonials: Array<{
   text: string;
 }> = [
   {
+    avatar: user1,
     user: "Alex Nguyen",
     company: "Boston Tech Corp",
     position: "Software Engineer Candidate",
@@ -37,6 +39,7 @@ export const testimonials: Array<{
     text: "The application tracker kept everything organized. I applied faster, followed up on time, and landed interviews within a week.",
   },
   {
+    avatar: user2,
     user: "Minh Tran",
     company: "Shoppee Vietnam",
     position: "Business Analyst Candidate",
@@ -44,6 +47,7 @@ export const testimonials: Array<{
     text: "The profile builder made it easy to showcase my experience. Recruiters started reaching out after I completed my profile.",
   },
   {
+    avatar: user3,
     user: "Jordan Lee",
     company: "Innovatech Solutions",
     position: "Frontend Developer Candidate",
@@ -51,6 +55,7 @@ export const testimonials: Array<{
     text: "I loved the one-click apply feature. It saved me so much time and ensured my info was consistent across all applications.",
   },
   {
+    avatar: user4,
     user: "Thao Pham",
     company: "TheGioiDiDong.com Vietnam",
     position: "Human Resources Candidate",
@@ -58,6 +63,7 @@ export const testimonials: Array<{
     text: "The resume tips and guided profile sections helped me translate my past experience into the new role I wanted.",
   },
   {
+    avatar: user5,
     user: "Priya Patel",
     company: "Microsoft ",
     position: "UX Designer Candidate",
@@ -65,6 +71,7 @@ export const testimonials: Array<{
     text: "One-click apply and clean job details made applying feel effortless. I could tailor applications quickly without losing track.",
   },
   {
+    avatar: user6,
     user: "Chris Kim",
     company: "New Graduate",
     position: "New Graduate",
@@ -145,7 +152,7 @@ export const pricingOptions: Array<{
   features: string[];
 }> = [
   {
-    title: "Starter",
+    title: "Free",
     price: "$0",
     features: [
       "Create profile & resume summary",
@@ -164,16 +171,7 @@ export const pricingOptions: Array<{
       "Priority support",
     ],
   },
-  {
-    title: "Career+",
-    price: "$200",
-    features: [
-      "Everything in Pro",
-      "Dedicated career guidance",
-      "Resume review",
-      "Interview prep sessions",
-    ],
-  },
+  
 ];
 
 export const resourcesLinks: Array<{ href: string; text: string }> = [

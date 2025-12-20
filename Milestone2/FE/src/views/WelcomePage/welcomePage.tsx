@@ -1,7 +1,9 @@
 import FeatureSection from "../../components/FeatureSection";
 import HeroSection from "../../components/HeroSection";
 import NavbarWelcome from "../../components/NavBarWelcome";
-import Workflow from "../../components/WorkFlow";
+import Pricing from "../../components/Pricing";
+import Testimonials from "../../components/Testimonials";
+import Workflow from "../../components/Workflow";
 
 const WelcomePage = () => {
   return (
@@ -11,6 +13,8 @@ const WelcomePage = () => {
         <HeroSection />
         <FeatureSection />
         <Workflow />
+        <Pricing />
+        <Testimonials />
       </div>
     </>
   );
