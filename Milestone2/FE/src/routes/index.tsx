@@ -6,11 +6,13 @@ import ProfileCreatePage from '../views/profile/createProfile';
 import DashboardPage from '../views/dashboard/index';
 import ProtectedRoute from './ProtectedRoute';
 import ProfileUpdate from '../views/profile/updateProfile';
+import WelcomePage from '../views/WelcomePage/welcomePage';
 
 const AppRouter = () => (
   <BrowserRouter>
     <Routes>
       {/* Auth routes without layout */}
+      <Route path='/' element={<WelcomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
