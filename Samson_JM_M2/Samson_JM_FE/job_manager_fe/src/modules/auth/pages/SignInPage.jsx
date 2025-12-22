@@ -71,7 +71,12 @@ export default function SignInPage() {
 
         <div className="text-center text-muted mb-3">Or</div>
 
-        <button className="btn btn-light border w-100 d-flex justify-content-center align-items-center">
+        <button className="btn btn-light border w-100 d-flex justify-content-center align-items-center"
+        style={{ backgroundColor: "#D5FFD5" }}
+        onClick={() => {
+          window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        }}
+        >
           <i className="bi bi-google me-2"></i>
           Continue with Google
         </button>
