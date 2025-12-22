@@ -1,7 +1,6 @@
 package com.devision.job_manager_backend.config;
 
 import com.devision.job_manager_backend.security.JwtAuthenticationFilter;
-import com.devision.job_manager_backend.security.oauth.OAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,16 +15,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public SecurityConfig(
-        JwtAuthenticationFilter jwtFilter,
-        OAuth2SuccessHandler oAuth2SuccessHandler
-    ) {
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
-        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,36 +27,19 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> {})
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-
-                // ===== PUBLIC AUTH / OAUTH =====
-                .requestMatchers(
-                    "/api/auth/**",
-                    "/oauth2/**",
-                    "/oauth2/authorization/**",
-                    "/login/**"
-                ).permitAll()
-
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                // ===== ADMIN =====
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                // ===== COMPANY =====
-                .requestMatchers("/api/company/**").hasRole("COMPANY")
-
-                // ===== DEFAULT =====
-                .anyRequest().denyAll()
+            // PUBLIC endpoints
+                // ✅ AUTH endpoints
+            .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Everything else
+                .anyRequest().authenticated()
             )
-            .oauth2Login(oauth -> oauth 
-                .successHandler(oAuth2SuccessHandler)
-                .failureUrl("/oauth2/error")
-
-            )
-            
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable());
 
         return http.build();

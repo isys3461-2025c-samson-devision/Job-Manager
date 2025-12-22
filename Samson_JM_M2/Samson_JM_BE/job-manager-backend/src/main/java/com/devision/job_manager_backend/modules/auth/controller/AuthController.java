@@ -1,7 +1,6 @@
 package com.devision.job_manager_backend.modules.auth.controller;
 
 import com.devision.job_manager_backend.modules.auth.dto.request.LoginRequest;
-import com.devision.job_manager_backend.modules.auth.dto.request.OAuthCompleteRequest;
 import com.devision.job_manager_backend.modules.auth.dto.request.RegisterRequest;
 import com.devision.job_manager_backend.modules.auth.dto.response.AuthResponse;
 import com.devision.job_manager_backend.modules.auth.service.internal.AuthInternalService;
@@ -18,14 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthInternalService authService;
-
-    @PostMapping("/oauth/complete-profile")
-    public ResponseEntity<?> completeOAuth(
-            @RequestBody OAuthCompleteRequest request
-    ) {
-        return ResponseEntity.ok(authService.completeOAuthRegistration(request));
-    }
-
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(

@@ -1,11 +1,9 @@
 package com.devision.job_manager_backend.modules.auth.service.impl;
 
 import com.devision.job_manager_backend.modules.auth.dto.request.LoginRequest;
-import com.devision.job_manager_backend.modules.auth.dto.request.OAuthCompleteRequest;
 import com.devision.job_manager_backend.modules.auth.dto.request.RegisterRequest;
 import com.devision.job_manager_backend.modules.auth.dto.response.AuthResponse;
 import com.devision.job_manager_backend.modules.auth.model.CompanyAuth;
-import java.util.Map;
 import com.devision.job_manager_backend.modules.auth.repository.CompanyAuthRepository;
 import com.devision.job_manager_backend.modules.auth.service.internal.AuthInternalService;
 import com.devision.job_manager_backend.security.JwtService;
@@ -17,14 +15,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthInternalService {
 
-    private final CompanyAuthRepository companyAuthRepository;
+    private final CompanyAuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService; // ✅ INJECTED
 
     @Override
     public void registerCompany(RegisterRequest request) {
 
-        if (companyAuthRepository.existsByEmail(request.getEmail())) {
+        if (authRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered");
         }
 
@@ -37,14 +35,14 @@ public class AuthServiceImpl implements AuthInternalService {
         auth.setPhoneNumber(request.getPhoneNumber());
         auth.setCountry(request.getCountry());
 
-        companyAuthRepository.save(auth);
+        authRepository.save(auth);
     }
 
 
     @Override
     public AuthResponse login(LoginRequest request) {
 
-        CompanyAuth auth = companyAuthRepository.findByEmail(request.getEmail())
+        CompanyAuth auth = authRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
         boolean matches = passwordEncoder.matches(
@@ -60,32 +58,4 @@ public class AuthServiceImpl implements AuthInternalService {
 
         return new AuthResponse(token, auth.getRole());
     }
-
-    @Override
-    public Object completeOAuthRegistration(OAuthCompleteRequest request) {
-
-        // 1. Check duplicate
-        if (companyAuthRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Company already exists");
-        }
-
-        // 2. Create CompanyAuth
-        CompanyAuth auth = new CompanyAuth();
-        auth.setEmail(request.getEmail());
-        auth.setCompanyName(request.getCompanyName());
-        auth.setCountry(request.getCountry());
-        auth.setPhoneNumber(request.getPhoneNumber());
-        auth.setRole("COMPANY");
-
-        CompanyAuth saved = companyAuthRepository.save(auth);
-
-        // 3. Issue JWT
-        String token = jwtService.generateToken(
-                saved.getId(),
-                saved.getRole()
-        );
-
-        return Map.of("token", token);
-    }
-
 }

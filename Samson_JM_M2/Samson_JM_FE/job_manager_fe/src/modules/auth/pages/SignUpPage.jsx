@@ -107,9 +107,6 @@ export default function SignUpPage() {
         <button
           className="btn w-100 mb-3 d-flex align-items-center justify-content-center"
           style={{ backgroundColor: "#D5FFD5" }}
-          onClick={() => {
-            window.location.href = "http://localhost:8080/oauth2/authorization/google";
-          }}
         >
           <i className="bi bi-google me-2" />
           Continue with Google

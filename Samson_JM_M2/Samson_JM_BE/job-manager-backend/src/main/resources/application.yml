@@ -5,17 +5,6 @@ spring:
     mongodb:
       uri: mongodb+srv://jasonais99_db_user:jasontran2004@managerdb.xadcgas.mongodb.net/
       database: JobManagerBackend
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: 38644946592-v6rq1b0i08c3rplpljfbg4fn8954l58g.apps.googleusercontent.com
-            client-secret: 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
-            scope:
-              - openid
-              - email
-              - profile
       
 jwt:
   secret: devision-super-secret-key-change-later
