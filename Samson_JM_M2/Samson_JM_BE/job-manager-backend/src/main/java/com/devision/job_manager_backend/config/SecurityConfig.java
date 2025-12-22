@@ -34,6 +34,13 @@ public class SecurityConfig {
                 // ✅ AUTH endpoints
             .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+
+                // ✅ COMPANY endpoints
+                .requestMatchers(HttpMethod.GET, "/api/companies/*/public").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/companies//public").permitAll()
+
+
+
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Everything else
                 .anyRequest().authenticated()
