@@ -18,7 +18,7 @@ export default function CancelPaymentPage() {
 
       <button
         className="btn btn-secondary mt-4 px-4"
-        onClick={() => navigate("/subscription")}
+        onClick={() => navigate("/company/subscription")}
       >
         Return to Subscription Page
       </button>

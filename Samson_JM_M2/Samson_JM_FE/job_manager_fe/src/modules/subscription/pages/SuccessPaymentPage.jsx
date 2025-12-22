@@ -17,7 +17,7 @@ export default function SuccessPaymentPage() {
 
       <button
         className="btn btn-primary mt-4 px-4"
-        onClick={() => navigate("/dashboard")}
+        onClick={() => navigate("/company/dashboard")}
       >
         Go to Dashboard
       </button>
