@@ -34,21 +34,27 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> {})
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
             .authorizeHttpRequests(auth -> auth
 
-                // PUBLIC
-                .requestMatchers("/api/auth/**").permitAll()
+                // ===== PUBLIC AUTH / OAUTH =====
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/oauth2/**",
+                    "/oauth2/authorization/**",
+                    "/login/**"
+                ).permitAll()
+
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // ADMIN ONLY
+                // ===== ADMIN =====
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                // COMPANY ONLY
+                // ===== COMPANY =====
                 .requestMatchers("/api/company/**").hasRole("COMPANY")
 
-                // DENY EVERYTHING ELSE
+                // ===== DEFAULT =====
                 .anyRequest().denyAll()
             )
             .oauth2Login(oauth -> oauth 
@@ -56,7 +62,7 @@ public class SecurityConfig {
                 .failureUrl("/oauth2/error")
 
             )
-
+            
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .httpBasic(basic -> basic.disable());
 

@@ -13,6 +13,7 @@ spring:
             client-id: 38644946592-v6rq1b0i08c3rplpljfbg4fn8954l58g.apps.googleusercontent.com
             client-secret: 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
             scope:
+              - openid
               - email
               - profile
       
