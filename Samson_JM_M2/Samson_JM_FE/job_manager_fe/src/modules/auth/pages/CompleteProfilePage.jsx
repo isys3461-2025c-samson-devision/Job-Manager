@@ -45,14 +45,15 @@ export default function CompleteProfilePage() {
         email: emailFromOAuth,
         companyName: form.companyName,
         country: form.country,
-        phoneNumber: form.phoneNumber,
+        phoneNumber: `${form.phoneCode}${form.phoneNumber}`,
     });
+
 
 
       const res = await authService.completeOAuthProfile(payload);
 
       // ✅ Save JWT
-      localStorage.setItem("authToken", res.token);
+      localStorage.setItem("authToken", res.accessToken);
 
       // ✅ Redirect after OAuth completion
       navigate("/company/dashboard");

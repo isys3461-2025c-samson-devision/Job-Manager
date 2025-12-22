@@ -19,7 +19,7 @@ public class AuthController {
 
     private final AuthInternalService authService;
 
-    @PostMapping("/oauth/complete")
+    @PostMapping("/oauth/complete-profile")
     public ResponseEntity<?> completeOAuth(
             @RequestBody OAuthCompleteRequest request
     ) {
