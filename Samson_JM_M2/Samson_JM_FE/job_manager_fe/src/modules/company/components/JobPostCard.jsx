@@ -13,7 +13,7 @@ export default function JobPostCard({ post }) {
 
   // Go to Applicants page with job context
   const handleViewApplicants = () => {
-    navigate("/applicants", {
+    navigate("/company/applicants", {
       state: {
         jobId: post.id,       // id of this job post
         jobTitle: post.title, // title shown on Applicants page

@@ -36,7 +36,7 @@ zIndex: 1000,
 <div
 className="fw-bold"
 style={{ fontSize: "20px", cursor: "pointer" }}
-onClick={() => navigate("/dashboard")}
+onClick={() => navigate("/company/dashboard")}
 >
 DEV<span style={{ color: "#0054FF" }}>ision</span>
 </div>
@@ -44,19 +44,19 @@ DEV<span style={{ color: "#0054FF" }}>ision</span>
     {/* CENTER — NAVIGATION BUTTONS */}
     <div className="d-flex align-items-center gap-3">
       <NavButton
-        path="/dashboard"
+        path="/company/dashboard"
         icon="bi-house-door"
         label="Dashboard"
         location={location}
       />
       <NavButton
-        path="/applicants"
+        path="/company/applicants"
         icon="bi-people"
         label="Applicants"
         location={location}
       />
       <NavButton
-        path="/profile"
+        path="/company/profile"
         icon="bi-person"
         label="Profile"
         location={location}
@@ -74,7 +74,7 @@ DEV<span style={{ color: "#0054FF" }}>ision</span>
           cursor: "pointer",
         }}
         title={isPremium ? "Premium Subscription" : "Upgrade to Premium"}
-        onClick={() => navigate("/subscription")}
+        onClick={() => navigate("/company/subscription")}
       ></i>
 
       {/* Notifications (click to open modal) */}

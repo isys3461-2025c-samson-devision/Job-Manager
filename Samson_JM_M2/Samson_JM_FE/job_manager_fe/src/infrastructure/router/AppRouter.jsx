@@ -22,10 +22,10 @@ export default function AppRouter() {
         <Route path="/oauth/success" element={<OAuthSuccessPage />} />
         <Route path="/oauth/complete-profile" element={<CompleteProfilePage />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
-        <Route path="/dashboard" element={<CompanyDashboard />} />
-        <Route path="/applicants" element={<CompanyApplicants />} /> 
-        <Route path="/profile" element={<CompanyProfile />} />
-        <Route path="/subscription" element={<SubscriptionPage />} />
+        <Route path="/company/dashboard" element={<CompanyDashboard />} />
+        <Route path="/company/applicants" element={<CompanyApplicants />} /> 
+        <Route path="/company/profile" element={<CompanyProfile />} />
+        <Route path="/company/subscription" element={<SubscriptionPage />} />
         <Route path="/subscription/payment" element={<PaymentPage />} />
         <Route path="/subscription/payment/success" element={<SuccessPaymentPage />} />
         <Route path="/subscription/payment/cancel" element={<CancelPaymentPage />} />
