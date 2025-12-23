@@ -1,5 +1,13 @@
 import Joi from "joi";
 
+export const updateProfileSchema = Joi.object({
+  phone: Joi.string().optional(),
+  address: Joi.string().optional(),
+  city: Joi.string().optional(),
+  country: Joi.string().optional()
+});
+
+///////////////Bacsic Text Profile Validation Schema/////////////////////
 const yearRegex = /^\d{4}$/;
 const monthYearRegex = /^(0[1-9]|1[0-2])-\d{4}$/;
 const currentYear = new Date().getFullYear();
@@ -161,26 +169,7 @@ const workExperienceEntrySchema = Joi.object({
     })
 });
 
-export const updateProfileSchema = Joi.object({
-  phone: Joi.string().optional().allow(''),
-  address: Joi.string().optional().allow(''),
-  city: Joi.string().optional().allow(''),
-  country: Joi.string().optional(),
-  skills: Joi.array().items(Joi.string()).optional(),
 
-  name: Joi.string().min(1).max(200).optional().allow(''),
-  birthday: Joi.string().optional().allow(''),
-  isPremium: Joi.boolean().optional(),
-  mediaId: Joi.string().optional().allow(''),
-
-  summary: Joi.string().max(500).optional().allow(''),
-  education: Joi.array().items(educationEntrySchema).optional().max(10),
-  workExperiences: Joi.array().items(workExperienceEntrySchema).optional().max(20),
-})
-.options({
-  stripUnknown: true,
-  abortEarly: false,
-});
 
 export const updateBasicTextProfileSchema = Joi.object({
   summary: Joi.string()
@@ -292,3 +281,112 @@ function datesOverlap(start1: string, end1: string, start2: string, end2: string
   
   return (date1 <= date4 && date2 >= date3);
 }
+
+
+
+export const updateSkillsSchema = Joi.object({
+  skills: Joi.array()
+    .items(
+      Joi.string()
+        .min(1)
+        .max(50)
+        .pattern(/^[A-Za-z0-9+#.\s-]+$/)
+        .custom((value, helpers) => {
+          // Capitalize first letter of each word for consistency
+          const sanitized = value.trim()
+            .split(' ')
+            .map((word :any) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+          return sanitized;
+        }, 'Skill formatting')
+    )
+    .max(30)
+    .unique()
+    .required()
+    .messages({
+      'array.base': 'Skills must be an array',
+      'array.max': 'Maximum 30 skills allowed',
+      'array.unique': 'Duplicate skills are not allowed',
+      'string.min': 'Skill name must be at least 1 character',
+      'string.max': 'Skill name cannot exceed 50 characters',
+      'string.pattern.base': 'Skill name can only contain letters, numbers, spaces, and: + # . -',
+      'any.required': 'Skills field is required'
+    })
+})
+.options({
+  stripUnknown: true,
+  abortEarly: false,
+});
+
+////////////////////Profile Creation Validation Schema/////////////////////
+const phoneSchema = Joi.string()
+  .pattern(/^(\+84|0)[1-9][0-9]{8}$/)
+  .messages({
+    'string.pattern.base': 'Phone must be a valid Vietnamese phone number'
+  });
+
+const dateSchema = Joi.string()
+  .pattern(/^\d{4}-\d{2}-\d{2}$/)
+  .messages({
+    'string.pattern.base': 'Date must be in YYYY-MM-DD format'
+  });
+
+// Create Profile Schema
+export const createProfileSchema = Joi.object({
+  country: Joi.string()
+    .length(2)
+    .uppercase()
+    .default('VN')
+    .messages({
+      'string.length': 'Country must be a 2-letter ISO code',
+      'string.uppercase': 'Country code must be uppercase'
+    }),
+    
+  name: Joi.string()
+    .min(2)
+    .max(100)
+    .optional(),
+    
+  phone: phoneSchema.optional(),
+  
+  address: Joi.string()
+    .max(200)
+    .optional(),
+    
+  city: Joi.string()
+    .max(100)
+    .optional(),
+    
+  birthday: dateSchema.optional()
+})
+.options({
+  abortEarly: false,
+  stripUnknown: true,
+});
+
+// Create Basic Text Profile Schema
+export const createBasicTextProfileSchema = Joi.object({
+  summary: Joi.string()
+    .min(10)
+    .max(500)
+    .required()
+    .messages({
+      'string.min': 'Summary must be at least 10 characters',
+      'string.max': 'Summary cannot exceed 500 characters',
+      'any.required': 'Summary is required'
+    }),
+    
+  workExperiences: Joi.array()
+    .items(workExperienceEntrySchema)
+    .optional()
+    .max(5),
+    
+  education: Joi.array()
+    .items(educationEntrySchema)
+    .optional()
+    .max(5)
+})
+.options({
+  abortEarly: false,
+  stripUnknown: true,
+});
