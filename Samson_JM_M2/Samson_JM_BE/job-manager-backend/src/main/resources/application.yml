@@ -5,6 +5,18 @@ spring:
     mongodb:
       uri: mongodb+srv://jasonais99_db_user:jasontran2004@managerdb.xadcgas.mongodb.net/
       database: JobManagerBackend
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tnduyy2k3@gmail.com
+    password: dqvduwrsvdcvbjhi
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
       
 jwt:
   secret: devision-super-secret-key-change-later

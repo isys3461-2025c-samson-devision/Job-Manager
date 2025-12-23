@@ -1,4 +1,4 @@
-package com.devision.job_manager_backend.modules.auth.dto.response;
+package com.devision.job_manager_backend.modules.auth.DTO.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
