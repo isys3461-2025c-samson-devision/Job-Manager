@@ -1,0 +1,41 @@
+// prisma/schema.prisma
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum MediaType {
+  AVATAR
+  PORTFOLIO_IMAGE
+  PORTFOLIO_VIDEO
+}
+
+model Media {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  authId       String   // Changed from profileId to authId
+  mediaType    MediaType
+  s3Key        String   
+  s3Url        String   @map("s3_url")
+  thumbnailKey String?  @map("thumbnail_key")
+  thumbnailUrl String?  @map("thumbnail_url")
+  fileSize     Int
+  mimeType     String
+  width        Int?
+  height       Int?
+  duration     Int?
+  title        String?
+  description  String?
+  tags         String[]
+  uploadedAt   DateTime @default(now())
+  processedAt  DateTime?
+  deletedAt    DateTime?
+  
+  @@index([authId])  // Updated index
+  @@index([mediaType])
+  @@index([uploadedAt])
+  @@index([s3Key])
+}

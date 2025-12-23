@@ -32,7 +32,7 @@ model profile {
   createdAt       DateTime                 @default(now()) @db.Date
   education       ProfileEducation[]
   isPremium       Boolean?
-  mediaId         String?
+  avatarMediaId   String?
   name            String?
   phone           String?
   skills          String[]

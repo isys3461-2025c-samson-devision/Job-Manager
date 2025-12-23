@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { JwtPayload, logError, ServiceError } from "../types";
 import { createErrorResponse } from "../utils";
 import jwt from "jsonwebtoken";
+import multer from 'multer';
 
 //extends express request to include async handler
 
@@ -108,6 +109,25 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
+
+const storage = multer.memoryStorage();
+
+// Create multer instance WITHOUT fileFilter to avoid issues
+export const avatarUpload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max for avatars
+    files: 1
+  }
+});
+
+export const portfolioUpload = multer({
+  storage,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB max for portfolio items
+    files: 1
+  }
+});
 
 
 
