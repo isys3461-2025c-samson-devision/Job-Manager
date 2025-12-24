@@ -1,170 +1,125 @@
-import React, { useState } from "react";
-import shibaImg from "../../assets/shiba_find_job.png";
-import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
-import { setToken } from "../../store/authSlice";
-import { register } from "../../services/authService";
+import { Link } from 'react-router-dom';
+import shibaImg from '../../assets/shiba_find_job.png';
+import CountrySelect from '../../components/CountrySelect';
+import { useRegister } from '../../hooks/useRegister';
 
-const Register = () => {
-	const dispatch = useDispatch();
-	const navigate = useNavigate();
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState("");
+/* ================= COMPONENT ================= */
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setLoading(true);
-		setError("");
-		try {
-			const data = await register(email, password);
-			dispatch(setToken(data.data?.accessToken));
-			dispatch(setToken(data.data?.refreshToken));
-			navigate("/dashboard");
-		} catch (err) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const apiError = (err as any)?.response?.data;
-			console.log('API error response:', apiError);
-			if (apiError) {
-				// Collect all error messages
-				const messages: string[] = [];
-				if (typeof apiError === 'string') {
-					messages.push(apiError);
-				} else {
-					if (apiError.error) messages.push(apiError.error);
-					if (apiError.message) messages.push(apiError.message);
-					if (apiError.errors && typeof apiError.errors === 'object') {
-						Object.values(apiError.errors).forEach((val) => {
-							if (Array.isArray(val)) {
-								messages.push(...val);
-							} else if (typeof val === 'string') {
-								messages.push(val);
-							}
-						});
-					}
-				}
-				setError(messages.length > 0 ? messages.join(' | ') : 'Register failed');
-			} else {
-				setError('Register failed');
-			}
-		} finally {
-			setLoading(false);
-		}
-	};
+export default function Register() {
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    countries,
+    country,
+    handleCountryChange,
+    loading,
+    error,
+    countryError,
+    handleSubmit,
+  } = useRegister('/profile/create');
 
-	 return (
-		 <div style={{
-			 minHeight: "100vh",
-			 width: "100vw",
-			 position: "relative",
-			 display: "flex",
-			 alignItems: "center",
-			 justifyContent: "center",
-			 fontFamily: 'Segoe UI, Arial, sans-serif',
-			 background: `url(${shibaImg}) center/cover no-repeat #f8fafc`,
-		 }}>
-			 <div style={{
-				 maxWidth: 400,
-				 width: "100%",
-				 background: "rgba(255,255,255,0.95)",
-				 borderRadius: "18px",
-				 boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-				 padding: "2.5rem 2rem",
-				 margin: "2rem",
-				 zIndex: 2,
-			 }}>
-				 <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-					 <h2 style={{ fontWeight: 700, fontSize: "2rem", color: "#2563eb", marginBottom: "0.5rem" }}>Register JA SAMSON</h2>
-					 <p style={{ color: "#64748b", fontSize: "1rem" }}>Create your account</p>
-				 </div>
+  /* ================= RENDER ================= */
 
-				{/* Move up: Already have an account? */}
-				<div style={{ textAlign: "center", margin: "0.5rem 0 1.5rem 0" }}>
-					<span style={{ color: "#64748b", fontSize: "0.98rem" }}>
-						Already have an account?{' '}
-						<Link to="/login" style={{ color: "#2563eb", textDecoration: "underline", cursor: "pointer", fontWeight: 600 }}>
-							Login Here
-						</Link>
-					</span>
-				</div>
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      style={{ backgroundImage: `url(${shibaImg})` }}
+    >
+      <div className="w-full max-w-md bg-white/95 rounded-2xl shadow-xl p-8 mx-4">
+        {/* HEADER */}
+        <h2 className="text-2xl font-bold text-blue-600 text-center">
+          Register JA SAMSON
+        </h2>
+        <p className="text-center text-slate-500 mt-1">
+          Create your account
+        </p>
 
-				 {error && (
-					 <div style={{ background: "#fee2e2", color: "#b91c1c", borderRadius: "6px", padding: "0.5rem", textAlign: "center", marginBottom: "1rem", fontSize: "0.95rem" }}>{error}</div>
-				 )}
+        {/* LOGIN LINK */}
+        <p className="text-center text-sm text-slate-500 mt-4">
+          Already have an account?{' '}
+          <Link
+            to="/login"
+            className="text-blue-600 font-semibold hover:underline"
+          >
+            Login here
+          </Link>
+        </p>
 
-				 <form onSubmit={handleSubmit}>
-					 <div style={{ marginBottom: "1.2rem" }}>
-						 <label htmlFor="email" style={{ fontWeight: 600, marginBottom: "0.5rem", display: "block", color: "#334155" }}>
-							 Email address
-						 </label>
-						 <input
-							 type="email"
-							 id="email"
-							 value={email}
-							 onChange={(e) => setEmail(e.target.value)}
-							 placeholder="Enter your email"
-							 required
-							 style={{
-								 borderRadius: "8px",
-								 border: "1px solid #cbd5e1",
-								 padding: "0.75rem 1rem",
-								 width: "100%",
-								 fontSize: "1rem",
-								 outline: "none",
-								 boxSizing: "border-box",
-								 marginTop: "0.2rem",
-							 }}
-						 />
-					 </div>
+        {/* ERROR */}
+        {error && (
+          <div className="mt-4 rounded bg-red-100 text-red-700 px-3 py-2 text-sm text-center">
+            {error}
+          </div>
+        )}
 
-					 <div style={{ marginBottom: "1.8rem" }}>
-						 <label htmlFor="password" style={{ fontWeight: 600, marginBottom: "0.5rem", display: "block", color: "#334155" }}>
-							 Password
-						 </label>
-						 <input
-							 type="password"
-							 id="password"
-							 value={password}
-							 onChange={(e) => setPassword(e.target.value)}
-							 placeholder="Enter your password"
-							 required
-							 style={{
-								 borderRadius: "8px",
-								 border: "1px solid #cbd5e1",
-								 padding: "0.75rem 1rem",
-								 width: "100%",
-								 fontSize: "1rem",
-								 outline: "none",
-								 boxSizing: "border-box",
-								 marginTop: "0.2rem",
-							 }}
-						 />
-					 </div>
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+          {/* EMAIL */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700">
+              Email address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2
+                focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-					 <button
-						 type="submit"
-						 disabled={loading}
-						 style={{
-							 borderRadius: "8px",
-							 background: "linear-gradient(90deg,#2563eb 60%,#1e40af 100%)",
-							 color: "#fff",
-							 fontWeight: 600,
-							 fontSize: "1.15rem",
-							 width: "100%",
-							 padding: "0.85rem 0",
-							 boxShadow: "0 4px 16px rgba(37,99,235,0.08)",
-							 border: "none",
-							 cursor: loading ? "not-allowed" : "pointer",
-							 transition: "background 0.2s",
-						 }}
-					 >
-						 {loading ? "Registering..." : "Register"}
-					 </button>
-				 </form>
-			 </div>
-		 </div>
-	);
-};
+          {/* PASSWORD */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2
+                focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-export default Register;
+          {/* COUNTRY */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700">
+              Country
+            </label>
+
+            <CountrySelect
+              countries={countries}
+              value={country}
+              onChange={handleCountryChange}
+              error={!!countryError}
+            />
+
+            {countryError && (
+              <p className="text-sm text-red-600 mt-1">
+                {countryError}
+              </p>
+            )}
+          </div>
+
+          {/* BUTTON */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-blue-800
+              text-white font-semibold py-2 hover:opacity-90
+              disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Registering...' : 'Register'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

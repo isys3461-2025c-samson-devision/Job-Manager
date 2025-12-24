@@ -169,6 +169,8 @@ const workExperienceEntrySchema = Joi.object({
     })
 });
 
+
+
 export const updateBasicTextProfileSchema = Joi.object({
   summary: Joi.string()
     .max(500)

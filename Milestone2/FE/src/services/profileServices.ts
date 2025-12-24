@@ -1,38 +1,71 @@
-import axios from 'axios';
 import type { ProfileFormData, Skill } from '../types';
+import appApi from './httpApp';
+import profileApi from './httpProfile';
 
-const API_BASE_URL = 'http://localhost:3001/api';
+type ApiEnvelope<T> = {
+    success?: boolean;
+    data?: T;
+    message?: string;
+    error?: string;
+};
 
-const profileAPI = axios.create({
-    baseURL: API_BASE_URL,
-});
-
-// Add token to requests
-profileAPI.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+type ProfileResponseDto = {
+    name?: string;
+    birthday?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    country?: string;
+    skills?: string[];
+};
 
 export const profileService = {
 
     getSkills: async (): Promise<Skill[]> => {
-        const response = await profileAPI.get('/skills');
+        const response = await appApi.get('/skills');
         return response.data;
     },
 
     createProfile: async (profileData: ProfileFormData): Promise<void> => {
-        await profileAPI.post('/profile', profileData);
+        await appApi.post('/profile', profileData);
     },
 
-    getProfile: async (): Promise<ProfileFormData> => {
-        const response = await profileAPI.get('/profile');
-        return response.data;
+    getProfile: async (authId: string): Promise<ProfileFormData> => {
+        const response = await profileApi.get<ApiEnvelope<ProfileResponseDto>>(`/${authId}`);
+        const dto = response.data?.data;
+
+        return {
+            name: dto?.name ?? '',
+            birthday: dto?.birthday ?? '',
+            email: '',
+            country: dto?.country ?? '',
+            phone: dto?.phone,
+            street: dto?.address,
+            city: dto?.city,
+            skills: dto?.skills ?? [],
+        };
     },
 
-    updateProfile: async (profileData: ProfileFormData): Promise<void> => {
-        await profileAPI.put('/profile', profileData);
+    updateProfile: async (authId: string, profileData: ProfileFormData): Promise<void> => {
+        const optionalString = (value: unknown): string | undefined => {
+            if (typeof value !== 'string') return undefined;
+            const trimmed = value.trim();
+            return trimmed.length > 0 ? trimmed : undefined;
+        };
+
+        const payload = {
+            // required by backend (on create) and generally expected
+            country: profileData.country,
+            skills: profileData.skills,
+
+            ...(optionalString(profileData.name) ? { name: optionalString(profileData.name) } : {}),
+            ...(optionalString(profileData.birthday) ? { birthday: optionalString(profileData.birthday) } : {}),
+
+            ...(optionalString(profileData.phone) ? { phone: optionalString(profileData.phone) } : {}),
+            ...(optionalString(profileData.street) ? { address: optionalString(profileData.street) } : {}),
+            ...(optionalString(profileData.city) ? { city: optionalString(profileData.city) } : {}),
+        };
+
+        await profileApi.put(`/${authId}`, payload);
     },
 };

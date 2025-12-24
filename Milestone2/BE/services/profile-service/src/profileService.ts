@@ -50,12 +50,39 @@ export class ProfileService {
     const profile = await prisma.profile.findFirst({ where: { authId } });
 
     if (!profile) {
-      throw createServiceError("Profile not found", 404);
+      if (!data.country) {
+        throw createServiceError("Country is required", 400);
+      }
+      if (!Array.isArray(data.skills) || data.skills.length === 0) {
+        throw createServiceError("At least one skill is required", 400);
+      }
+
+      return prisma.profile.create({
+        data: {
+          authId,
+          country: data.country,
+          skills: data.skills,
+          phone: data.phone,
+          address: data.address,
+          city: data.city,
+          name: data.name,
+          birthday: data.birthday,
+          isPremium: data.isPremium,
+          mediaId: data.mediaId,
+          summary: data.summary,
+          education: data.education ?? [],
+          workExperiences: data.workExperiences ?? [],
+          updatedAt: new Date(),
+        },
+      });
     }
 
     return prisma.profile.update({
       where: { id: profile.id }, 
-      data,
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
     });
   }
 

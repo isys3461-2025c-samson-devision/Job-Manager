@@ -1,30 +1,31 @@
 
-import { API_BASE_URL_AUTH } from "../config";
-import axios from "axios";
+
+import api from "./http";
 
 export const register = async (email: string, password: string) => {
-  const response = await axios.post(`${API_BASE_URL_AUTH}/register`, { email, password });
+  const response = await api.post(`/register`, { email, password });
   return response.data;
 };
 
 export const login = async (email: string, password: string) => {
-  const response = await axios.post(`${API_BASE_URL_AUTH}/login`, { email, password });
+  const response = await api.post(`/login`, { email, password });
   return response.data;
 };
 
-export const refreshToken = async (refreshToken: string) => {
-  const response = await axios.post(`${API_BASE_URL_AUTH}/refresh-token`, { refreshToken });
+export const refreshToken = async (refreshToken?: string) => {
+  // backend will read refreshToken from cookie if not provided in body
+  const response = await api.post(`/refresh-token`, refreshToken ? { refreshToken } : {});
   return response.data;
 };
 
-export const logout = async (refreshToken: string) => {
-  const response = await axios.post(`${API_BASE_URL_AUTH}/logout`, { refreshToken });
+export const logout = async (refreshToken?: string) => {
+  const response = await api.post(`/logout`, refreshToken ? { refreshToken } : {});
   return response.data;
 };
 
 export const validateToken = async (token: string) => {
-  const response = await axios.post(
-    `${API_BASE_URL_AUTH}/validate-token`,
+  const response = await api.post(
+    `/validate-token`,
     {},
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -32,14 +33,14 @@ export const validateToken = async (token: string) => {
 };
 
 export const getProfile = async (token: string) => {
-  const response = await axios.get(`${API_BASE_URL_AUTH}/profile`, {
+  const response = await api.get(`/profile`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
 export const deleteAccount = async (token: string) => {
-  const response = await axios.delete(`${API_BASE_URL_AUTH}/delete-account`, {
+  const response = await api.delete(`/delete-account`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;

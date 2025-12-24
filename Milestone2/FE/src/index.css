@@ -1,1 +1,30 @@
 @import "tailwindcss";
+
+@keyframes company-marquee-scroll {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(-50%);
+	}
+}
+
+.company-marquee {
+	overflow: hidden;
+}
+
+.company-marquee-track {
+	display: flex;
+	width: max-content;
+	will-change: transform;
+	animation: company-marquee-scroll 28s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.company-marquee-track {
+		animation: none;
+		transform: none;
+	}
+}
+
+

@@ -1,5 +1,5 @@
-import { AuthTokens, LoginResponse } from "../../../shared/types";
-import {  ServiceError } from "../../../shared/types";
+import { AuthTokens } from "../../../shared/types";
+import { ServiceError } from "../../../shared/types";
 import prisma from "./database";
 import { createServiceError } from "../../../shared/utils";
 import bcrypt from "bcryptjs";
@@ -46,10 +46,11 @@ export class AuthService {
     });
 
     // generate tokens
-    return this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    return tokens;
   }
 
-  async login(email: string, password: string): Promise<LoginResponse> {
+  async login(email: string, password: string): Promise<AuthTokens> {
     //find the user
     const user = await prisma.user.findUnique({
       where: { email },
@@ -68,11 +69,8 @@ export class AuthService {
 
     //generate tokens
     const tokens = await this.generateTokens(user.id, user.email, user.role);
-    
-    return {
-      ...tokens,
-      userId: user.id
-    };
+
+    return tokens;
   }
   
 

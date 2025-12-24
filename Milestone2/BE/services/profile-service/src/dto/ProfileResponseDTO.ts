@@ -3,13 +3,25 @@ export class ProfileResponseDTO {
   address?: string;
   city?: string;
   country: string;
-  birthday?: Date;
-  ispremium?: boolean;
+  birthday?: string;
+  isPremium?: boolean;
   name?: string;
   skills?: string[];
   summary?: string;
-  workExperiences?: string[];
-  education?: string[];
+  mediaId?: string;
+  workExperiences?: Array<{
+    description?: string;
+    endDate?: string;
+    startDate: string;
+    title: string;
+  }>;
+  education?: Array<{
+    GPA?: number;
+    degree: string;
+    from: string;
+    institution: string;
+    to?: string;
+  }>;
 
 
   constructor(entity: any) {
@@ -18,10 +30,11 @@ export class ProfileResponseDTO {
     this.city = entity.city;
     this.country = entity.country;
     this.birthday = entity.birthday;
-    this.ispremium = entity.ispremium;
+    this.isPremium = entity.isPremium;
     this.name = entity.name;
     this.skills = entity.skills;
     this.summary = entity.summary;
+    this.mediaId = entity.mediaId;
     this.workExperiences = entity.workExperiences;
     this.education = entity.education;
   }

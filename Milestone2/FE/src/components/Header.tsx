@@ -8,6 +8,7 @@ export default function Header({ title, subtitle, breadcrumbs }: HeaderProps) {
     return (
         <div className="bg-gray-50 border-b border-gray-200 py-6 px-4">
             <div className="max-w-7xl mx-auto">
+                
                 {/* Breadcrumbs */}
                 {breadcrumbs && breadcrumbs.length > 0 && (
                     <nav className="flex mb-4 text-sm text-gray-600">
