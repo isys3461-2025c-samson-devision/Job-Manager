@@ -1,6 +1,7 @@
 // src/router.ts
 import express from 'express';
 import { MediaController } from './mediaController';
+import { authenticate, asyncHandler, validateRequest } from "../../../shared/middleware";
 
 const router = express.Router();
 const mediaController = new MediaController();
@@ -12,26 +13,31 @@ router.get('/health', mediaController.healthCheck.bind(mediaController));
 router.post(
   '/avatars/:authId',
   mediaController.getUploadMiddleware(),
+  authenticate,
   mediaController.uploadAvatar.bind(mediaController)
 );
 router.get(
   '/avatars/:authId',
+  authenticate,
   mediaController.getAvatar.bind(mediaController)
 );
 
 // Portfolio routes
 router.post(
   '/portfolio/images/:authId',
+  authenticate,
   mediaController.getUploadMiddleware(),
   mediaController.uploadPortfolioImage.bind(mediaController)
 );
 router.post(
   '/portfolio/videos/:authId',
+  authenticate,
   mediaController.getUploadMiddleware(),
   mediaController.uploadPortfolioVideo.bind(mediaController)
 );
 router.get(
   '/portfolio/:authId',
+  authenticate,
   mediaController.getPortfolio.bind(mediaController)
 );
 

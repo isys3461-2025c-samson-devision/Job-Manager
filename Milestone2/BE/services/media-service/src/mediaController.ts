@@ -43,6 +43,11 @@ export class MediaController {
       const authId = req.params.authId;
       const file = req.file;
       const { title, description, tags } = req.body;
+      const requester = req.user!;
+
+      if (requester.role === "APPLICANT" && requester.userId !== authId) {
+        throw createServiceError("Forbidden: Cannot update another user's profile", 403);
+      }
 
       if (!file) {
         res.status(400).json({
@@ -99,7 +104,11 @@ export class MediaController {
   async getAvatar(req: Request, res: Response): Promise<void> {
     try {
       const { authId } = req.params;
-      console.log('REQUEST PARAMS:', req.params);
+      const requester = req.user!;
+
+      if (requester.role === "APPLICANT" && requester.userId !== authId) {
+        throw createServiceError("Forbidden: Cannot update another user's profile", 403);
+      }
       if (!authId) {
         res.status(400).json({
           success: false,
@@ -151,6 +160,11 @@ export class MediaController {
       const authId = req.params.authId;
       const file = req.file;
       const { title, description, tags } = req.body;
+      const requester = req.user!;
+
+      if (requester.role === "APPLICANT" && requester.userId !== authId) {
+        throw createServiceError("Forbidden: Cannot update another user's profile", 403);
+      }
 
       if (!file) {
         res.status(400).json({
@@ -209,6 +223,11 @@ export class MediaController {
       const authId = req.params.authId;
       const file = req.file;
       const { title, description, tags } = req.body;
+      const requester = req.user!;
+
+      if (requester.role === "APPLICANT" && requester.userId !== authId) {
+        throw createServiceError("Forbidden: Cannot update another user's profile", 403);
+      }
 
       if (!file) {
         res.status(400).json({
@@ -265,6 +284,11 @@ export class MediaController {
   async getPortfolio(req: Request, res: Response): Promise<void> {
     try {
       const { authId } = req.params;
+      const requester = req.user!;
+
+      if (requester.role === "APPLICANT" && requester.userId !== authId) {
+        throw createServiceError("Forbidden: Cannot update another user's profile", 403);
+      }
       const { 
         page = '1', 
         limit = '20', 

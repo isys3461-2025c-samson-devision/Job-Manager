@@ -45,18 +45,38 @@ export class MediaService {
     tags?: string[]
   ): Promise<MediaResponseDTO> {
     try {
+      console.log('=== AVATAR UPLOAD/REPLACE START ===');
+      console.log('Auth ID:', authId);
+      
       // 1. Validate file type
       if (!mimeType.startsWith('image/')) {
         throw createServiceError('Only image files allowed for avatar', 400);
       }
+
+      // 2. Check for existing avatar and mark as deleted
+      const existingAvatar = await prisma.media.findFirst({
+        where: {
+          authId,
+          mediaType: MediaType.AVATAR
+        }
+      });
+      if (existingAvatar) { 
+        await prisma.media.delete({
+          where: { id: existingAvatar.id }
+        });
+        console.log('✅ Previous avatar marked as deleted');
+      }
       
-      // 2. Process image (auto-resize to standard size)
+      // 3. Process image (auto-resize to standard size)
+      console.log('Processing new avatar image...');
       const { processedBuffer, width, height } = await this.imageProcessor.processAvatar(fileBuffer);
       
-      // 3. Generate S3 key
+      // 4. Generate S3 key
       const s3Key = this.s3Service.generateKey(authId, 'avatar', originalName);
+      console.log('Generated S3 key:', s3Key);
       
-      // 4. Upload to S3
+      // 5. Upload to S3
+      console.log('Uploading to S3...');
       const { key, url } = await this.s3Service.uploadFile(
         processedBuffer,
         s3Key,
@@ -70,10 +90,13 @@ export class MediaService {
         }
       );
       
-      // 5. Save to database
+      console.log('✅ S3 upload successful');
+      
+      // 6. Save to database
+      console.log('Saving to database...');
       const media = await prisma.media.create({
         data: {
-          authId, // Changed from profileId to authId
+          authId,
           mediaType: MediaType.AVATAR,
           s3Key: key,
           s3Url: url,
@@ -88,15 +111,13 @@ export class MediaService {
           processedAt: new Date()
         }
       });
-      
-      console.log(`✅ Avatar uploaded to S3: ${key}`);
-      console.log('DB URL:', process.env.DATABASE_URL);
+
       return new MediaResponseDTO(media);
-      
+
     } catch (error: any) {
-      console.error('Avatar upload failed:', error);
+      console.error('Avatar upload/replace failed:', error);
       throw createServiceError(
-        error.message || 'Failed to upload avatar',
+        error.message || 'Failed to upload/replace avatar',
         error.status || 500
       );
     }
@@ -323,7 +344,6 @@ export class MediaService {
       // Build where clause
       const where: any = {
         authId,
-        deletedAt: null,
         mediaType: {
           in: [MediaType.PORTFOLIO_IMAGE, MediaType.PORTFOLIO_VIDEO]
         }
@@ -346,7 +366,17 @@ export class MediaService {
         take: limit
       });
 
-      const items = mediaItems.map(media => new MediaResponseDTO(media));
+      const items = await Promise.all(
+        mediaItems.map(async (media) => {
+          const signedUrl = await this.createSignedUrl(media.s3Key);
+
+          return new MediaResponseDTO({
+            ...media,
+            s3Url: signedUrl,
+          });
+        })
+      );
+
       const totalPages = Math.ceil(total / limit);
 
       return {
@@ -616,4 +646,6 @@ export class MediaService {
       { expiresIn }
     );
   }
+
+  
 }
