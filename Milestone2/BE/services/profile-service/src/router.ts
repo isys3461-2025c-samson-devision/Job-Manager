@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { ProfileController } from "./profileController";
 import { authenticate, asyncHandler, validateRequest } from "../../../shared/middleware";
-import { updateProfileSchema, updateBasicTextProfileSchema } from "./validation";
+import { updateProfileSchema, updateBasicTextProfileSchema, updateSkillsSchema } from "./validation";
 
 
 const router = Router();
@@ -31,6 +31,20 @@ router.put(
   authenticate,
   validateRequest(updateBasicTextProfileSchema),
   asyncHandler(controller.updateBasicTextProfile)
+);
+
+router.get(
+  "/:authId/skills",
+  authenticate,
+  asyncHandler(controller.getSkills)
+);
+
+// Update/replace all skills
+router.put(
+  "/:authId/skills",
+  authenticate,
+  validateRequest(updateSkillsSchema),
+  asyncHandler(controller.updateSkills)
 );
 
 

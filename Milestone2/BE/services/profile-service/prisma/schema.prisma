@@ -26,13 +26,13 @@ model profile {
   id              String                   @id @default(auto()) @map("_id") @db.ObjectId
   address         String?
   authId          String @unique
-  birthday        String?
+  birthday        Json?
   city            String?
   country         String
   createdAt       DateTime                 @default(now()) @db.Date
   education       ProfileEducation[]
   isPremium       Boolean?
-  mediaId         String?
+  avatarMediaId   String?
   name            String?
   phone           String?
   skills          String[]
@@ -40,3 +40,4 @@ model profile {
   updatedAt       DateTime                 @db.Date
   workExperiences ProfileWorkExperiences[]
 }
+

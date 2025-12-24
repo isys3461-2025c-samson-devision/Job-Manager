@@ -1,0 +1,40 @@
+version: "3.9"
+
+name: jobapp-be
+
+services:
+  # Auth Service 
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    container_name: jobapp-auth-service
+    ports:
+      - "3001:3001"
+    env_file:
+      - services/auth-service/.env
+    restart: unless-stopped
+
+  # Profile Service 
+  profile-service:
+    build:
+      context: .
+      dockerfile: services/profile-service/Dockerfile
+    container_name: jobapp-profile-service
+    ports:
+      - "3002:3002"
+    env_file:
+      - services/profile-service/.env
+    restart: unless-stopped
+
+  # Search Profile Service 
+  search-profile-service:
+    build:
+      context: .
+      dockerfile: services/search-profile-service/Dockerfile
+    container_name: jobapp-search-service
+    ports:
+      - "3009:3009"
+    env_file:
+      - services/search-profile-service/.env
+    restart: unless-stopped
