@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -23,7 +25,10 @@ public class JobpostModel {
     private String location;// change into map obj later
     private String skillTag;
     @NotNull
+    @Field(targetType = FieldType.STRING)
     private List<EmploymentType> employmentType;// make it either full time or parst time
+    @NotNull
+    @Field(targetType = FieldType.STRING)
     private SalaryType salaryType;
     private Double salaryAmountMin;// default to salary threshold
     private Double salaryAmountMax;
