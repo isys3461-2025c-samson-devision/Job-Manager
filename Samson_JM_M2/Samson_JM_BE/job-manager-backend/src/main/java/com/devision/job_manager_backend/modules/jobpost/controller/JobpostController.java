@@ -9,6 +9,7 @@ import com.devision.job_manager_backend.modules.jobpost.services.JobpostService;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,13 +49,13 @@ public class JobpostController {
         }
     }
     @GetMapping("/search/by_skill/{tag}")
-    public ResponseEntity getBySkillTag(@PathVariable List<String> tag) {
+    public ResponseEntity getBySkillTag(@PathVariable String tag) {
         List<JobpostModel> job = jobpostService.getJobpostBySkillTag(tag);
         return job == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(job);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<JobpostModel> getById(@PathVariable String id) {
-        JobpostModel job = jobpostService.getJobpostById(id);
+    public ResponseEntity<Optional<JobpostModel>> getById(@PathVariable String id) {
+        Optional<JobpostModel> job = jobpostService.getJobpostById(id);
         return job == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(job);
     }
 
@@ -63,9 +64,9 @@ public class JobpostController {
         JobpostModel job = jobpostService.getJobpostByTitle(title);
         return job == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(job);
     }
-    @GetMapping("/search/by_location_city")
-    public ResponseEntity getByLocationCity(@PathVariable String city) {
-        JobpostModel job = jobpostService.getJobPostByLocationCity(city);
+    @GetMapping("/search/by_location/{location}")
+    public ResponseEntity getByLocationCity(@PathVariable String location) {
+        JobpostModel job = jobpostService.getJobPostByLocation(location);
         return job == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(job);
     }
 

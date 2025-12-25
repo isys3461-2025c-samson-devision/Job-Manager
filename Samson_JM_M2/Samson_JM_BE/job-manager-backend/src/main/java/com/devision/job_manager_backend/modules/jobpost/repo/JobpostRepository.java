@@ -5,19 +5,17 @@ import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.devision.job_manager_backend.modules.jobpost.model.JobpostModel;
+import java.time.LocalDate;
+
 
 public interface JobpostRepository extends MongoRepository<JobpostModel, String> {
-    JobpostModel findByJobpostTitle(String jobpostTitle);
-    JobpostModel findByJobpostId(String jobpostId);
-    List<JobpostModel> findByJobpostRequiredSkillsIn(List<String> skills);
-    List<JobpostModel> findByJobpostLocationCity(String city);
-    List<JobpostModel> findByJobpostLocationCountry(String country);
+    JobpostModel findByTitle(String jobpostTitle);
+    List<JobpostModel> findByLocation(String city);
     List<JobpostModel> findByEmploymentType(String employmentType);
-    List<JobpostModel> findBySkillTag(List<String> skillTag);
+    List<JobpostModel> findBySkillTag(String skillTag);
     List<JobpostModel> findBySalaryType(String salaryType);
     List<JobpostModel> findByIsPublished(Boolean isPublished);
-    List<JobpostModel> findByPendingApplication(List<String> pendingApplication); // return all jobposts with this applications
-    List<JobpostModel> findByArchivedApplication(List<String> archivedApplication);  // return all jobposts with this applications
-
-    JobpostModel deleteByJobpostId(String jobpostId);
+    List<JobpostModel> findByPostedDate(LocalDate postedDate);
+    List<JobpostModel> findByPendingApplicationContaining(List<String> pendingApplication); // return all jobposts with this applications
+    List<JobpostModel> findByArchivedApplicationContaining(List<String> archivedApplication);  // return all jobposts with this applications
 }

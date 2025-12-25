@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 public class JobpostModel {
     @Id
-    private String Id;
+    private String id;
     private String companyId;
     private String title;
     private String description;

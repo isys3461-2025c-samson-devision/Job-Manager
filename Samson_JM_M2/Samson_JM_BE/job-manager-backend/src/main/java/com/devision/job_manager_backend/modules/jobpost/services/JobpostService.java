@@ -1,11 +1,15 @@
 package com.devision.job_manager_backend.modules.jobpost.services;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.devision.job_manager_backend.modules.jobpost.model.JobpostModel;
 import com.devision.job_manager_backend.modules.jobpost.repo.JobpostRepository;
 
-
+@Service
 public class JobpostService {
     @Autowired
     private final JobpostRepository jobpostRepository;
@@ -30,24 +34,20 @@ public class JobpostService {
         jobpostRepository.deleteById(jobpostId);
     }
 
-    public JobpostModel getJobpostById(String jobpostId) {
-        return jobpostRepository.findByJobpostId(jobpostId);
+    public Optional<JobpostModel> getJobpostById(String jobpostId) {
+        return jobpostRepository.findById(jobpostId);
     }
 
     public JobpostModel getJobpostByTitle(String jobpostTitle) {
-        return jobpostRepository.findByJobpostTitle(jobpostTitle);
+        return jobpostRepository.findByTitle(jobpostTitle);
     }
 
     public Iterable<JobpostModel> getAllJobposts() {
         return jobpostRepository.findAll();
     }
 
-    public JobpostModel getJobPostByLocationCity(String city) {
-        return jobpostRepository.findByJobpostLocationCity(city).stream().findFirst().orElse(null);
-    }
-
-    public JobpostModel getJobPostByLocationCountry(String country) {
-        return jobpostRepository.findByJobpostLocationCountry(country).stream().findFirst().orElse(null);
+    public JobpostModel getJobPostByLocation(String city) {
+        return jobpostRepository.findByLocation(city).stream().findFirst().orElse(null);
     }
 
     public JobpostModel getJobPostByEmploymentType(String employmentType) {
@@ -62,7 +62,7 @@ public class JobpostService {
         return jobpostRepository.findByIsPublished(isPublished);
     }
 
-    public List<JobpostModel> getJobpostBySkillTag(List<String> skillTag) {
+    public List<JobpostModel> getJobpostBySkillTag(String skillTag) {
         return jobpostRepository.findBySkillTag(skillTag);
     }
 
