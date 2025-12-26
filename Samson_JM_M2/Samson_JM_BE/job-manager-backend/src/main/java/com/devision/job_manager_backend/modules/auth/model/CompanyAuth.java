@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 @Document(collection = "company_auth")
 @Getter
@@ -18,7 +19,8 @@ public class CompanyAuth {
     private String phoneNumber;
 
     private String country;
-
+    
+    @Indexed(unique = true)
     private String email;
 
     private String passwordHash;

@@ -11,6 +11,8 @@ import com.devision.job_manager_backend.modules.company.mapper.CompanyMapper;
 import com.devision.job_manager_backend.modules.company.model.CompanyProfile;
 import com.devision.job_manager_backend.modules.company.repository.CompanyRepository;
 import com.devision.job_manager_backend.modules.company.service.CompanyService;
+import com.devision.job_manager_backend.common.exception.NotFoundException;
+
 
 @Service
 public class CompanyServiceImpl implements CompanyService {
@@ -34,34 +36,35 @@ public class CompanyServiceImpl implements CompanyService {
         return CompanyMapper.toProfileResponse(profile);
     }
 
-    @Override
-    public CompanyProfileResponse updateMyProfile(String companyId, CompanyProfileUpdateRequest req) {
-        CompanyProfile profile = companyRepository.findById(companyId).orElseGet(() -> {
-            CompanyProfile p = new CompanyProfile(companyId);
-            p.setCreatedAt(Instant.now());
-            return p;
-        });
+@Override
+public CompanyProfileResponse updateMyProfile(String companyId, CompanyProfileUpdateRequest req) {
 
-        profile.setName(req.getName());
-        profile.setPhone(req.getPhone());
-        profile.setStreet(req.getStreet());
-        profile.setCity(req.getCity());
-        profile.setCountry(req.getCountry());
-        profile.setAboutUs(req.getAboutUs());
-        profile.setWhoWeAreLookingFor(req.getWhoWeAreLookingFor());
-        profile.setUpdatedAt(Instant.now());
+    CompanyProfile profile = companyRepository.findById(companyId).orElseGet(() -> {
+        CompanyProfile p = new CompanyProfile(companyId);
+        Instant now = Instant.now();
+        p.setCreatedAt(now);
+        p.setUpdatedAt(now);
+        return p;
+    });
 
-        CompanyProfile saved = companyRepository.save(profile);
-        return CompanyMapper.toProfileResponse(saved);
-    }
+    if (req.getName() != null) profile.setName(req.getName());
+    if (req.getPhone() != null) profile.setPhone(req.getPhone());
+    if (req.getStreet() != null) profile.setStreet(req.getStreet());
+    if (req.getCity() != null) profile.setCity(req.getCity());
+    if (req.getCountry() != null) profile.setCountry(req.getCountry());
+    if (req.getAboutUs() != null) profile.setAboutUs(req.getAboutUs());
+    if (req.getWhoWeAreLookingFor() != null) profile.setWhoWeAreLookingFor(req.getWhoWeAreLookingFor());
 
-    @Override
-    public CompanyPublicProfileResponse getPublicProfile(String companyId) {
-        CompanyProfile profile = companyRepository.findById(companyId).orElse(null);
-        if (profile == null) {
-            CompanyProfile empty = new CompanyProfile(companyId);
-            return CompanyMapper.toPublicResponse(empty);
-        }
-        return CompanyMapper.toPublicResponse(profile);
-    }
+    profile.setUpdatedAt(Instant.now());
+
+    CompanyProfile saved = companyRepository.save(profile);
+    return CompanyMapper.toProfileResponse(saved);
+}
+
+@Override
+public CompanyPublicProfileResponse getPublicProfile(String companyId) {
+    CompanyProfile profile = companyRepository.findById(companyId)
+        .orElseThrow(() -> new NotFoundException("Company public profile not found"));
+    return CompanyMapper.toPublicResponse(profile);
+}
 }

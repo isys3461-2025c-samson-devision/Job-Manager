@@ -27,8 +27,8 @@ public class CompanyController {
         return ResponseEntity.ok(res);
     }
 
-    @PutMapping("/me")
-    public ResponseEntity<CompanyProfileResponse> updateMyProfile(@Valid @RequestBody CompanyProfileUpdateRequest req) {
+    @PatchMapping("/me")
+    public ResponseEntity<CompanyProfileResponse> patchMyProfile(@Valid @RequestBody CompanyProfileUpdateRequest req) {
         String companyId = CurrentUserUtil.getCurrentUserId();
         CompanyProfileResponse res = companyService.updateMyProfile(companyId, req);
         return ResponseEntity.ok(res);
@@ -40,4 +40,5 @@ public class CompanyController {
         return ResponseEntity.ok(res);
     }
 }
+
 

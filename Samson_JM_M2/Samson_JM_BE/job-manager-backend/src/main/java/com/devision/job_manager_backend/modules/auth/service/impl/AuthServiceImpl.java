@@ -6,17 +6,22 @@ import com.devision.job_manager_backend.modules.auth.dto.response.AuthResponse;
 import com.devision.job_manager_backend.modules.auth.model.CompanyAuth;
 import com.devision.job_manager_backend.modules.auth.repository.CompanyAuthRepository;
 import com.devision.job_manager_backend.modules.auth.service.internal.AuthInternalService;
+import com.devision.job_manager_backend.modules.company.model.CompanyProfile;
+import com.devision.job_manager_backend.modules.company.repository.CompanyRepository;
 import com.devision.job_manager_backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
+
+import java.time.Instant;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthInternalService {
-
     private final CompanyAuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CompanyRepository companyRepository;
     private final JwtService jwtService; // ✅ INJECTED
 
     @Override
@@ -31,13 +36,21 @@ public class AuthServiceImpl implements AuthInternalService {
         auth.setEmail(request.getEmail());
         auth.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         auth.setRole("COMPANY");
-
         auth.setPhoneNumber(request.getPhoneNumber());
         auth.setCountry(request.getCountry());
 
-        authRepository.save(auth);
-    }
+        CompanyAuth savedAuth = authRepository.save(auth);
+        // ✅ create profile with SAME id
+        Instant now = Instant.now();
+        CompanyProfile profile = new CompanyProfile(savedAuth.getId());
+        profile.setName(request.getCompanyName());
+        profile.setPhone(request.getPhoneNumber());
+        profile.setCountry(request.getCountry());
+        profile.setCreatedAt(now);
+        profile.setUpdatedAt(now);
 
+        companyRepository.save(profile);
+    }
 
     @Override
     public AuthResponse login(LoginRequest request) {
@@ -55,7 +68,6 @@ public class AuthServiceImpl implements AuthInternalService {
         }
 
         String token = jwtService.generateToken(auth.getId(), auth.getRole());
-
         return new AuthResponse(token, auth.getRole());
     }
 }

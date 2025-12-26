@@ -31,15 +31,18 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
             // PUBLIC endpoints
-                // ✅ AUTH endpoints
+            // ✅ AUTH endpoints
             .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
 
-                // ✅ COMPANY endpoints
-                .requestMatchers(HttpMethod.GET, "/api/companies/*/public").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/companies//public").permitAll()
+            // ✅ COMPANY endpoints
+            // Public profile is open
+            .requestMatchers(HttpMethod.GET, "/api/companies/*/public").permitAll()
 
-
+            // "me" endpoints must be COMPANY only
+            .requestMatchers(HttpMethod.GET, "/api/companies/me").hasRole("COMPANY")
+            .requestMatchers(HttpMethod.PATCH, "/api/companies/me").hasRole("COMPANY")
+            .requestMatchers(HttpMethod.PUT, "/api/companies/me").hasRole("COMPANY")
 
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Everything else
