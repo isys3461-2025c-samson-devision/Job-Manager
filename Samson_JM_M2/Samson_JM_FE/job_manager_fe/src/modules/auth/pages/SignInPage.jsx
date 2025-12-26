@@ -21,7 +21,7 @@ export default function SignInPage() {
 
     try {
       await login(form); // ✅ ONLY call context
-      navigate("/dashboard"); // ✅ redirect
+      navigate("/company/dashboard"); // ✅ redirect
     } catch (err) {
       setError("Invalid email or password.");
     }
