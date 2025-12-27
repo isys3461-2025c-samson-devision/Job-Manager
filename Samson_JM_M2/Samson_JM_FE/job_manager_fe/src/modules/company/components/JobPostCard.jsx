@@ -7,13 +7,15 @@ import {
   formatPostedDate,
 } from "../config/jobPostConfig";
 
-export default function JobPostCard({ post }) {
+export default function JobPostCard({ post, onEdit, onDelete }) {
   const navigate = useNavigate();
 
   // ---------------------------
-  // DERIVED VALUES (SAFE)
+  // DERIVED VALUES
   // ---------------------------
   const isPublished = post.isPublished === true;
+
+  const jobId = post.id || post._id;
 
   const statusLabel = isPublished ? "Published" : "Draft";
   const statusClass = isPublished ? "status-public" : "status-draft";
@@ -27,16 +29,17 @@ export default function JobPostCard({ post }) {
       : "No description provided.";
 
   // ---------------------------
-  // NAVIGATION
+  // HANDLERS
   // ---------------------------
   const handleViewApplicants = () => {
     navigate("/company/applicants", {
       state: {
-        jobId: post.id || post._id,
+        jobId: post.id,
         jobTitle: post.title,
       },
     });
   };
+  
 
   // ---------------------------
   // RENDER
@@ -44,18 +47,17 @@ export default function JobPostCard({ post }) {
   return (
     <div className="p-4 mb-4 bg-white rounded-4 shadow-sm border">
       <div className="row">
-        {/* LEFT COLUMN */}
+        {/* LEFT */}
         <div className="col-12 col-lg-9">
           {/* TITLE + STATUS */}
           <div className="d-flex align-items-center gap-3 mb-2">
             <h4 className="fw-bold mb-0">{post.title}</h4>
-
             <span className={`status-badge ${statusClass}`}>
               {statusLabel}
             </span>
           </div>
 
-          {/* META ROW */}
+          {/* META */}
           <div className="text-muted small d-flex flex-wrap gap-4 mb-3">
             <span>
               <i className="bi bi-geo-alt me-1 text-danger"></i>
@@ -84,7 +86,7 @@ export default function JobPostCard({ post }) {
             Salary: {formatSalary(post)}
           </div>
 
-          {/* TECHNICAL SKILLS */}
+          {/* SKILLS */}
           {post.technicalSkills?.length > 0 && (
             <div className="d-flex flex-wrap gap-2 mb-3">
               {post.technicalSkills.map((skill) => (
@@ -95,13 +97,13 @@ export default function JobPostCard({ post }) {
             </div>
           )}
 
-          {/* POSTED DATE */}
+          {/* DATE */}
           <div className="text-muted small">
             Posted: {formatPostedDate(post.postedDate)}
           </div>
         </div>
 
-        {/* RIGHT COLUMN — ACTIONS */}
+        {/* RIGHT ACTIONS */}
         <div className="col-12 col-lg-3 d-flex flex-column align-items-end gap-3 mt-3 mt-lg-0">
           <button
             className="btn btn-primary job-action-btn"
@@ -110,13 +112,17 @@ export default function JobPostCard({ post }) {
             View Applicants
           </button>
 
-          <button className="btn btn-outline-secondary job-action-btn">
-            Edit
+          <button
+            className="btn btn-outline-secondary"
+            onClick={() => onEdit(post)}
+          >
+            <i className="bi bi-pencil me-1"></i> Edit
           </button>
 
           <button
             className="btn job-action-btn"
             style={{ background: "#F8D7DA", color: "#D9534F" }}
+            onClick={() => onDelete(jobId)}
           >
             Delete
           </button>

@@ -27,6 +27,11 @@ async function request(method, path, body, options = {}) {
     throw new Error(`HTTP error ${response.status}`);
   }
 
+  // ✅ Handle empty responses (DELETE, 204)
+  if (response.status === 204) {
+    return null;
+  }
+
   return response.json();
 }
 

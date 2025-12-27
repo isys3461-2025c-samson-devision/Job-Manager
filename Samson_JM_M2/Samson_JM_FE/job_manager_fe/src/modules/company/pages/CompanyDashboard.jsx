@@ -5,7 +5,7 @@ import WelcomeBanner from "../components/WelcomeBanner";
 import StatCard from "../components/StatCard";
 import JobPostCard from "../components/JobPostCard";
 import JobFilterBar from "../components/JobFilterBar";
-import CreateJobPostModal from "../components/CreateJobPostModal";
+import JobPostFormModal from "../components/JobPostFormModal";
 
 import { companyService } from "../service/companyService";
 import { jobPostService } from "../service/jobPostService";
@@ -20,6 +20,7 @@ export default function CompanyDashboard() {
   const [filterStatus, setFilterStatus] = useState("all");
 
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
+  const [editingJob, setEditingJob] = useState(null);
 
   // =======================
   // LOAD COMPANY STATS
@@ -44,6 +45,17 @@ export default function CompanyDashboard() {
   }, []);
 
   if (!stats) return <p>Loading...</p>;
+
+  // =======================
+  // DELETE JOB
+  // =======================
+  const handleDeleteJob = async (jobId) => {
+    if (!window.confirm("Are you sure you want to delete this job post?"))
+      return;
+
+    await jobPostService.deleteJobPost(jobId);
+    fetchJobPosts();
+  };
 
   // =======================
   // SEARCH + FILTER
@@ -112,23 +124,13 @@ export default function CompanyDashboard() {
         </div>
 
         {/* =======================
-            JOB POSTING HEADER
+            HEADER
         ======================== */}
         <div className="d-flex justify-content-between align-items-center mt-4 mb-2">
           <div>
             <h4 className="fw-bold">Job Posting</h4>
             <p className="text-muted small">Create new jobs</p>
           </div>
-
-          <CreateJobPostModal
-            show={showCreateJobModal}
-            onClose={() => setShowCreateJobModal(false)}
-            onSubmit={async (payload) => {
-              await jobPostService.createJobPost(payload);
-              setShowCreateJobModal(false);
-              fetchJobPosts();
-            }}
-          />
 
           <button
             className="btn btn-primary"
@@ -139,30 +141,28 @@ export default function CompanyDashboard() {
         </div>
 
         {/* =======================
-            YOUR JOB LIST
+            FILTER BAR
         ======================== */}
-        <div className="mt-4">
-          <h4 className="fw-bold">Your Job List</h4>
-          <p className="text-muted small">
-            Manage your job listing and track applications
-          </p>
-
-          <JobFilterBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filterStatus={filterStatus}
-            setFilterStatus={setFilterStatus}
-          />
-        </div>
+        <JobFilterBar
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          filterStatus={filterStatus}
+          setFilterStatus={setFilterStatus}
+        />
 
         {/* =======================
-            JOB POST LIST
+            JOB LIST
         ======================== */}
         {loadingJobs ? (
           <p className="text-muted mt-4">Loading job posts...</p>
         ) : filteredPosts.length > 0 ? (
           filteredPosts.map((post) => (
-            <JobPostCard key={post._id} post={post} />
+            <JobPostCard
+              key={post.id}
+              post={post}
+              onEdit={setEditingJob}
+              onDelete={handleDeleteJob}
+            />
           ))
         ) : (
           <div className="text-center text-muted py-5">
@@ -172,6 +172,35 @@ export default function CompanyDashboard() {
           </div>
         )}
       </div>
+
+      {/* =======================
+          CREATE MODAL
+      ======================== */}
+      <JobPostFormModal
+        show={showCreateJobModal}
+        mode="create"
+        onClose={() => setShowCreateJobModal(false)}
+        onSubmit={async (payload) => {
+          await jobPostService.createJobPost(payload);
+          setShowCreateJobModal(false);
+          fetchJobPosts();
+        }}
+      />
+
+      {/* =======================
+          EDIT MODAL
+      ======================== */}
+      <JobPostFormModal
+        show={!!editingJob}
+        mode="edit"
+        initialData={editingJob}
+        onClose={() => setEditingJob(null)}
+        onSubmit={async (payload) => {
+          await jobPostService.updateJobPost(editingJob.id, payload);
+          setEditingJob(null);
+          fetchJobPosts();
+        }}
+      />
     </>
   );
 }
