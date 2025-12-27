@@ -3,8 +3,6 @@ package com.devision.job_manager_backend.modules.jobpost.dto.request;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import com.devision.job_manager_backend.modules.jobpost.model.EmploymentType;
@@ -13,28 +11,18 @@ import com.devision.job_manager_backend.modules.jobpost.model.SalaryType;
 
 @Getter
 @Setter
-public class CreateJobPostRequest {
+public class UpdateJobPostRequest {
 
-    @NotBlank
     private String title;
-
-    @NotBlank
     private String description;
-
-    @NotBlank
     private String location;
 
-    @NotNull
     private EmploymentType employmentType;
-
-    @NotNull
     private List<JobCategory> categories;
 
     private LocalDate expiryDate;
 
-    @NotNull
     private SalaryType salaryType;
-
     private Double salaryMin;
     private Double salaryMax;
 
