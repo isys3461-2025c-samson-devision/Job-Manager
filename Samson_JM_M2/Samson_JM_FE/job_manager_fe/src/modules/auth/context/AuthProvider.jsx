@@ -7,7 +7,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const token = localStorageUtil.getToken();
     const role = localStorageUtil.getRole();
-    return token ? { accessToken: token, role } : null;
+    const companyName = localStorageUtil.getCompanyName();
+    return token ? { accessToken: token, role, companyName } : null;
   });
 
   const login = async (loginRequest) => {
@@ -15,8 +16,10 @@ export const AuthProvider = ({ children }) => {
 
     localStorageUtil.setToken(authUser.accessToken);
     localStorageUtil.setRole(authUser.role);
+    localStorageUtil.setCompanyName(authUser.companyName);
 
     setUser(authUser);
+    return authUser;
   };
 
   const signup = async (formData) => {
@@ -34,6 +37,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorageUtil.removeToken();
     localStorageUtil.removeRole();
+    localStorageUtil.removeCompanyName();
     setUser(null);
   };
 

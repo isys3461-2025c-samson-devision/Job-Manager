@@ -11,7 +11,7 @@ export const authService = {
       AUTH_ENDPOINTS.AUTH.LOGIN,
       loginRequest
     );
-    return new AuthUser(res.accessToken, res.role);
+    return new AuthUser(res.accessToken, res.role, res.companyName);
   },
 
   async signup(signupRequest) {

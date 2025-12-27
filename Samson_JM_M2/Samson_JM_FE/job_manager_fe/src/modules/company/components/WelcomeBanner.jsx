@@ -2,10 +2,9 @@ import { useContext } from "react";
 import { AuthContext } from "../../auth/context/AuthContext";
 
 export default function WelcomeBanner() {
-  const { auth } = useContext(AuthContext);
+  const {user} = useContext(AuthContext);
 
-  // Later: auth.companyName or auth.data.company.name
-  const companyName = auth?.companyName || "Company Name";
+  const companyName = user?.companyName || "Company";
 
   return (
     <div
@@ -15,7 +14,9 @@ export default function WelcomeBanner() {
         color: "white",
       }}
     >
-      <h3 className="fw-semibold mb-1">Welcome Back, {companyName} 👋</h3>
+      <h3 className="fw-semibold mb-1">
+        Welcome Back, {companyName} 👋
+      </h3>
       <p className="mb-0" style={{ opacity: 0.9 }}>
         Here’s what’s happening with your job posts today.
       </p>
