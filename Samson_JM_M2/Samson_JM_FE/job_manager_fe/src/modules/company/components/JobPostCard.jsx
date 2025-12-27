@@ -15,6 +15,8 @@ export default function JobPostCard({ post, onEdit, onDelete }) {
   // ---------------------------
   const isPublished = post.isPublished === true;
 
+  const isDraft = post.isPublished === false;
+
   const jobId = post.id || post._id;
 
   const statusLabel = isPublished ? "Published" : "Draft";
@@ -39,7 +41,6 @@ export default function JobPostCard({ post, onEdit, onDelete }) {
       },
     });
   };
-  
 
   // ---------------------------
   // RENDER
@@ -52,9 +53,7 @@ export default function JobPostCard({ post, onEdit, onDelete }) {
           {/* TITLE + STATUS */}
           <div className="d-flex align-items-center gap-3 mb-2">
             <h4 className="fw-bold mb-0">{post.title}</h4>
-            <span className={`status-badge ${statusClass}`}>
-              {statusLabel}
-            </span>
+            <span className={`status-badge ${statusClass}`}>{statusLabel}</span>
           </div>
 
           {/* META */}
@@ -107,7 +106,11 @@ export default function JobPostCard({ post, onEdit, onDelete }) {
         <div className="col-12 col-lg-3 d-flex flex-column align-items-end gap-3 mt-3 mt-lg-0">
           <button
             className="btn btn-primary job-action-btn"
-            onClick={handleViewApplicants}
+            disabled={isDraft}
+            onClick={() => {
+              if (isDraft) return;
+              handleViewApplicants();
+            }}
           >
             View Applicants
           </button>
