@@ -56,6 +56,8 @@ public class SecurityConfig {
 
                 // ===== JA - PUBLIC =====
                 .requestMatchers("/api/companies/**").permitAll()
+                .requestMatchers("/api/jobposts/**").permitAll()   // 👈 PUBLIC
+
 
                 // ===== DEFAULT =====
                 .anyRequest().authenticated()
