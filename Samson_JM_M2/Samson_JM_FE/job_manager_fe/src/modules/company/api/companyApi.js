@@ -17,7 +17,7 @@ export const getMyCompany = async () => {
 export const updateMyCompany = async (payload) => {
   const token = localStorage.getItem("accessToken");
 
-  const res = await axios.put(`${BASE_URL}/me`, payload, {
+  const res = await axios.patch(`${BASE_URL}/me`, payload, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

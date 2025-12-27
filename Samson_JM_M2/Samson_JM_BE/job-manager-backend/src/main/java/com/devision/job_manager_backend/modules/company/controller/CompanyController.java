@@ -37,7 +37,7 @@ public class CompanyController {
         return ResponseEntity.ok(toResponse(company));
     }
 
-    @PutMapping("/me")
+    @PatchMapping("/me")
     public ResponseEntity<CompanyResponse> updateMyCompany(
             Authentication authentication,
             @RequestBody UpdateCompanyRequest request

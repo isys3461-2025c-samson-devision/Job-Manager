@@ -45,26 +45,40 @@ public class CompanyService {
     /**
      * Update company profile
      */
-    public Company updateCompany(
+        public Company updateCompany(
             String userId,
             UpdateCompanyRequest request
     ) {
-
         Company company = companyRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
 
-        company.setCompanyName(request.getCompanyName());
-        company.setPhoneNumber(request.getPhoneNumber());
-        company.setStreet(request.getStreet());
-        company.setCity(request.getCity());
-        company.setCountry(request.getCountry());
+        if (request.getCompanyName() != null)
+            company.setCompanyName(request.getCompanyName());
 
-        company.setAboutUs(request.getAboutUs());
-        company.setWhoWeAreLookingFor(request.getWhoWeAreLookingFor());
-        company.setLogoUrl(request.getLogoUrl());
+        if (request.getPhoneNumber() != null)
+            company.setPhoneNumber(request.getPhoneNumber());
+
+        if (request.getStreet() != null)
+            company.setStreet(request.getStreet());
+
+        if (request.getCity() != null)
+            company.setCity(request.getCity());
+
+        if (request.getCountry() != null)
+            company.setCountry(request.getCountry());
+
+        if (request.getAboutUs() != null)
+            company.setAboutUs(request.getAboutUs());
+
+        if (request.getWhoWeAreLookingFor() != null)
+            company.setWhoWeAreLookingFor(request.getWhoWeAreLookingFor());
+
+        if (request.getLogoUrl() != null)
+            company.setLogoUrl(request.getLogoUrl());
 
         company.setUpdatedAt(Instant.now());
 
         return companyRepository.save(company);
     }
+
 }
