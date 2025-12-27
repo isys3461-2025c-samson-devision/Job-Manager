@@ -9,7 +9,7 @@ export const AUTH_ENDPOINTS = {
   },
   JOBPOST: {
     ALL: "/api/company/jobposts",
-    CREATE: "/api/company/jobposts/",
+    CREATE: "/api/company/jobposts",
     BY_ID: (id) => `/api/company/jobposts/${id}`,
     PUBLISH: (id) => `/api/company/jobposts/${id}/publish`,
   },
