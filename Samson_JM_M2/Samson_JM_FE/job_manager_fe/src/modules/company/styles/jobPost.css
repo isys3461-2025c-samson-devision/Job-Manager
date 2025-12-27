@@ -60,3 +60,17 @@
   background: #e0e0e0;
   color: #555;
 }
+
+/* =========================
+   SKILL TAGS (BLUE CHIPS)
+========================= */
+.skill-chip {
+  background-color: #eaf2ff;      /* light blue background */
+  color: #2d68ff;                 /* primary blue text */
+  border: 1px solid #cfe0ff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}

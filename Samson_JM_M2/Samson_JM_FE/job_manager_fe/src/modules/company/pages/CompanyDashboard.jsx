@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import CompanyHeader from "../components/CompanyHeader";
 import WelcomeBanner from "../components/WelcomeBanner";
 import StatCard from "../components/StatCard";
@@ -5,41 +7,60 @@ import JobPostCard from "../components/JobPostCard";
 import JobFilterBar from "../components/JobFilterBar";
 import CreateJobPostModal from "../components/CreateJobPostModal";
 
-import mockPosts from "../data/mockJobPosts.json";
-
-import { useEffect, useState } from "react";
 import { companyService } from "../service/companyService";
+import { jobPostService } from "../service/jobPostService";
 
 export default function CompanyDashboard() {
   const [stats, setStats] = useState(null);
 
-  // SEARCH INPUT
-  const [searchTerm, setSearchTerm] = useState("");
+  const [jobPosts, setJobPosts] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
 
-  // SIMPLE FILTER DROPDOWN
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // JOB POST MODAL
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
 
+  // =======================
+  // LOAD COMPANY STATS
+  // =======================
   useEffect(() => {
     companyService.getCompanyStats().then(setStats);
   }, []);
 
+  // =======================
+  // LOAD JOB POSTS
+  // =======================
+  const fetchJobPosts = () => {
+    setLoadingJobs(true);
+    jobPostService
+      .getCompanyJobPosts()
+      .then(setJobPosts)
+      .finally(() => setLoadingJobs(false));
+  };
+
+  useEffect(() => {
+    fetchJobPosts();
+  }, []);
+
   if (!stats) return <p>Loading...</p>;
 
-  // ---------------------------
-  // SEARCH + FILTER LOGIC
-  // ---------------------------
-  const filteredPosts = mockPosts.filter((post) => {
+  // =======================
+  // SEARCH + FILTER
+  // =======================
+  const filteredPosts = jobPosts.filter((post) => {
+    const search = searchTerm.toLowerCase();
+
     const searchMatch =
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.type.toLowerCase().includes(searchTerm.toLowerCase());
+      (post.title || "").toLowerCase().includes(search) ||
+      (post.location || "").toLowerCase().includes(search) ||
+      (post.employmentType || "").toLowerCase().includes(search);
 
-    const filterMatch = filterStatus === "all" || post.status === filterStatus;
+    let statusMatch = true;
+    if (filterStatus === "published") statusMatch = post.isPublished === true;
+    if (filterStatus === "draft") statusMatch = post.isPublished === false;
 
-    return searchMatch && filterMatch;
+    return searchMatch && statusMatch;
   });
 
   return (
@@ -49,7 +70,9 @@ export default function CompanyDashboard() {
       <div className="container py-4">
         <WelcomeBanner />
 
-        {/* STAT CARDS */}
+        {/* =======================
+            STAT CARDS
+        ======================== */}
         <div className="row mb-4 g-4">
           <div className="col-md-3 col-sm-6">
             <StatCard
@@ -88,20 +111,22 @@ export default function CompanyDashboard() {
           </div>
         </div>
 
-        {/* JOB POSTING HEADER */}
+        {/* =======================
+            JOB POSTING HEADER
+        ======================== */}
         <div className="d-flex justify-content-between align-items-center mt-4 mb-2">
           <div>
             <h4 className="fw-bold">Job Posting</h4>
             <p className="text-muted small">Create new jobs</p>
           </div>
+
           <CreateJobPostModal
             show={showCreateJobModal}
             onClose={() => setShowCreateJobModal(false)}
-            onSubmit={(jobPost) => {
-              console.log("Created job:", jobPost);
-
-              // Later: call backend here
-              // axios.post('/api/jobpost', jobPost)
+            onSubmit={async (payload) => {
+              await jobPostService.createJobPost(payload);
+              setShowCreateJobModal(false);
+              fetchJobPosts();
             }}
           />
 
@@ -113,14 +138,15 @@ export default function CompanyDashboard() {
           </button>
         </div>
 
-        {/* YOUR JOB LIST */}
+        {/* =======================
+            YOUR JOB LIST
+        ======================== */}
         <div className="mt-4">
           <h4 className="fw-bold">Your Job List</h4>
           <p className="text-muted small">
             Manage your job listing and track applications
           </p>
 
-          {/* SEARCH + FILTER */}
           <JobFilterBar
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -129,9 +155,15 @@ export default function CompanyDashboard() {
           />
         </div>
 
-        {/* JOB POST LIST */}
-        {filteredPosts.length > 0 ? (
-          filteredPosts.map((post) => <JobPostCard key={post.id} post={post} />)
+        {/* =======================
+            JOB POST LIST
+        ======================== */}
+        {loadingJobs ? (
+          <p className="text-muted mt-4">Loading job posts...</p>
+        ) : filteredPosts.length > 0 ? (
+          filteredPosts.map((post) => (
+            <JobPostCard key={post._id} post={post} />
+          ))
         ) : (
           <div className="text-center text-muted py-5">
             <i className="bi bi-search fs-1 mb-3"></i>

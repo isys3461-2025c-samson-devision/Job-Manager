@@ -102,13 +102,16 @@ public class JobPostMapper {
         return new JobPostSummaryResponse(
                 jobPost.getId(),
                 jobPost.getTitle(),
+                jobPost.getDescription(),
                 jobPost.getLocation(),
                 jobPost.getEmploymentType(),
                 jobPost.getCategories(),
                 jobPost.getSalaryType(),
                 jobPost.getSalaryMin(),
                 jobPost.getSalaryMax(),
-                jobPost.getTechnicalSkills()
+                jobPost.getTechnicalSkills(),
+                jobPost.getPostedDate(),
+                jobPost.getIsPublished()
         );
     }
 

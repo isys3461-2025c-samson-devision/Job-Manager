@@ -15,14 +15,14 @@ export default function JobFilterBar({
           <i className="bi bi-search me-2"></i>
           <input
             type="text"
-            placeholder="Search job title, location, or type..."
+            placeholder="Search job title, location, or employment type..."
             className="job-search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        {/* STATUS DROPDOWN */}
+        {/* STATUS FILTER (BACKEND-ALIGNED) */}
         <div className="job-dropdown-box px-3 d-flex align-items-center">
           <i className="bi bi-funnel me-2"></i>
           <select
@@ -31,14 +31,17 @@ export default function JobFilterBar({
             onChange={(e) => setFilterStatus(e.target.value)}
           >
             <option value="all">All Status</option>
-            <option value="public">public</option>
-            <option value="private">private</option>
+            <option value="published">Published</option>
             <option value="draft">Draft</option>
           </select>
         </div>
 
-        {/* FILTER BUTTON */}
-        <button className="btn job-filter-btn text-white px-4">
+        {/* FILTER BUTTON (UI ONLY) */}
+        <button
+          type="button"
+          className="btn job-filter-btn text-white px-4"
+          disabled
+        >
           <i className="bi bi-sliders me-2"></i>
           Filters
         </button>
