@@ -54,8 +54,11 @@ public class SecurityConfig {
                 // ===== COMPANY =====
                 .requestMatchers("/api/company/**").hasRole("COMPANY")
 
+                // ===== JA - PUBLIC =====
+                .requestMatchers("/api/companies/**").permitAll()
+
                 // ===== DEFAULT =====
-                .anyRequest().denyAll()
+                .anyRequest().authenticated()
             )
             .oauth2Login(oauth -> oauth 
                 .successHandler(oAuth2SuccessHandler)
