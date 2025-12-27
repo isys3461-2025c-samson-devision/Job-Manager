@@ -1,55 +1,141 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CompanyHeader from "../components/CompanyHeader";
-import mockProfile from "../data/profile";
+import { getMyCompany, updateMyCompany } from "../api/companyApi";
 
 export default function CompanyProfile() {
-  // dữ liệu mock tách riêng
-  const [profile, setProfile] = useState(mockProfile);
-  // trạng thái bật/tắt edit mode
+  const [profile, setProfile] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [logoPreview, setLogoPreview] = useState(null);
 
-  const p = profile;
+  // =========================
+  // Fetch company profile
+  // =========================
+  useEffect(() => {
+    fetchCompany();
+  }, []);
 
-  const toggleEditMode = () => {
+  const fetchCompany = async () => {
+    const data = await getMyCompany();
+
+    setLogoPreview(data.logoUrl || null);
+
+    setProfile({
+      name: data.companyName,
+      title: "Employer",
+      email: data.email,
+      phone: data.phoneNumber,
+      location: [data.city, data.country].filter(Boolean).join(", "),
+      about: data.aboutUs || "Not provided yet",
+      skillsNeeded: [], // later from job posts
+      media: data.logoUrl
+        ? [
+            {
+              id: 1,
+              type: "image",
+              url: data.logoUrl,
+              label: "Company logo",
+            },
+          ]
+        : [],
+      achievements: [], // static for now
+    });
+
+    setLoading(false);
+  };
+
+  // =========================
+  // Toggle edit mode (SAVE on Done)
+  // =========================
+  const toggleEditMode = async () => {
+    if (isEditMode) {
+      await updateMyCompany({
+        companyName: profile.name,
+        phoneNumber: profile.phone,
+        aboutUs: profile.about,
+        logoUrl: logoPreview,
+      });
+
+      await fetchCompany();
+    }
+
     setIsEditMode((prev) => !prev);
   };
 
-  // ví dụ: edit About Us bằng window.prompt
+  // =========================
+  // Edit handlers (UI-only, saved on Done)
+  // =========================
   const handleEditAbout = () => {
     if (!isEditMode) return;
-    const newAbout = window.prompt("Edit About Us", p.about);
+    const newAbout = window.prompt("Edit About Us", profile.about);
     if (newAbout !== null) {
-      setProfile({ ...p, about: newAbout });
+      setProfile({ ...profile, about: newAbout });
     }
   };
 
-  // ví dụ: edit Skills Needed (nhập comma-separated)
   const handleEditSkills = () => {
     if (!isEditMode) return;
-    const current = p.skillsNeeded.join(", ");
-    const input = window.prompt(
-      "Edit skills (separate by comma):",
-      current
-    );
+    const current = profile.skillsNeeded.join(", ");
+    const input = window.prompt("Edit skills (comma separated):", current);
     if (input !== null) {
       const skills = input
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
-      setProfile({ ...p, skillsNeeded: skills });
+      setProfile({ ...profile, skillsNeeded: skills });
     }
   };
 
-  // tạm thời cho Images & Achievements chỉ alert
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const size = 128; // final logo size
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext("2d");
+
+        // center-crop
+        const minSide = Math.min(img.width, img.height);
+        const sx = (img.width - minSide) / 2;
+        const sy = (img.height - minSide) / 2;
+
+        ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+
+        const resizedBase64 = canvas.toDataURL("image/png");
+        setLogoPreview(resizedBase64);
+      };
+    };
+
+    reader.readAsDataURL(file);
+  };
+
   const handleEditMedia = () => {
     if (!isEditMode) return;
-    alert("Media editing not implemented yet (demo only).");
+    alert("Media editing not implemented yet.");
   };
 
   const handleEditAchievements = () => {
     if (!isEditMode) return;
-    alert("Achievements editing not implemented yet (demo only).");
+    alert("Achievements editing not implemented yet.");
   };
+
+  // =========================
+  // Loading guard
+  // =========================
+  if (loading) return <p>Loading profile...</p>;
+  if (!profile) return <p>No company profile</p>;
+
+  const p = profile;
 
   return (
     <>
@@ -66,40 +152,81 @@ export default function CompanyProfile() {
               boxShadow: "0 8px 18px rgba(15,23,42,0.08)",
             }}
           >
-            {/* blue banner */}
-            <div
-              style={{
-                backgroundColor: "#006BFF",
-                height: "80px",
-              }}
-            />
+            <div style={{ backgroundColor: "#006BFF", height: "80px" }} />
 
-            {/* main content */}
             <div className="px-4 pb-3 pt-2 bg-white">
               <div className="d-flex justify-content-between align-items-center">
                 <div className="d-flex align-items-center">
-                  {/* avatar placeholder */}
                   <div
-                    className="d-flex align-items-center justify-content-center me-3"
+                    className="position-relative me-3"
                     style={{
                       width: 64,
                       height: 64,
-                      borderRadius: "12px",
-                      backgroundColor: "#e5e7eb",
                       marginTop: -32,
-                      border: "3px solid #ffffff",
                     }}
                   >
-                    <span
+                    <div
+                      className="d-flex align-items-center justify-content-center"
                       style={{
-                        fontSize: "1.4rem",
-                        fontWeight: 600,
-                        color: "#4b5563",
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "12px",
+                        backgroundColor: "#e5e7eb",
+                        border: "3px solid #ffffff",
+                        overflow: "hidden",
                       }}
                     >
-                      {p.name.charAt(0)}
-                    </span>
+                      {logoPreview ? (
+                        <img
+                          src={logoPreview}
+                          alt="Company logo"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <span
+                          style={{
+                            fontSize: "1.4rem",
+                            fontWeight: 600,
+                            color: "#4b5563",
+                          }}
+                        >
+                          {p.name.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Edit icon */}
+                    {isEditMode && (
+                      <label
+                        htmlFor="logoUpload"
+                        className="position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center"
+                        style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: "50%",
+                          backgroundColor: "#006BFF",
+                          color: "#fff",
+                          cursor: "pointer",
+                          fontSize: "0.7rem",
+                        }}
+                      >
+                        <i className="bi bi-pencil" />
+                      </label>
+                    )}
+
+                    <input
+                      id="logoUpload"
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={handleLogoUpload}
+                    />
                   </div>
+
                   <div>
                     <div style={{ fontSize: "1rem", fontWeight: 600 }}>
                       {p.name}
@@ -129,7 +256,7 @@ export default function CompanyProfile() {
                 </button>
               </div>
 
-              {/* contact row */}
+              {/* CONTACT ROW */}
               <div
                 className="d-flex flex-wrap justify-content-between mt-3 pt-3"
                 style={{ borderTop: "1px solid #e5e7eb", fontSize: "0.85rem" }}
@@ -152,239 +279,117 @@ export default function CompanyProfile() {
 
           {/* MAIN GRID */}
           <div className="row g-3">
-            {/* LEFT COLUMN */}
+            {/* LEFT */}
             <div className="col-lg-8">
               {/* About Us */}
-              <div
-                className="card border-0 mb-3"
-                style={{
-                  borderRadius: "14px",
-                  boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
-                }}
-              >
+              <div className="card border-0 mb-3" style={{ borderRadius: 14 }}>
                 <div className="card-body">
-                  <div
-                    className="d-flex justify-content-between align-items-center mb-2"
-                    style={{ fontSize: "0.95rem", fontWeight: 600 }}
-                  >
-                    <span>About Us</span>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span style={{ fontWeight: 600 }}>About Us</span>
                     {isEditMode && (
                       <button
-                        type="button"
-                        className="btn btn-link p-0 ms-1"
+                        className="btn btn-link p-0"
                         onClick={handleEditAbout}
                       >
-                        <i
-                          className="bi bi-pencil"
-                          style={{ fontSize: "0.9rem" }}
-                        />
+                        <i className="bi bi-pencil" />
                       </button>
                     )}
                   </div>
-                  <p
-                    className="mb-0"
-                    style={{ fontSize: "0.85rem", color: "#4b5563" }}
-                  >
-                    {p.about}
-                  </p>
+                  <p>{p.about}</p>
                 </div>
               </div>
 
               {/* Images & Video */}
-              <div
-                className="card border-0"
-                style={{
-                  borderRadius: "14px",
-                  boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
-                }}
-              >
+              <div className="card border-0" style={{ borderRadius: 14 }}>
                 <div className="card-body">
-                  <div
-                    className="d-flex justify-content-between align-items-center mb-3"
-                    style={{ fontSize: "0.95rem", fontWeight: 600 }}
-                  >
-                    <span>Images &amp; Video</span>
+                  <div className="d-flex justify-content-between mb-3">
+                    <span style={{ fontWeight: 600 }}>Images & Video</span>
                     {isEditMode && (
                       <button
-                        type="button"
-                        className="btn btn-link p-0 ms-1"
+                        className="btn btn-link p-0"
                         onClick={handleEditMedia}
                       >
-                        <i
-                          className="bi bi-pencil"
-                          style={{ fontSize: "0.9rem" }}
-                        />
+                        <i className="bi bi-pencil" />
                       </button>
                     )}
                   </div>
 
                   <div className="d-flex flex-wrap gap-3">
-                    {p.media.map((m) =>
-                      m.type === "image" ? (
-                        <div
-                          key={m.id}
-                          className="position-relative"
+                    {p.media.map((m) => (
+                      <div
+                        key={m.id}
+                        style={{
+                          width: 220,
+                          height: 130,
+                          borderRadius: 12,
+                          backgroundColor: "#f3f4f6",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <img
+                          src={m.url}
+                          alt={m.label}
                           style={{
-                            width: 220,
-                            height: 130,
-                            borderRadius: "12px",
-                            overflow: "hidden",
-                            backgroundColor: "#e5e7eb",
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
                           }}
-                        >
-                          <img
-                            src={m.url}
-                            alt={m.label}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
-                          <div
-                            className="position-absolute bottom-0 start-0 end-0 px-2 py-1"
-                            style={{
-                              background:
-                                "linear-gradient(to top, rgba(0,0,0,0.55), transparent)",
-                              fontSize: "0.75rem",
-                              color: "#f9fafb",
-                            }}
-                          >
-                            {m.label}
-                          </div>
-                        </div>
-                      ) : (
-                        <div key={m.id} style={{ flex: "1 1 100%" }}>
-                          <div
-                            className="ratio ratio-16x9"
-                            style={{
-                              borderRadius: "12px",
-                              overflow: "hidden",
-                              backgroundColor: "#000",
-                            }}
-                          >
-                            <iframe
-                              src={m.url}
-                              title={m.label}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          </div>
-                          <div
-                            className="mt-1"
-                            style={{ fontSize: "0.8rem", color: "#6b7280" }}
-                          >
-                            {m.label}
-                          </div>
-                        </div>
-                      )
-                    )}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* RIGHT COLUMN */}
+            {/* RIGHT */}
             <div className="col-lg-4">
-              {/* Skills Needed */}
-              <div
-                className="card border-0 mb-3"
-                style={{
-                  borderRadius: "14px",
-                  boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
-                }}
-              >
+              {/* Skills */}
+              <div className="card border-0 mb-3" style={{ borderRadius: 14 }}>
                 <div className="card-body">
-                  <div
-                    className="d-flex justify-content-between align-items-center mb-2"
-                    style={{ fontSize: "0.95rem", fontWeight: 600 }}
-                  >
-                    <span>Skills Needed</span>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span style={{ fontWeight: 600 }}>Skills Needed</span>
                     {isEditMode && (
                       <button
-                        type="button"
-                        className="btn btn-link p-0 ms-1"
+                        className="btn btn-link p-0"
                         onClick={handleEditSkills}
                       >
-                        <i
-                          className="bi bi-pencil"
-                          style={{ fontSize: "0.9rem" }}
-                        />
+                        <i className="bi bi-pencil" />
                       </button>
                     )}
                   </div>
-                  <div>
-                    {p.skillsNeeded.map((s) => (
-                      <span
-                        key={s}
-                        className="badge me-1 mb-1"
-                        style={{
-                          backgroundColor: "#e5f0ff",
-                          color: "#006BFF",
-                          borderRadius: 999,
-                          padding: "4px 10px",
-                          fontSize: "0.75rem",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
+
+                  {p.skillsNeeded.map((s) => (
+                    <span
+                      key={s}
+                      className="badge me-1"
+                      style={{ backgroundColor: "#e5f0ff", color: "#006BFF" }}
+                    >
+                      {s}
+                    </span>
+                  ))}
                 </div>
               </div>
 
               {/* Achievements */}
-              <div
-                className="card border-0"
-                style={{
-                  borderRadius: "14px",
-                  boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
-                }}
-              >
+              <div className="card border-0" style={{ borderRadius: 14 }}>
                 <div className="card-body">
-                  <div
-                    className="d-flex justify-content-between align-items-center mb-3"
-                    style={{ fontSize: "0.95rem", fontWeight: 600 }}
-                  >
-                    <span>Achievements</span>
+                  <div className="d-flex justify-content-between mb-3">
+                    <span style={{ fontWeight: 600 }}>Achievements</span>
                     {isEditMode && (
                       <button
-                        type="button"
-                        className="btn btn-link p-0 ms-1"
+                        className="btn btn-link p-0"
                         onClick={handleEditAchievements}
                       >
-                        <i
-                          className="bi bi-pencil"
-                          style={{ fontSize: "0.9rem" }}
-                        />
+                        <i className="bi bi-pencil" />
                       </button>
                     )}
                   </div>
 
-                  {p.achievements.map((a, idx) => (
-                    <div key={idx} className="mb-3">
-                      <div className="d-flex align-items-start">
-                        <i
-                          className="bi bi-trophy me-2"
-                          style={{ color: "#F59E0B", fontSize: "1.1rem" }}
-                        />
-                        <div>
-                          <div
-                            style={{ fontSize: "0.85rem", fontWeight: 600 }}
-                            className="mb-1"
-                          >
-                            {a.title}
-                          </div>
-                          <div
-                            style={{ fontSize: "0.8rem", color: "#6b7280" }}
-                          >
-                            {a.description}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  <p style={{ color: "#6b7280" }}>No achievements added yet.</p>
                 </div>
               </div>
             </div>
