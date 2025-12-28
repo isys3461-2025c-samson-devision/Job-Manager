@@ -23,4 +23,6 @@ public class PaymentTransactionModel {
     private String provider;         // STRIPE
     private PaymentStatus status;    // SUCCESS / FAILED
     private LocalDateTime createdAt;
+
+    private String stripeSessionId;
 }

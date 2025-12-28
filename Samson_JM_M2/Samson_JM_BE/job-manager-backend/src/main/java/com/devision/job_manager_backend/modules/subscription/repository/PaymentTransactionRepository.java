@@ -5,9 +5,10 @@ import com.devision.job_manager_backend.modules.subscription.model.PaymentTransa
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PaymentTransactionRepository
         extends MongoRepository<PaymentTransactionModel, String> {
 
-    List<PaymentTransactionModel> findByPayerEmailOrderByCreatedAtDesc(String payerEmail);
+    Optional<PaymentTransactionModel> findByStripeSessionId(String stripeSessionId);
 }

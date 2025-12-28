@@ -21,17 +21,29 @@ public class PaymentInternalServiceImpl implements PaymentInternalService {
             String email,
             PayerType payerType,
             Double amount,
-            PaymentStatus status
+            PaymentStatus status,
+            String stripeSessionId
     ) {
         PaymentTransactionModel transaction = PaymentTransactionModel.builder()
                 .payerEmail(email)
                 .payerType(payerType)
                 .amount(amount)
+                .stripeSessionId(stripeSessionId)
                 .provider("STRIPE")
                 .status(status)
                 .createdAt(LocalDateTime.now())
                 .build();
 
         paymentTransactionRepository.save(transaction);
+    }
+
+    @Override
+    public void markPaymentFailed(String stripeSessionId) {
+        paymentTransactionRepository
+                .findByStripeSessionId(stripeSessionId)
+                .ifPresent(tx -> {
+                    tx.setStatus(PaymentStatus.FAILED);
+                    paymentTransactionRepository.save(tx);
+                });
     }
 }

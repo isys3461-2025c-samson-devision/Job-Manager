@@ -5,10 +5,13 @@ import com.devision.job_manager_backend.modules.subscription.model.PayerType;
 
 public interface PaymentInternalService {
 
+    void markPaymentFailed(String stripeSessionId);
+
     void recordPayment(
             String email,
             PayerType payerType,
             Double amount,
-            PaymentStatus status
+            PaymentStatus status,
+            String stripeSessionId
     );
 }

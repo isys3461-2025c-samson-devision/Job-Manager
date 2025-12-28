@@ -4,14 +4,12 @@ import com.devision.job_manager_backend.modules.subscription.dto.external.Create
 import com.devision.job_manager_backend.modules.subscription.model.PaymentStatus;
 import com.devision.job_manager_backend.modules.subscription.model.PayerType;
 import com.devision.job_manager_backend.modules.subscription.service.external.PaymentExternalService;
-import com.devision.job_manager_backend.modules.subscription.service.internal.ApplicantSubscriptionService;
-import com.devision.job_manager_backend.modules.subscription.service.internal.CompanySubscriptionService;
-import com.devision.job_manager_backend.modules.subscription.service.internal.PaymentInternalService;
-
+import com.devision.job_manager_backend.modules.subscription.service.internal.*;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,9 +19,6 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
     private final CompanySubscriptionService companySubscriptionService;
     private final ApplicantSubscriptionService applicantSubscriptionService;
 
-    // ==============================
-    // 1️⃣ CREATE STRIPE CHECKOUT
-    // ==============================
     @Override
     public String createCheckoutSession(CreateCheckoutSessionRequest request) {
         try {
@@ -32,6 +27,11 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setSuccessUrl(request.getSuccessUrl())
                     .setCancelUrl(request.getCancelUrl())
+
+                    // ✅ payerType is already String
+                    .putMetadata("payerType", request.getPayerType().name())
+                    .putMetadata("email", request.getEmail())
+                    .addAllExpand(List.of("payment_intent")) // 🔴 ADD THIS
                     .addLineItem(
                         SessionCreateParams.LineItem.builder()
                             .setQuantity(1L)
@@ -41,9 +41,7 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
                                     .setUnitAmount(request.getAmount().longValue() * 100)
                                     .setProductData(
                                         SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                            .setName(
-                                                request.getPayerType() + " Subscription"
-                                            )
+                                            .setName(request.getPayerType() + " Subscription")
                                             .build()
                                     )
                                     .build()
@@ -51,6 +49,7 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
                             .build()
                     )
                     .build();
+
 
             Session session = Session.create(params);
             return session.getUrl();
@@ -60,44 +59,14 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
         }
     }
 
-
-    // ==============================
-    // 2️⃣ HANDLE PAYMENT SUCCESS
-    // ==============================
     @Override
-    public void handlePaymentSuccess(
-            String email,
-            PayerType payerType,
-            Double amount
-    ) {
-
-        // 1️⃣ Record payment
-        paymentInternalService.recordPayment(
-                email,
-                payerType,
-                amount,
-                PaymentStatus.SUCCESS
-        );
-
-        // 2️⃣ Activate subscription
-        if (payerType == PayerType.COMPANY) {
-            companySubscriptionService.activateCompanySubscription(email);
-        } else {
-            applicantSubscriptionService.activateApplicantSubscription(email);
-        }
+    public void handlePaymentSuccess(String email, PayerType payerType, Double amount) {
+        // UI-only fallback (webhook is authoritative)
+        paymentInternalService.recordPayment(email, payerType, amount, PaymentStatus.SUCCESS, null);
     }
 
     @Override
-    public void handlePaymentCancel(
-            String email,
-            PayerType payerType,
-            Double amount
-    ) {
-        paymentInternalService.recordPayment(
-                email,
-                payerType,
-                amount,
-                PaymentStatus.CANCELLED
-        );
+    public void handlePaymentCancel(String email, PayerType payerType, Double amount) {
+        paymentInternalService.recordPayment(email, payerType, amount, PaymentStatus.CANCELLED, null);
     }
 }
