@@ -1,6 +1,7 @@
 package com.devision.job_manager_backend.modules.subscription.service.external;
 
 import com.devision.job_manager_backend.modules.subscription.dto.external.CreateCheckoutSessionRequest;
+import com.devision.job_manager_backend.modules.subscription.model.PayerType;
 
 public interface PaymentExternalService {
 
@@ -8,7 +9,7 @@ public interface PaymentExternalService {
 
     void handlePaymentSuccess(
             String email,
-            String payerType,
+            PayerType payerType,
             Double amount
     );
 }

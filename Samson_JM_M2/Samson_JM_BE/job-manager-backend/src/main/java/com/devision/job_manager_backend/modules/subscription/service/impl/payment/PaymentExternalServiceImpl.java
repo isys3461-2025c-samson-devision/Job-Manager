@@ -7,6 +7,7 @@ import com.devision.job_manager_backend.modules.subscription.service.external.Pa
 import com.devision.job_manager_backend.modules.subscription.service.internal.ApplicantSubscriptionService;
 import com.devision.job_manager_backend.modules.subscription.service.internal.CompanySubscriptionService;
 import com.devision.job_manager_backend.modules.subscription.service.internal.PaymentInternalService;
+
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
@@ -66,25 +67,26 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
     @Override
     public void handlePaymentSuccess(
             String email,
-            String payerType,
+            PayerType payerType,
             Double amount
     ) {
 
-        PayerType resolvedType = PayerType.valueOf(payerType);
-
-        // 1. Record payment
+        // 1️⃣ Record payment
         paymentInternalService.recordPayment(
                 email,
-                resolvedType,
+                payerType,
                 amount,
                 PaymentStatus.SUCCESS
         );
 
-        // 2. Activate subscription based on owner
-        if (resolvedType == PayerType.COMPANY) {
+        // 2️⃣ Activate subscription
+        if (payerType == PayerType.COMPANY) {
             companySubscriptionService.activateCompanySubscription(email);
         } else {
             applicantSubscriptionService.activateApplicantSubscription(email);
         }
     }
+
+
+
 }
