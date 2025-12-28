@@ -23,6 +23,7 @@ import java.util.List;
 public class PaymentController {
 
     private final PaymentExternalService paymentExternalService;
+    private final PaymentInternalService paymentInternalService;
     private final PaymentTransactionRepository paymentTransactionRepository;
 
     // ==============================
@@ -30,7 +31,7 @@ public class PaymentController {
     // ==============================
     @PostMapping("/checkout")
     public ResponseEntity<?> createCheckoutSession(
-            @RequestBody CreateCheckoutSessionRequest request
+        @RequestBody CreateCheckoutSessionRequest request
     ) {
         String redirectUrl = paymentExternalService.createCheckoutSession(request);
         return ResponseEntity.ok(redirectUrl);
@@ -41,13 +42,28 @@ public class PaymentController {
     // ==============================
     @GetMapping("/success")
     public ResponseEntity<?> handlePaymentSuccess(
-            @RequestParam String email,
-            @RequestParam PayerType payerType,
-            @RequestParam Double amount
+        @RequestParam String email,
+        @RequestParam PayerType payerType,
+        @RequestParam Double amount
     ) {
         paymentExternalService.handlePaymentSuccess(email, payerType, amount);
         return ResponseEntity.ok("Payment successful and subscription activated");
     }
+
+    @GetMapping("/cancel")
+    public ResponseEntity<?> handlePaymentCancel(
+        @RequestParam String email,
+        @RequestParam PayerType payerType,
+        @RequestParam Double amount
+    ) {
+        paymentInternalService.recordPayment(
+                email,
+                payerType,
+                amount,
+                PaymentStatus.CANCELLED
+        );
+        return ResponseEntity.ok("Payment cancelled");
+}
 
 //     // ==============================
 //     // 3️⃣ PAYMENT HISTORY

@@ -87,6 +87,17 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
         }
     }
 
-
-
+    @Override
+    public void handlePaymentCancel(
+            String email,
+            PayerType payerType,
+            Double amount
+    ) {
+        paymentInternalService.recordPayment(
+                email,
+                payerType,
+                amount,
+                PaymentStatus.CANCELLED
+        );
+    }
 }

@@ -12,4 +12,10 @@ public interface PaymentExternalService {
             PayerType payerType,
             Double amount
     );
+
+    void handlePaymentCancel(
+            String email,
+            PayerType payerType,
+            Double amount
+    );
 }
