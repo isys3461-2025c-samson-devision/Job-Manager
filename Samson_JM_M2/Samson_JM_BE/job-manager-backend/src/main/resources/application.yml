@@ -16,6 +16,9 @@ spring:
               - openid
               - email
               - profile
+stripe:
+  secret-key: sk_test_51ScUfpBB6o3QuzcAussrpixCQfUijPKcU9Eo3feMtV8eieqVV55X4sHNA6YEIRtVZk0AiqpETy0WTdpiypFRwTrw00u95dA9ps
+
       
 jwt:
   secret: devision-super-secret-key-change-later

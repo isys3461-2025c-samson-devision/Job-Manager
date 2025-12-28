@@ -1,5 +1,14 @@
 package com.devision.job_manager_backend.modules.subscription.service.external;
 
-public class PaymentExternalService {
-    
+import com.devision.job_manager_backend.modules.subscription.dto.external.CreateCheckoutSessionRequest;
+
+public interface PaymentExternalService {
+
+    String createCheckoutSession(CreateCheckoutSessionRequest request);
+
+    void handlePaymentSuccess(
+            String email,
+            String payerType,
+            Double amount
+    );
 }
