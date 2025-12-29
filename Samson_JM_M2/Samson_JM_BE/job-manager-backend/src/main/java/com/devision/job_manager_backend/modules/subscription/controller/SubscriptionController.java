@@ -23,18 +23,14 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @GetMapping("/me")
-    public ResponseEntity<SubscriptionResponse> getMySubscription(
-            Authentication authentication
-    ) {
-        String email = (String) authentication.getDetails();
+    public ResponseEntity<?> getCurrentSubscription(Authentication auth) {
+        String ownerId = auth.getName(); // JWT subject
 
-        SubscriptionResponse response = subscriptionService
-                .getCurrentSubscription(email)
-                .map(this::toResponse)
-                .orElseGet(this::freeResponse);
-
-        return ResponseEntity.ok(response);
+        return subscriptionService.getCurrentSubscription(ownerId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
+
 
     /* =========================
        Helpers

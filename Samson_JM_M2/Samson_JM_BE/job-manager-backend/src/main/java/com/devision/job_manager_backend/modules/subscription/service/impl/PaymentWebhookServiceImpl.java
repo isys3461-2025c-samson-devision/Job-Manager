@@ -56,7 +56,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
                 .getAsJsonObject("data")
                 .getAsJsonObject("object");
 
-        // ✅ Stripe-guaranteed email
+        // 1️⃣ Stripe-guaranteed email
         String payerEmail = session.has("customer_email")
                 ? session.get("customer_email").getAsString()
                 : null;
@@ -65,21 +65,32 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
             throw new IllegalStateException("Stripe session missing customer_email");
         }
 
-        // ✅ Payer type (optional metadata)
+        // 2️⃣ Extract metadata ONCE (THIS WAS MISSING)
+        JsonObject metadata = session.has("metadata")
+                ? session.getAsJsonObject("metadata")
+                : null;
+
+        // 3️⃣ Payer type
         PayerType payerType = PayerType.COMPANY;
-        if (session.has("metadata")) {
-            JsonObject metadata = session.getAsJsonObject("metadata");
-            if (metadata.has("payerType")) {
-                payerType = PayerType.valueOf(metadata.get("payerType").getAsString());
-            }
+        if (metadata != null && metadata.has("payerType")) {
+            payerType = PayerType.valueOf(metadata.get("payerType").getAsString());
         }
 
-        // ✅ Amount is always cents
+        // 4️⃣ Owner ID (from metadata)
+        String ownerId = metadata.get("userId").getAsString();
+
+
+        if (ownerId == null || ownerId.isBlank()) {
+            throw new IllegalStateException("Stripe session missing userId metadata");
+        }
+
+        // 5️⃣ Amount (cents → dollars)
         double amount = session.get("amount_total").getAsDouble() / 100.0;
 
-        // ✅ Stripe session ID
+        // 6️⃣ Session ID
         String sessionId = session.get("id").getAsString();
 
+        // 7️⃣ Record payment
         paymentInternalService.recordPayment(
                 payerEmail,
                 payerType,
@@ -88,13 +99,14 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
                 sessionId
         );
 
-        // 2️⃣ Activate subscription WITH SAME EMAIL
+        // 8️⃣ Activate subscription
         if (payerType == PayerType.COMPANY) {
-            companySubscriptionService.activateCompanySubscription(payerEmail);
+            companySubscriptionService.activateCompanySubscription(ownerId, payerEmail);
         } else {
-            applicantSubscriptionService.activateApplicantSubscription(payerEmail);
+            applicantSubscriptionService.activateApplicantSubscription(ownerId, payerEmail);
         }
     }
+
 
 
 

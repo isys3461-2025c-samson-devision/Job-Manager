@@ -34,6 +34,10 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
     @Value("${stripe.cancel-url}")
     private String cancelUrl;
 
+    @Value("${stripe.premium-price-id}")
+    private String premiumPriceId;
+
+
     @Override
     public String createCheckoutSession(CreateCheckoutSessionRequest request) {
         try {
@@ -51,9 +55,11 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
             // ✅ REAL email (Stripe-safe)
             String payerEmail = company.getEmail();
 
+            
+
             SessionCreateParams params =
                 SessionCreateParams.builder()
-                    .setMode(SessionCreateParams.Mode.PAYMENT)
+                    .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                     .setSuccessUrl(successUrl + "?session_id={CHECKOUT_SESSION_ID}")
                     .setCancelUrl(cancelUrl)
 
@@ -66,20 +72,10 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
                     .putMetadata("userId", userId)
 
                     .addLineItem(
-                        SessionCreateParams.LineItem.builder()
-                            .setQuantity(1L)
-                            .setPriceData(
-                                SessionCreateParams.LineItem.PriceData.builder()
-                                    .setCurrency("usd")
-                                    .setUnitAmount(request.getAmount().longValue() * 100)
-                                    .setProductData(
-                                        SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                            .setName("Company Subscription")
-                                            .build()
-                                    )
-                                    .build()
-                            )
-                            .build()
+                    SessionCreateParams.LineItem.builder()
+                        .setPrice(premiumPriceId) // 🔴 Stripe Price ID
+                        .setQuantity(1L)
+                        .build()
                     )
                     .build();
 

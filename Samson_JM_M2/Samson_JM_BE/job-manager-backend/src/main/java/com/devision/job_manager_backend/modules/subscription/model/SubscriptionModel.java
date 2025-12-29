@@ -17,6 +17,8 @@ public class SubscriptionModel {
     @Id
     private String id;
 
+    private String ownerId;
+
     private String ownerEmail;
     private PayerType ownerType;     // COMPANY / APPLICANT
     private Instant startDate;

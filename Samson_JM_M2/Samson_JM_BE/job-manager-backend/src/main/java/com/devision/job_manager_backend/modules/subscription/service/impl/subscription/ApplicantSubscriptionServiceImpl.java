@@ -1,34 +1,44 @@
 package com.devision.job_manager_backend.modules.subscription.service.impl.subscription;
 
 import com.devision.job_manager_backend.modules.subscription.service.internal.ApplicantSubscriptionService;
+import com.devision.job_manager_backend.modules.subscription.model.*;
+import com.devision.job_manager_backend.modules.subscription.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ApplicantSubscriptionServiceImpl implements ApplicantSubscriptionService {
 
+    private final SubscriptionRepository subscriptionRepository;
+
     @Override
-    public void activateApplicantSubscription(String applicantEmail) {
+    public void activateApplicantSubscription(String ownerId, String applicantEmail) {
 
-        /**
-         * IMPORTANT:
-         * Job Manager does NOT own Applicant subscription state.
-         * This method only delegates activation responsibility.
-         *
-         * In Milestone 2:
-         * - Replace this with REST call to Job Applicant system
-         *   OR Kafka event publish
-         */
+        // expire existing
+        subscriptionRepository.findByOwnerEmailAndStatus(
+                applicantEmail,
+                SubscriptionStatus.ACTIVE
+        ).ifPresent(sub -> {
+            sub.setStatus(SubscriptionStatus.EXPIRED);
+            subscriptionRepository.save(sub);
+        });
 
-        log.info(
-                "[ApplicantSubscription] Payment successful. Delegating premium activation for applicant: {}",
-                applicantEmail
-        );
+        Instant now = Instant.now();
 
-        // TODO (Milestone 2):
-        // call Job Applicant API OR publish Kafka event
+        SubscriptionModel sub = SubscriptionModel.builder()
+                .ownerId(ownerId)
+                .ownerEmail(applicantEmail)
+                .ownerType(PayerType.APPLICANT)
+                .startDate(now)
+                .endDate(now.plus(30, ChronoUnit.DAYS))
+                .status(SubscriptionStatus.ACTIVE)
+                .build();
+
+        subscriptionRepository.save(sub);
     }
 }

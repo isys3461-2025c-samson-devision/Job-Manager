@@ -14,8 +14,9 @@ public interface SubscriptionRepository
         SubscriptionStatus status
     );
     
-    Optional<SubscriptionModel> findTopByOwnerEmailOrderByEndDateDesc(
-        String ownerEmail
+    Optional<SubscriptionModel> findTopByOwnerIdAndStatusOrderByEndDateDesc(
+        String ownerId,
+        SubscriptionStatus status
 );
 
 }

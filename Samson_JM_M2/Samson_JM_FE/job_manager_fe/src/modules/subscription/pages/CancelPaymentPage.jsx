@@ -1,4 +1,3 @@
-// src/modules/subscription/pages/CancelPaymentPage.jsx
 import { useNavigate } from "react-router-dom";
 
 export default function CancelPaymentPage() {
@@ -6,18 +5,12 @@ export default function CancelPaymentPage() {
 
   return (
     <div className="container text-center py-5">
-      <div className="mb-4">
-        <i className="bi bi-x-circle-fill text-danger" style={{ fontSize: "80px" }}></i>
-      </div>
-
-      <h2 className="fw-bold">Payment Canceled</h2>
-      <p className="text-muted">
-        You canceled the payment process.  
-        Your subscription has not been upgraded.
-      </p>
+      <i className="bi bi-x-circle-fill text-danger" style={{ fontSize: 80 }} />
+      <h2 className="fw-bold mt-3">Payment Canceled</h2>
+      <p className="text-muted">Your subscription was not upgraded.</p>
 
       <button
-        className="btn btn-secondary mt-4 px-4"
+        className="btn btn-secondary mt-4"
         onClick={() => navigate("/company/subscription")}
       >
         Return to Subscription Page

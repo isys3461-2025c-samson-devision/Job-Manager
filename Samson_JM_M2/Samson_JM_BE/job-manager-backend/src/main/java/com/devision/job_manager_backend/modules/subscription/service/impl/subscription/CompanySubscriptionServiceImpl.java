@@ -20,7 +20,7 @@ public class CompanySubscriptionServiceImpl implements CompanySubscriptionServic
     private final SubscriptionRepository subscriptionRepository;
 
     @Override
-    public void activateCompanySubscription(String companyEmail) {
+    public void activateCompanySubscription(String ownerId, String companyEmail) {
 
         // 1. Expire any existing ACTIVE subscription (safety)
         Optional<SubscriptionModel> existing =
@@ -38,6 +38,7 @@ public class CompanySubscriptionServiceImpl implements CompanySubscriptionServic
 
         // 2. Create new subscription
         SubscriptionModel newSubscription = SubscriptionModel.builder()
+                .ownerId(ownerId)
                 .ownerEmail(companyEmail)
                 .ownerType(PayerType.COMPANY)
                 .startDate(now)
@@ -46,5 +47,10 @@ public class CompanySubscriptionServiceImpl implements CompanySubscriptionServic
                 .build();
 
         subscriptionRepository.save(newSubscription);
+
+        if (ownerId == null || ownerId.isBlank()) {
+            throw new IllegalStateException("ownerId must not be null when creating subscription");
+        }
+
     }
 }

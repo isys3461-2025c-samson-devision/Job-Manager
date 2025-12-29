@@ -19,22 +19,32 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
 
-    public Optional<SubscriptionModel> getCurrentSubscription(String ownerEmail) {
+    public Optional<SubscriptionModel> getCurrentSubscription(String ownerId) {
 
-        System.out.println("[DEBUG] querying subscription for email = '" + ownerEmail + "'");
+        System.out.println("[DEBUG] querying subscription for ownerId = '" + ownerId + "'");
 
         // 🔍 DEBUG: log all subscriptions in DB
-        subscriptionRepository.findAll()
-            .forEach(s ->
-                System.out.println(
-                    "[DEBUG] owner=" + s.getOwnerEmail()
+        subscriptionRepository
+            .findTopByOwnerIdAndStatusOrderByEndDateDesc(ownerId, SubscriptionStatus.ACTIVE)
+            .ifPresentOrElse(
+                s -> System.out.println(
+                    "[DEBUG] MATCHED subscription ownerId=" + s.getOwnerId()
                     + ", status=" + s.getStatus()
                     + ", endDate=" + s.getEndDate()
-                )
+                ),
+                () -> System.out.println("[DEBUG] No subscription found for ownerId=" + ownerId)
             );
 
+
         return subscriptionRepository
-                .findTopByOwnerEmailOrderByEndDateDesc(ownerEmail);
+                .findTopByOwnerIdAndStatusOrderByEndDateDesc(ownerId, SubscriptionStatus.ACTIVE);
+    }
+
+    public Optional<SubscriptionModel> getActiveByEmail(String ownerEmail) {
+        return subscriptionRepository.findByOwnerEmailAndStatus(
+                ownerEmail,
+                SubscriptionStatus.ACTIVE
+        );
     }
 
     public boolean isPremium(SubscriptionModel sub) {
