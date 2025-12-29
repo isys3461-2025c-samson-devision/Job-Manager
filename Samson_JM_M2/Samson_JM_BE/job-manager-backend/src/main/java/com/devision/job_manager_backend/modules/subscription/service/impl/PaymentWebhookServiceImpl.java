@@ -40,7 +40,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
         }
 
         switch (event.getType()) {
-            case "checkout.session.completed" -> handleCheckoutCompleted(event);
+            case "checkout.session.completed" -> handleCheckoutCompleted(payload);
             case "payment_intent.payment_failed" -> handlePaymentFailed(event);
             default -> {
                 // ignored
@@ -48,42 +48,57 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
         }
     }
 
-    private void handleCheckoutCompleted(Event event) {
+    private void handleCheckoutCompleted(String payload) {
 
-        log.info("📩 checkout.session.completed received");
+        JsonObject json = JsonParser.parseString(payload).getAsJsonObject();
 
-        JsonObject root = JsonParser.parseString(event.toJson()).getAsJsonObject();
-        JsonObject sessionJson = root
-            .getAsJsonObject("data")
-            .getAsJsonObject("object");
+        JsonObject session = json
+                .getAsJsonObject("data")
+                .getAsJsonObject("object");
 
-        String sessionId = sessionJson.get("id").getAsString();
-        double amount = sessionJson.get("amount_total").getAsDouble() / 100.0;
+        // ✅ Stripe-guaranteed email
+        String payerEmail = session.has("customer_email")
+                ? session.get("customer_email").getAsString()
+                : null;
 
-        JsonObject metadata = sessionJson.getAsJsonObject("metadata");
-
-        if (metadata == null || metadata.size() == 0) {
-            log.error("❌ Metadata missing in session {}", sessionId);
-            return;
+        if (payerEmail == null || payerEmail.isBlank()) {
+            throw new IllegalStateException("Stripe session missing customer_email");
         }
 
-        String email = metadata.get("email").getAsString();
-        PayerType payerType = PayerType.valueOf(metadata.get("payerType").getAsString());
+        // ✅ Payer type (optional metadata)
+        PayerType payerType = PayerType.COMPANY;
+        if (session.has("metadata")) {
+            JsonObject metadata = session.getAsJsonObject("metadata");
+            if (metadata.has("payerType")) {
+                payerType = PayerType.valueOf(metadata.get("payerType").getAsString());
+            }
+        }
+
+        // ✅ Amount is always cents
+        double amount = session.get("amount_total").getAsDouble() / 100.0;
+
+        // ✅ Stripe session ID
+        String sessionId = session.get("id").getAsString();
 
         paymentInternalService.recordPayment(
-            email,
-            payerType,
-            amount,
-            PaymentStatus.SUCCESS,
-            sessionId
+                payerEmail,
+                payerType,
+                amount,
+                PaymentStatus.SUCCESS,
+                sessionId
         );
 
+        // 2️⃣ Activate subscription WITH SAME EMAIL
         if (payerType == PayerType.COMPANY) {
-            companySubscriptionService.activateCompanySubscription(email);
+            companySubscriptionService.activateCompanySubscription(payerEmail);
         } else {
-            applicantSubscriptionService.activateApplicantSubscription(email);
+            applicantSubscriptionService.activateApplicantSubscription(payerEmail);
         }
     }
+
+
+
+
 
 
 
