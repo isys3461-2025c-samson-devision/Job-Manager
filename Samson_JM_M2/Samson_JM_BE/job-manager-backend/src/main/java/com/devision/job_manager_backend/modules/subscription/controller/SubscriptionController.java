@@ -26,7 +26,7 @@ public class SubscriptionController {
     public ResponseEntity<SubscriptionResponse> getMySubscription(
             Authentication authentication
     ) {
-        String email = authentication.getName();
+        String email = (String) authentication.getDetails();
 
         SubscriptionResponse response = subscriptionService
                 .getCurrentSubscription(email)

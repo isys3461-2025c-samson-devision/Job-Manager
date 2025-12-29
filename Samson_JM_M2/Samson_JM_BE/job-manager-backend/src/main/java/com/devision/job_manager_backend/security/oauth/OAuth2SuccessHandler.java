@@ -42,6 +42,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         if (existing.isPresent()) {
             String token = jwtService.generateToken(
                     existing.get().getId(),
+                    existing.get().getEmail(),
                     existing.get().getRole() // ✅ String, NO .name()
             );
 
