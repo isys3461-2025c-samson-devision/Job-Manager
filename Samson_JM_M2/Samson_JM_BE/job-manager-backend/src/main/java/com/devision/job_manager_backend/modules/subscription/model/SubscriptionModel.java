@@ -4,7 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Document(collection = "subscriptions")
 @Getter
@@ -19,7 +19,7 @@ public class SubscriptionModel {
 
     private String ownerEmail;
     private PayerType ownerType;     // COMPANY / APPLICANT
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private Instant startDate;
+    private Instant endDate;
     private SubscriptionStatus status;
 }

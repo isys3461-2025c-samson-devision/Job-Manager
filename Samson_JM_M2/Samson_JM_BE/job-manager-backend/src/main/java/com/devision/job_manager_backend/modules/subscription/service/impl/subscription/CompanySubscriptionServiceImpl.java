@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +34,14 @@ public class CompanySubscriptionServiceImpl implements CompanySubscriptionServic
             subscriptionRepository.save(sub);
         });
 
+        Instant now = Instant.now();
+
         // 2. Create new subscription
         SubscriptionModel newSubscription = SubscriptionModel.builder()
                 .ownerEmail(companyEmail)
                 .ownerType(PayerType.COMPANY)
-                .startDate(LocalDate.now())
-                .endDate(LocalDate.now().plusDays(30))
+                .startDate(now)
+                .endDate(now.plus(30, ChronoUnit.DAYS))
                 .status(SubscriptionStatus.ACTIVE)
                 .build();
 

@@ -61,6 +61,9 @@ public class SecurityConfig {
                 // ===== WEBHOOK =====
                 .requestMatchers("/api/payments/webhook/**").permitAll()
 
+                // ===== SUBSCRIPTION =====
+                .requestMatchers("/api/subscriptions/**").authenticated()
+
 
                 // ===== DEFAULT =====
                 .anyRequest().authenticated()

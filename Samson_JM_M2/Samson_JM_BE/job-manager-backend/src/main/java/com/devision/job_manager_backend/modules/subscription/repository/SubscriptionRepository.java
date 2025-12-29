@@ -10,7 +10,12 @@ public interface SubscriptionRepository
         extends MongoRepository<SubscriptionModel, String> {
 
     Optional<SubscriptionModel> findByOwnerEmailAndStatus(
-            String ownerEmail,
-            SubscriptionStatus status
+        String ownerEmail,
+        SubscriptionStatus status
     );
+    
+    Optional<SubscriptionModel> findTopByOwnerEmailOrderByEndDateDesc(
+        String ownerEmail
+);
+
 }
