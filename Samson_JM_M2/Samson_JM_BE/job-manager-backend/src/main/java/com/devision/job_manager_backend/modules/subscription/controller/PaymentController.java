@@ -3,6 +3,7 @@ package com.devision.job_manager_backend.modules.subscription.controller;
 import com.devision.job_manager_backend.modules.subscription.dto.external.CreateCheckoutSessionRequest;
 import com.devision.job_manager_backend.modules.subscription.model.PayerType;
 import com.devision.job_manager_backend.modules.subscription.model.PaymentStatus;
+import com.devision.job_manager_backend.modules.subscription.model.SubscriptionStatus;
 import com.devision.job_manager_backend.modules.subscription.service.external.PaymentExternalService;
 import com.devision.job_manager_backend.modules.subscription.service.internal.PaymentInternalService;
 import com.devision.job_manager_backend.modules.subscription.repository.SubscriptionRepository;
@@ -36,15 +37,20 @@ public class PaymentController {
 
         String companyId = authentication.getName();
 
-        String payerEmail = subscriptionRepository
-                .findActiveByOwnerId(companyId)
-                .getOwnerEmail();
-
-
-        return ResponseEntity.ok(
-                paymentInternalService.getPaymentHistory(payerEmail)
-        );
+        return subscriptionRepository
+            .findFirstByOwnerIdAndStatus(companyId, SubscriptionStatus.ACTIVE)
+            .map(subscription -> {
+                String payerEmail = subscription.getOwnerEmail();
+                return ResponseEntity.ok(
+                    paymentInternalService.getPaymentHistory(payerEmail)
+                );
+            })
+            .orElseGet(() ->
+                // ✅ Free plan or no active subscription → empty history
+                ResponseEntity.ok(java.util.List.of())
+            );
     }
+
 
 
 
