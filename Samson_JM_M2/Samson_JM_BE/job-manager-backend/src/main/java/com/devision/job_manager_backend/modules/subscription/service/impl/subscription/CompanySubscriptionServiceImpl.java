@@ -53,4 +53,12 @@ public class CompanySubscriptionServiceImpl implements CompanySubscriptionServic
         }
 
     }
+
+    @Override
+    public boolean hasActiveSubscription(String ownerId) {
+        return subscriptionRepository
+            .findFirstByOwnerIdAndStatus(ownerId, SubscriptionStatus.ACTIVE)
+            .filter(sub -> sub.getEndDate().isAfter(Instant.now()))
+            .isPresent();
+    }
 }

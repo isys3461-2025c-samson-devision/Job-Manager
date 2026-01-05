@@ -39,7 +39,7 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
 
 
     @Override
-    public String createCheckoutSession(CreateCheckoutSessionRequest request) {
+    public String createCheckoutSession() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth == null || !auth.isAuthenticated()) {
@@ -48,6 +48,11 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
 
             // ✅ auth.getName() = userId (company user)
             String userId = auth.getName();
+
+            if (companySubscriptionService.hasActiveSubscription(userId)) {
+                throw new IllegalStateException("Subscription already active");
+            }
+
 
             // ✅ get company (auto-created if missing)
             Company company = companyService.getOrCreateMyCompany(userId);

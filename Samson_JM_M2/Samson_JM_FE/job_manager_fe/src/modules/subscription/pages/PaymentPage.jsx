@@ -7,23 +7,30 @@ export default function PaymentPage() {
   const navigate = useNavigate();
 
   const handleStripePayment = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await httpClient.post("/api/payments/checkout", {
-      payerType: "COMPANY",
-      amount: 30
-    });
+      const res = await httpClient.post("/api/payments/checkout");
 
-    window.location.href = res; // Stripe Checkout URL
+      // 🔥 REDIRECT TO STRIPE
+      window.location.href = res.checkoutUrl;
+    } catch (err) {
+      console.error("Stripe redirect failed", err);
+      alert("You're a premium user or an error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
-
 
   return (
     <div className="container py-5 text-center">
       <h2 className="fw-bold mb-3">Upgrade to DEVision Premium</h2>
       <p className="text-muted">Secure payment powered by Stripe</p>
 
-      <div className="card shadow p-4 rounded-4 mx-auto" style={{ maxWidth: 450 }}>
+      <div
+        className="card shadow p-4 rounded-4 mx-auto"
+        style={{ maxWidth: 450 }}
+      >
         <h4>Order Summary</h4>
         <div className="d-flex justify-content-between border-bottom pb-2 mb-3">
           <span>Premium Subscription</span>

@@ -17,6 +17,11 @@ public interface SubscriptionRepository
     Optional<SubscriptionModel> findTopByOwnerIdAndStatusOrderByEndDateDesc(
         String ownerId,
         SubscriptionStatus status
-);
+    );
+
+    Optional<SubscriptionModel> findFirstByOwnerIdAndStatus(
+        String ownerId,
+        SubscriptionStatus status
+    );
 
 }

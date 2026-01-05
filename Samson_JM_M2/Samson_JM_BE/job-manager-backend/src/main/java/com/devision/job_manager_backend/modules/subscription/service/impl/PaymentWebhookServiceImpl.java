@@ -56,41 +56,49 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
                 .getAsJsonObject("data")
                 .getAsJsonObject("object");
 
-        // 1️⃣ Stripe-guaranteed email
-        String payerEmail = session.has("customer_email")
-                ? session.get("customer_email").getAsString()
-                : null;
+        // 1️⃣ Email (DO NOT trust customer_email)
+        String payerEmail = getNullableString(session, "payer_email");
 
-        if (payerEmail == null || payerEmail.isBlank()) {
-            throw new IllegalStateException("Stripe session missing customer_email");
-        }
-
-        // 2️⃣ Extract metadata ONCE (THIS WAS MISSING)
+        // Fallback: metadata email (BEST PRACTICE)
         JsonObject metadata = session.has("metadata")
                 ? session.getAsJsonObject("metadata")
                 : null;
 
-        // 3️⃣ Payer type
+        if (payerEmail == null) {
+            payerEmail = getNullableString(metadata, "payerEmail");
+        }
+
+        if (payerEmail == null) {
+            log.warn("Webhook ignored: missing payer email");
+            return; // ❗ NEVER throw
+        }
+
+        // 2️⃣ Payer type
         PayerType payerType = PayerType.COMPANY;
-        if (metadata != null && metadata.has("payerType")) {
-            payerType = PayerType.valueOf(metadata.get("payerType").getAsString());
+        String payerTypeRaw = getNullableString(metadata, "payerType");
+        if (payerTypeRaw != null) {
+            payerType = PayerType.valueOf(payerTypeRaw);
         }
 
-        // 4️⃣ Owner ID (from metadata)
-        String ownerId = metadata.get("userId").getAsString();
-
-
-        if (ownerId == null || ownerId.isBlank()) {
-            throw new IllegalStateException("Stripe session missing userId metadata");
+        // 3️⃣ Owner ID
+        String ownerId = getNullableString(metadata, "userId");
+        if (ownerId == null) {
+            log.warn("Webhook ignored: missing userId metadata");
+            return;
         }
 
-        // 5️⃣ Amount (cents → dollars)
-        double amount = session.get("amount_total").getAsDouble() / 100.0;
+        // 4️⃣ Amount
+        Double amountCents = getNullableDouble(session, "amount_total");
+        double amount = amountCents != null ? amountCents / 100.0 : 0.0;
 
-        // 6️⃣ Session ID
-        String sessionId = session.get("id").getAsString();
+        // 5️⃣ Session ID
+        String sessionId = getNullableString(session, "id");
+        if (sessionId == null) {
+            log.warn("Webhook ignored: missing session id");
+            return;
+        }
 
-        // 7️⃣ Record payment
+        // 6️⃣ Record payment (idempotent)
         paymentInternalService.recordPayment(
                 payerEmail,
                 payerType,
@@ -99,13 +107,16 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
                 sessionId
         );
 
-        // 8️⃣ Activate subscription
+        // 7️⃣ Activate subscription
         if (payerType == PayerType.COMPANY) {
             companySubscriptionService.activateCompanySubscription(ownerId, payerEmail);
         } else {
             applicantSubscriptionService.activateApplicantSubscription(ownerId, payerEmail);
         }
+
+        log.info("Stripe checkout completed: sessionId={}, payer={}", sessionId, payerEmail);
     }
+
 
 
 
@@ -127,4 +138,22 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
         paymentInternalService.markPaymentFailed(sessionId);
 
     }
+
+    // ======================
+    // Safe JSON helpers
+    // ======================
+    private String getNullableString(JsonObject obj, String key) {
+        if (obj == null || !obj.has(key) || obj.get(key).isJsonNull()) {
+            return null;
+        }
+        return obj.get(key).getAsString();
+    }
+
+    private Double getNullableDouble(JsonObject obj, String key) {
+        if (obj == null || !obj.has(key) || obj.get(key).isJsonNull()) {
+            return null;
+        }
+        return obj.get(key).getAsDouble();
+    }
+
 }

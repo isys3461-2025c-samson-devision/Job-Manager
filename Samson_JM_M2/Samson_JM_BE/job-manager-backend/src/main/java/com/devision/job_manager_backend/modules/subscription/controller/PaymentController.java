@@ -18,37 +18,38 @@ public class PaymentController {
     private final PaymentInternalService paymentInternalService;
 
     @PostMapping("/checkout")
-    public ResponseEntity<?> createCheckoutSession(
-            @RequestBody CreateCheckoutSessionRequest request
+    public ResponseEntity<?> createCheckoutSession( 
     ) {
+        String checkoutUrl = paymentExternalService.createCheckoutSession();
+
         return ResponseEntity.ok(
-                paymentExternalService.createCheckoutSession(request)
+                java.util.Map.of("checkoutUrl", checkoutUrl)
         );
     }
 
-    @GetMapping("/success")
-    public ResponseEntity<?> handlePaymentSuccess(
-            @RequestParam String email,
-            @RequestParam PayerType payerType,
-            @RequestParam Double amount
-    ) {
-        paymentExternalService.handlePaymentSuccess(email, payerType, amount);
-        return ResponseEntity.ok("Payment successful");
-    }
+//     @GetMapping("/success")
+//     public ResponseEntity<?> handlePaymentSuccess(
+//             @RequestParam String email,
+//             @RequestParam PayerType payerType,
+//             @RequestParam Double amount
+//     ) {
+//         paymentExternalService.handlePaymentSuccess(email, payerType, amount);
+//         return ResponseEntity.ok("Payment successful");
+//     }
 
-    @GetMapping("/cancel")
-    public ResponseEntity<?> handlePaymentCancel(
-            @RequestParam String email,
-            @RequestParam PayerType payerType,
-            @RequestParam Double amount
-    ) {
-        paymentInternalService.recordPayment(
-                email,
-                payerType,
-                amount,
-                PaymentStatus.CANCELLED,
-                null
-        );
-        return ResponseEntity.ok("Payment cancelled");
-    }
+//     @GetMapping("/cancel")
+//     public ResponseEntity<?> handlePaymentCancel(
+//             @RequestParam String email,
+//             @RequestParam PayerType payerType,
+//             @RequestParam Double amount
+//     ) {
+//         paymentInternalService.recordPayment(
+//                 email,
+//                 payerType,
+//                 amount,
+//                 PaymentStatus.CANCELLED,
+//                 null
+//         );
+//         return ResponseEntity.ok("Payment cancelled");
+//     }
 }

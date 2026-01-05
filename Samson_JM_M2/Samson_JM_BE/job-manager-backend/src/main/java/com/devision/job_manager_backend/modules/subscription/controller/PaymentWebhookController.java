@@ -12,7 +12,7 @@ public class PaymentWebhookController {
 
     private final PaymentWebHookService paymentWebhookService;
 
-    @PostMapping
+    @PostMapping("/stripe")
     public ResponseEntity<String> handleWebhook(
             @RequestBody String payload,
             @RequestHeader("Stripe-Signature") String signature

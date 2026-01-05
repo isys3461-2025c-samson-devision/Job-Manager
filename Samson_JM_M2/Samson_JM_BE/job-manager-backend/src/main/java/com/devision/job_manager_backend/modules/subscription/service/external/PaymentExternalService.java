@@ -5,7 +5,7 @@ import com.devision.job_manager_backend.modules.subscription.model.PayerType;
 
 public interface PaymentExternalService {
 
-    String createCheckoutSession(CreateCheckoutSessionRequest request);
+    String createCheckoutSession();
 
     void handlePaymentSuccess(
             String email,
