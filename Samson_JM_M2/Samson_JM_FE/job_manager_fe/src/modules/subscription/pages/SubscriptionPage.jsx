@@ -2,10 +2,14 @@ import { useNavigate } from "react-router-dom";
 import CompanyHeader from "../../company/components/CompanyHeader";
 import SubscriptionPlanCard from "../components/SubscriptionPlanCard";
 import { useSubscription } from "../hooks/useSubscription";
+import { Button } from "react-bootstrap";
+import { useState } from "react";
+import PaymentHistoryModal from "../components/PaymentHistoryModal";
 
 export default function SubscriptionPage() {
   const { isPremium, loading } = useSubscription();
   const navigate = useNavigate();
+  const [showPayments, setShowPayments] = useState(false);
 
   const FEATURES = [
     { label: "Post up to 3 job listings", free: true, premium: true },
@@ -22,7 +26,9 @@ export default function SubscriptionPage() {
     return (
       <>
         <CompanyHeader />
-        <div className="container py-5 text-center">Loading subscription...</div>
+        <div className="container py-5 text-center">
+          Loading subscription...
+        </div>
       </>
     );
   }
@@ -32,9 +38,19 @@ export default function SubscriptionPage() {
       <CompanyHeader />
 
       <div className="container py-5" style={{ maxWidth: "1000px" }}>
-        <h2 className="fw-bold mb-2">Subscription Plans</h2>
-        <p className="text-muted">Choose the best plan for your company.</p>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h2 className="fw-bold mb-1">Subscription Plans</h2>
+            <p className="text-muted mb-0">
+              Choose the best plan for your company.
+            </p>
+          </div>
 
+          <Button variant="primary" onClick={() => setShowPayments(true)}>
+            <i className="bi bi-receipt me-2"></i>
+            View Payment History
+          </Button>
+        </div>
         <div className="row g-4 mt-4">
           {/* FREE */}
           <div className="col-md-6">
@@ -67,6 +83,10 @@ export default function SubscriptionPage() {
           </div>
         </div>
       </div>
+      <PaymentHistoryModal
+        show={showPayments}
+        onHide={() => setShowPayments(false)}
+      />
     </>
   );
 }
