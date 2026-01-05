@@ -32,6 +32,12 @@ export class ProfileController {
     return res.json({ success: true, data: new ProfileResponseDTO(profile) });
   };
 
+  getAllProfile = async (req: Request, res: Response) => {
+    const profiles = await this.profileService.getAllProfile();
+    const profileDTOs = profiles.map(profile => new ProfileResponseDTO(profile));
+    return res.json({ success: true, data: profileDTOs });
+  }
+
   updateProfile = async (req: Request, res: Response) => {
     const { authId } = req.params;
     const requester = req.user!;

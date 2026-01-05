@@ -46,6 +46,10 @@ export class ProfileService {
     return profile;
   }
 
+  async getAllProfile(){
+    return prisma.profile.findMany();
+  }
+
   async updateProfileByAuthId(authId: string, data: UpdateProfileDTO) {
     const profile = await prisma.profile.findFirst({ where: { authId } });
 

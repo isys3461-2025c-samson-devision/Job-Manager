@@ -21,6 +21,11 @@ router.put(
 );
 
 router.get(
+  "/",
+  asyncHandler(controller.getAllProfile)
+);
+
+router.get(
   "/:authId/basic-text-profile",
   authenticate,
   asyncHandler(controller.getBasicTextProfile)
