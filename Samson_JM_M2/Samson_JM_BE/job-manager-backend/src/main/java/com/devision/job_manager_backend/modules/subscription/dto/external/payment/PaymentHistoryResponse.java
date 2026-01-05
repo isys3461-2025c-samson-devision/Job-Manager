@@ -8,6 +8,10 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class PaymentHistoryResponse {
+
+    private String payerEmail;
+    private String payerType;
+    
     private Double amount;
     private String status;
     private String provider;

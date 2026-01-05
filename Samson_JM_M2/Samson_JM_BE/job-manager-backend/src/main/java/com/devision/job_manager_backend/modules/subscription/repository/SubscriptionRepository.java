@@ -24,4 +24,13 @@ public interface SubscriptionRepository
         SubscriptionStatus status
     );
 
+    default SubscriptionModel findActiveByOwnerId(String ownerId) {
+        return findFirstByOwnerIdAndStatus(
+            ownerId,
+            SubscriptionStatus.ACTIVE
+        ).orElseThrow(() ->
+            new RuntimeException("Active subscription not found for ownerId: " + ownerId)
+        );
+    }
+
 }

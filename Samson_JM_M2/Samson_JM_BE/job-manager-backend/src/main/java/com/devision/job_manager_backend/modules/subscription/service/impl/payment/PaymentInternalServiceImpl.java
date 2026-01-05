@@ -2,6 +2,7 @@ package com.devision.job_manager_backend.modules.subscription.service.impl.payme
 
 import com.devision.job_manager_backend.modules.subscription.model.PaymentStatus;
 import com.devision.job_manager_backend.modules.subscription.model.PaymentTransactionModel;
+import com.devision.job_manager_backend.modules.subscription.dto.external.payment.PaymentHistoryResponse;
 import com.devision.job_manager_backend.modules.subscription.model.PayerType;
 import com.devision.job_manager_backend.modules.subscription.repository.PaymentTransactionRepository;
 import com.devision.job_manager_backend.modules.subscription.service.internal.PaymentInternalService;
@@ -9,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +49,25 @@ public class PaymentInternalServiceImpl implements PaymentInternalService {
                     tx.setStatus(PaymentStatus.FAILED);
                     paymentTransactionRepository.save(tx);
                 });
+    }
+
+    @Override
+    public List<PaymentHistoryResponse> getPaymentHistory(String payerEmail) {
+
+        return paymentTransactionRepository
+        .findByPayerEmailOrderByCreatedAtDesc(payerEmail)
+        .stream()
+        .<PaymentHistoryResponse>map(tx ->
+                PaymentHistoryResponse.builder()
+                        .payerEmail(tx.getPayerEmail())
+                        .payerType(tx.getPayerType().name())
+                        .amount(tx.getAmount())
+                        .status(tx.getStatus().name())
+                        .provider(tx.getProvider())
+                        .createdAt(tx.getCreatedAt())
+                        .build()
+        )
+        .toList();
+
     }
 }

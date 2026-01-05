@@ -11,4 +11,7 @@ public interface PaymentTransactionRepository
         extends MongoRepository<PaymentTransactionModel, String> {
 
     Optional<PaymentTransactionModel> findByStripeSessionId(String stripeSessionId);
+
+    List<PaymentTransactionModel> findByPayerEmailOrderByCreatedAtDesc(String payerEmail);
+
 }
