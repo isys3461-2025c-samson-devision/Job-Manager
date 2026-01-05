@@ -1,4 +1,5 @@
 export class ProfileResponseDTO {
+  id: string;
   phone?: string;
   address?: string;
   city?: string;
@@ -25,6 +26,7 @@ export class ProfileResponseDTO {
 
 
   constructor(entity: any) {
+    this.id = entity.id;
     this.phone = entity.phone;
     this.address = entity.address;
     this.city = entity.city;

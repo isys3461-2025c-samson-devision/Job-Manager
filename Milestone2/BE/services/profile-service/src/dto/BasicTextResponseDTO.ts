@@ -1,4 +1,5 @@
-export class BasicTextProfileResponseDTO { 
+export class BasicTextProfileResponseDTO {
+    id: string; 
     summary: string;
     workExperiences?: string[];
     education?: string[];
