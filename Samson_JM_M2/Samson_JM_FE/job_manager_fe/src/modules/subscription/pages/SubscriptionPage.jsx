@@ -43,9 +43,9 @@ export default function SubscriptionPage() {
               price="$0"
               description="Basic features for all companies."
               featureList={FEATURES}
-              isPremium={false}
+              planType="FREE"
               isCurrent={!isPremium}
-              buttonLabel="Current Plan"
+              buttonLabel="Free Plan"
               buttonDisabled
             />
           </div>
@@ -58,7 +58,7 @@ export default function SubscriptionPage() {
               description="Unlock powerful hiring features."
               premium
               featureList={FEATURES}
-              isPremium
+              planType="PREMIUM"
               isCurrent={isPremium}
               buttonLabel={isPremium ? "Active" : "Upgrade to Premium"}
               buttonDisabled={isPremium}

@@ -10,8 +10,10 @@ export function SubscriptionProvider({ children }) {
   const fetchSubscription = async () => {
     try {
       const res = await getMySubscription();
-      setIsPremium(res.data.status === "ACTIVE");
+      console.log("SUB RESPONSE:", res.data); // 👈 ADD THIS
+      setIsPremium(res.status === "ACTIVE");
     } catch (err) {
+      console.error("SUB ERROR:", err); // 👈 ADD THIS
       setIsPremium(false);
     } finally {
       setLoading(false);
