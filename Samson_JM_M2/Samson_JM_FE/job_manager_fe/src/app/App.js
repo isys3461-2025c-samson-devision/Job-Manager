@@ -1,10 +1,13 @@
 import AppRouter from "../infrastructure/router/AppRouter";
-import {AuthProvider} from "../modules/auth/context/AuthProvider";
+import { AuthProvider } from "../modules/auth/context/AuthProvider";
+import { SubscriptionProvider } from "../modules/subscription/context/SubscriptionContext";
 
 function App() {
   return (
     <AuthProvider>
-      <AppRouter />
+      <SubscriptionProvider>
+        <AppRouter />
+      </SubscriptionProvider>
     </AuthProvider>
   );
 }

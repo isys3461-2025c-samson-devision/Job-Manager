@@ -1,5 +1,7 @@
 package com.devision.job_manager_backend.modules.company.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -18,25 +20,34 @@ public class Company {
     @Id
     private String id;
 
-    // 🔗 Auth linkage
+    //Auth linkage
     private String userId;   // JWT subject (immutable)
     private String email;    // copied from Auth (immutable)
 
-    // 🏢 Company basic info
+    //Company basic info
     private String companyName;
     private String phoneNumber;
     private String street;
     private String city;
     private String country;
 
-    // 🌐 Public profile content
+    //Public profile content
     private String aboutUs;
     private String whoWeAreLookingFor;
 
-    // 🖼️ Media (later: file upload)
+    //Media (later: file upload)
     private String logoUrl;
 
-    // 🕒 Metadata
+    //Metadata
     private Instant createdAt;
     private Instant updatedAt;
+
+    @Builder.Default
+    private List<String> skillsNeeded = new ArrayList<>();
+
+    @Builder.Default
+    private List<String> achievements = new ArrayList<>();
+
+    @Builder.Default
+    private List<String> mediaUrls = new ArrayList<>();
 }
