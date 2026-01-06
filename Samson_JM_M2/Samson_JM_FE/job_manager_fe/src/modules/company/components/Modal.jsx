@@ -1,15 +1,87 @@
 // src/modules/company/components/Modal.jsx
-import React, { useState } from "react";
+import React from "react";
 
-const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHire }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isWarning, setIsWarning] = useState(false);
+const Modal = ({
+  applicant,
+  onClose,
+  showHireButton = false,
+  jobTitle = "",
+  onHire,
+  isFavorite = false,
+  isWarning = false,
+  onToggleFavorite,
+  onToggleWarning,
+}) => {
+  const handleClose = () => {
+    if (typeof onClose === "function") {
+      onClose();
+    }
+  };
+
+  const handleToggleFavorite = () => {
+    if (typeof onToggleFavorite === "function") {
+      onToggleFavorite(applicant.id);
+    }
+  };
+
+  const handleToggleWarning = () => {
+    if (typeof onToggleWarning === "function") {
+      onToggleWarning(applicant.id);
+    }
+  };
 
   if (!applicant) return null;
 
   const summaryText =
     applicant.summary ||
     `${applicant.name} is a ${applicant.title} with ${applicant.yearsExperience}+ years of experience in modern development and collaboration with cross-functional teams.`;
+
+  const nameParts = (applicant.name || "").trim().split(/\s+/);
+  const firstName = applicant.firstName || nameParts[0] || "Unknown";
+  const lastName = applicant.lastName || nameParts.slice(1).join(" ") || "";
+
+  const educationEntries = Array.isArray(applicant.education)
+    ? applicant.education
+    : applicant.education
+      ? [{ degree: applicant.education }]
+      : [];
+
+  const getHighestEducationDegree = (education) => {
+    const rank = {
+      Bachelor: 1,
+      Master: 2,
+      Doctorate: 3,
+    };
+
+    if (!education) {
+      return "Not specified";
+    }
+
+    const degrees = Array.isArray(education)
+      ? education.map((edu) => edu.degree)
+      : [education];
+
+    let highest = "";
+    let highestRank = 0;
+
+    degrees.forEach((degree) => {
+      if (!degree || !rank[degree]) {
+        return;
+      }
+      if (rank[degree] > highestRank) {
+        highestRank = rank[degree];
+        highest = degree;
+      }
+    });
+
+    return highest || degrees[0] || "Not specified";
+  };
+
+  const highestEducation = getHighestEducationDegree(applicant.education);
+
+  const locationText = applicant.city && applicant.country
+    ? `${applicant.city}, ${applicant.country}`
+    : applicant.city || applicant.country || "Not specified";
 
   const pink = "#ec4899";
 
@@ -20,7 +92,7 @@ const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHi
 
   return (
     <div
-      onClick={onClose}
+      onClick={handleClose}
       style={{
         position: "fixed",
         inset: 0,
@@ -46,17 +118,29 @@ const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHi
       >
         {/* Close button */}
         <button
-          className="btn-close"
-          onClick={onClose}
+          type="button"
+          onClick={handleClose}
+          title="Close"
           style={{
             position: "absolute",
             top: 12,
             right: 12,
-            background: "none",
-            border: "none",
-            zIndex: 10,
+            borderRadius: "999px",
+            width: 36,
+            height: 36,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+            border: "1.5px solid #111827",
+            backgroundColor: "#ffffff",
+            color: "#111827",
+            zIndex: 12,
           }}
-        ></button>
+          aria-label="Close"
+        >
+          <i className="bi bi-x-lg" />
+        </button>
 
         {/* Top-right action buttons */}
         <div
@@ -77,7 +161,7 @@ const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHi
             <button
               type="button"
               title="Warning"
-              onClick={() => setIsWarning((p) => !p)}
+              onClick={handleToggleWarning}
               style={{
                 borderRadius: "999px",
                 width: 36,
@@ -91,14 +175,14 @@ const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHi
                 color: "#ef4444",
               }}
             >
-              <i className={`bi ${isWarning ? "bi-x-circle-fill" : "bi-x-lg"}`} />
+              <i className={`bi ${isWarning ? "bi-exclamation-triangle-fill" : "bi-exclamation-triangle"}`} />
             </button>
 
             {/* Favorite */}
             <button
               type="button"
               title="Favorite"
-              onClick={() => setIsFavorite((p) => !p)}
+              onClick={handleToggleFavorite}
               style={{
                 borderRadius: "999px",
                 width: 36,
@@ -186,8 +270,18 @@ const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHi
                 Contact
               </div>
               <div className="d-flex align-items-center mb-2">
+                <i className="bi bi-person me-2" />
+                <span>
+                  {firstName} {lastName}
+                </span>
+              </div>
+              <div className="d-flex align-items-center mb-2">
+                <i className="bi bi-envelope me-2" />
+                <span>{applicant.email || "Email not provided"}</span>
+              </div>
+              <div className="d-flex align-items-center mb-2">
                 <i className="bi bi-geo-alt me-2" />
-                <span>{applicant.location}</span>
+                <span>{locationText}</span>
               </div>
               <div className="d-flex align-items-center mb-2">
                 <i className="bi bi-clock me-2" />
@@ -223,7 +317,23 @@ const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHi
               >
                 Education
               </div>
-              <div style={{ lineHeight: 1.5 }}>{applicant.education}</div>
+              <div style={{ lineHeight: 1.5, marginBottom: 6 }}>
+                Highest Education: {highestEducation}
+              </div>
+              {educationEntries.length > 0 ? (
+                educationEntries.map((edu, index) => {
+                  const degree = edu.degree || "Degree";
+                  const institution = edu.institution ? ` - ${edu.institution}` : "";
+                  const years = edu.from && edu.to ? ` (${edu.from} - ${edu.to})` : "";
+                  return (
+                    <div key={index} style={{ lineHeight: 1.5 }}>
+                      {degree}{institution}{years}
+                    </div>
+                  );
+                })
+              ) : (
+                <div style={{ lineHeight: 1.5 }}>Not specified</div>
+              )}
             </div>
 
             {/* SKILLS */}
@@ -319,36 +429,31 @@ const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHi
                 Work Experience
               </h6>
 
-              {Array.isArray(applicant.experiences) && applicant.experiences.length > 0 ? (
-                applicant.experiences.map((exp, idx) => (
-                  <div key={idx} className="mb-3">
-                    <div className="d-flex justify-content-between">
-                      <strong>{exp.company}</strong>
-                      <span style={{ color: "#6b7280", fontSize: "0.8rem" }}>{exp.period}</span>
+              {Array.isArray(applicant.workExperiences) && applicant.workExperiences.length > 0 ? (
+                applicant.workExperiences.map((exp, idx) => {
+                  const period = exp.startDate && exp.endDate
+                    ? `${exp.startDate} - ${exp.endDate}`
+                    : "Date not specified";
+
+                  return (
+                    <div key={idx} className="mb-3">
+                      <div className="d-flex justify-content-between">
+                        <strong>{exp.title || "Role"}</strong>
+                        <span style={{ color: "#6b7280", fontSize: "0.8rem" }}>{period}</span>
+                      </div>
+                      <ul
+                        style={{
+                          paddingLeft: "1.1rem",
+                          marginBottom: 0,
+                          fontSize: "0.85rem",
+                          color: "#4b5563",
+                        }}
+                      >
+                        {exp.description && <li>{exp.description}</li>}
+                      </ul>
                     </div>
-                    <div
-                      style={{
-                        fontSize: "0.86rem",
-                        color: "#111827",
-                        marginBottom: 2,
-                      }}
-                    >
-                      {exp.role}
-                    </div>
-                    <ul
-                      style={{
-                        paddingLeft: "1.1rem",
-                        marginBottom: 0,
-                        fontSize: "0.85rem",
-                        color: "#4b5563",
-                      }}
-                    >
-                      {Array.isArray(exp.highlights)
-                        ? exp.highlights.map((h, i) => <li key={i}>{h}</li>)
-                        : exp.description && <li>{exp.description}</li>}
-                    </ul>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p style={{ color: "#4b5563", fontSize: "0.85rem" }}>
                   {applicant.yearsExperience}+ years of experience building and maintaining web
@@ -382,7 +487,7 @@ const Modal = ({ applicant, onClose, showHireButton = false, jobTitle = "", onHi
                   modern technologies.
                 </li>
                 <li>Comfortable working in agile teams and communicating with stakeholders.</li>
-                <li>Open to opportunities in {applicant.location}.</li>
+                <li>Open to opportunities in {locationText}.</li>
               </ul>
             </section>
           </div>

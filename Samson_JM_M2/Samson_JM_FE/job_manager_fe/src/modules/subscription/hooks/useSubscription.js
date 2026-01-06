@@ -5,6 +5,22 @@ export function useSubscription() {
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const isPremium = () => {
+    if (!subscription) {
+      return false;
+    }
+
+    if (subscription.premium === true) {
+      return true;
+    }
+
+    if (subscription.status !== "ACTIVE" || !subscription.endDate) {
+      return false;
+    }
+
+    return new Date(subscription.endDate).getTime() > Date.now();
+  };
+
   const fetchSubscription = async () => {
     try {
       setLoading(true);
@@ -23,7 +39,7 @@ export function useSubscription() {
 
   return {
     subscription,
-    isPremium: subscription?.premium === true,
+    isPremium: isPremium(),
     status: subscription?.status,
     loading,
     refresh: fetchSubscription,
