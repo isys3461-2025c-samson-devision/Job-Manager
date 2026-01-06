@@ -2,6 +2,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import CompanyHeader from "../components/CompanyHeader";
 import { getMyCompany, updateMyCompany } from "../api/companyApi";
+import { useContext } from "react";
+import { SubscriptionContext } from "../../subscription/context/SubscriptionContext";
+
 
 /* -----------------------------
   Helpers
@@ -52,46 +55,8 @@ const buildMediaObjects = (urls) => {
   }));
 };
 
-const deepFindFirst = (obj, predicate) => {
-  const seen = new Set();
-  const stack = [obj];
 
-  while (stack.length) {
-    const cur = stack.pop();
-    if (!cur || typeof cur !== "object") continue;
-    if (seen.has(cur)) continue;
-    seen.add(cur);
 
-    try {
-      if (predicate(cur)) return cur;
-    } catch (e) {}
-
-    for (const k of Object.keys(cur)) {
-      const v = cur[k];
-      if (v && typeof v === "object") stack.push(v);
-    }
-  }
-  return null;
-};
-
-const resolvePlanType = (data) => {
-  const direct =
-    data?.planType ||
-    data?.subscription?.planType ||
-    data?.company?.planType;
-
-  if (direct) return String(direct).toUpperCase();
-
-  const hit = deepFindFirst(data, (x) => typeof x.planType === "string");
-  if (hit?.planType) return String(hit.planType).toUpperCase();
-
-  return "FREEMIUM";
-};
-
-const isPrePlan = (planType) => {
-  const p = String(planType || "").toUpperCase();
-  return p === "PRE" || p === "PREMIUM" || p.includes("PRE");
-};
 
 /* -----------------------------
   UI: Toast
@@ -320,14 +285,13 @@ function MediaViewer({ open, item, onClose }) {
   UI: Plan Badge
 ------------------------------ */
 function PlanBadge({ planType }) {
-  const pre = isPrePlan(planType);
+  const isPremium = planType === "PREMIUM";
 
-  const style = pre
+  const style = isPremium
     ? { background: "#fff7d6", color: "#b45309", border: "1px solid #fde68a" }
     : { background: "#e5f0ff", color: "#006BFF", border: "1px solid #bfdbfe" };
 
-  const text = pre ? "PRE" : "FREEMIUM";
-
+  const text = isPremium ? "PREMIUM" : "FREEMIUM";
   return (
     <span
       style={{
@@ -603,6 +567,9 @@ function MediaThumb({ m, onOpen }) {
   Main Component
 ------------------------------ */
 export default function CompanyProfile() {
+  const { isPremium, loading: subscriptionLoading } =
+  useContext(SubscriptionContext);
+  
   const [profile, setProfile] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -631,13 +598,14 @@ export default function CompanyProfile() {
     try {
       setLoading(true);
 
+      const planType = isPremium ? "PREMIUM" : "FREEMIUM";
+
       const data = await getMyCompany();
 
       const logo = data.logoUrl || null;
       setLogoPreview(logo);
 
       const combined = uniqueKeepOrder([...(logo ? [logo] : []), ...(data.mediaUrls || [])]);
-      const planType = resolvePlanType(data);
       const media = buildMediaObjects(combined);
 
       setProfile({
@@ -657,7 +625,7 @@ export default function CompanyProfile() {
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [isPremium, showToast]);
 
   useEffect(() => {
     fetchCompany();
@@ -797,7 +765,7 @@ export default function CompanyProfile() {
     padding: 0
   };
 
-  if (loading) return <p>Loading profile...</p>;
+  if (loading || subscriptionLoading) return <p>Loading profile...</p>;
   if (!profile) return <p>No company profile</p>;
 
   const p = profile;
