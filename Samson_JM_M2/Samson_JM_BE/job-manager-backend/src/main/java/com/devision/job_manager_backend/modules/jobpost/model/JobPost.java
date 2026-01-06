@@ -41,10 +41,13 @@ public class JobPost {
     private SalaryType salaryType;
     private Double salaryMin;
     private Double salaryMax;
-
+    // flag to check if the job post for fresh graduate
+    private boolean fresher_flag; 
     /** Tags */
     private List<String> technicalSkills;
 
     /** Visibility */
     private Boolean isPublished;
+    // applicant lists, yet to be processed
+    private List<applicantFiles> applicantRecords;
 }
