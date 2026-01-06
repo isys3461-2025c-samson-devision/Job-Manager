@@ -1,5 +1,5 @@
 // src/app/modules/company/pages/CompanyApplicants.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import CompanyHeader from "../components/CompanyHeader";
 import ApplicantCard from "../components/ApplicantsCard";
@@ -34,17 +34,20 @@ export default function CompanyApplicants() {
     }
   });
 
-  const defaultFilters = {
-    locationType: "city",
-    locationValue: "",
-    educationDegree: "",
-    workExperience: "",
-    workExperienceKeyword: "",
-    employmentTypes: [],
-    skillTags: [],
-    salaryMin: "",
-    salaryMax: "",
-  };
+  const defaultFilters = useMemo(
+    () => ({
+      locationType: "city",
+      locationValue: "",
+      educationDegree: "",
+      workExperience: "",
+      workExperienceKeyword: "",
+      employmentTypes: [],
+      skillTags: [],
+      salaryMin: "",
+      salaryMax: "",
+    }),
+    []
+  );
 
   const [filters, setFilters] = useState(defaultFilters);
   const [draftFilters, setDraftFilters] = useState(defaultFilters);
@@ -227,7 +230,7 @@ export default function CompanyApplicants() {
     return { min, max };
   };
 
-  const getSalaryFilter = () => {
+  const getSalaryFilter = useCallback(() => {
     if (!isPremium) {
       return { hasFilter: false, min: 0, max: Infinity };
     }
@@ -244,38 +247,44 @@ export default function CompanyApplicants() {
       min: minValue ?? 0,
       max: maxValue ?? Infinity,
     };
-  };
+  }, [isPremium, filters.salaryMin, filters.salaryMax]);
 
-  const mapProfileToFilters = (profile) => {
-    if (!profile) {
-      return defaultFilters;
-    }
+  const mapProfileToFilters = useCallback(
+    (profile) => {
+      if (!profile) {
+        return defaultFilters;
+      }
 
-    const countryValue = profile.country || "";
-    return {
-      ...defaultFilters,
-      locationType: countryValue ? "country" : defaultFilters.locationType,
-      locationValue: countryValue,
-      educationDegree: profile.highestEducationDegree || "",
-      employmentTypes: Array.isArray(profile.employmentStatuses)
-        ? profile.employmentStatuses
-        : [],
-      skillTags: Array.isArray(profile.technicalBackground)
-        ? profile.technicalBackground
-        : [],
-      salaryMin: profile.salaryMin !== null && profile.salaryMin !== undefined
-        ? String(profile.salaryMin)
-        : "",
-      salaryMax: profile.salaryMax !== null && profile.salaryMax !== undefined
-        ? String(profile.salaryMax)
-        : "",
-    };
-  };
+      const countryValue = profile.country || "";
+      return {
+        ...defaultFilters,
+        locationType: countryValue ? "country" : defaultFilters.locationType,
+        locationValue: countryValue,
+        educationDegree: profile.highestEducationDegree || "",
+        employmentTypes: Array.isArray(profile.employmentStatuses)
+          ? profile.employmentStatuses
+          : [],
+        skillTags: Array.isArray(profile.technicalBackground)
+          ? profile.technicalBackground
+          : [],
+        salaryMin:
+          profile.salaryMin !== null && profile.salaryMin !== undefined
+            ? String(profile.salaryMin)
+            : "",
+        salaryMax:
+          profile.salaryMax !== null && profile.salaryMax !== undefined
+            ? String(profile.salaryMax)
+            : "",
+      };
+    },
+    [defaultFilters]
+  );
 
   const buildProfilePayload = (profileFilters) => {
-    const countryValue = profileFilters.locationType === "country"
-      ? profileFilters.locationValue.trim()
-      : "";
+    const countryValue =
+      profileFilters.locationType === "country"
+        ? profileFilters.locationValue.trim()
+        : "";
 
     return {
       technicalBackground: profileFilters.skillTags,
@@ -287,7 +296,7 @@ export default function CompanyApplicants() {
     };
   };
 
-  const fetchSavedProfile = async () => {
+  const fetchSavedProfile = useCallback(async () => {
     setProfileLoading(true);
     setProfileNotice("");
     try {
@@ -301,12 +310,12 @@ export default function CompanyApplicants() {
       setFilters(nextFilters);
       setDraftFilters(nextFilters);
       setProfileNotice("Saved search profile loaded.");
-    } catch (error) {
+    } catch {
       setProfileNotice("Failed to load search profile.");
     } finally {
       setProfileLoading(false);
     }
-  };
+  }, [mapProfileToFilters]);
 
   const saveProfile = async () => {
     setProfileSaving(true);
@@ -323,23 +332,26 @@ export default function CompanyApplicants() {
   };
 
   useEffect(() => {
-    if (subscriptionLoading || !isPremium) {
-      return;
-    }
+    if (subscriptionLoading || !isPremium) return;
     fetchSavedProfile();
-  }, [subscriptionLoading, isPremium]);
+  }, [subscriptionLoading, isPremium, fetchSavedProfile]);
 
   // Filter applicants
   const filteredApplicants = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
     const locationValue = filters.locationValue.trim().toLowerCase();
-    const experienceKeyword = filters.workExperienceKeyword.trim().toLowerCase();
+    const experienceKeyword = filters.workExperienceKeyword
+      .trim()
+      .toLowerCase();
     const salaryFilter = getSalaryFilter();
 
     return mockApplicants
       .filter((a) => {
         if (!jobIdFromJobPage) return true;
-        return Array.isArray(a.appliedJobIds) && a.appliedJobIds.includes(Number(jobIdFromJobPage));
+        return (
+          Array.isArray(a.appliedJobIds) &&
+          a.appliedJobIds.includes(Number(jobIdFromJobPage))
+        );
       })
       .filter((a) => {
         const experienceText = (a.workExperiences || [])
@@ -384,8 +396,8 @@ export default function CompanyApplicants() {
           return true;
         }
 
-        const hasExperience = Array.isArray(a.workExperiences)
-          && a.workExperiences.length > 0;
+        const hasExperience =
+          Array.isArray(a.workExperiences) && a.workExperiences.length > 0;
 
         if (filters.workExperience === "none") {
           return !hasExperience;
@@ -419,8 +431,8 @@ export default function CompanyApplicants() {
           ? a.employmentTypes.map((t) => t.toLowerCase())
           : [];
 
-        return filters.employmentTypes.some(
-          (type) => applicantTypes.includes(type.toLowerCase())
+        return filters.employmentTypes.some((type) =>
+          applicantTypes.includes(type.toLowerCase())
         );
       })
       .filter((a) => {
@@ -446,10 +458,12 @@ export default function CompanyApplicants() {
           return true;
         }
 
-        return applicantSalary.min <= salaryFilter.max
-          && applicantSalary.max >= salaryFilter.min;
+        return (
+          applicantSalary.min <= salaryFilter.max &&
+          applicantSalary.max >= salaryFilter.min
+        );
       });
-  }, [keyword, filters, jobIdFromJobPage, isPremium]);
+  }, [keyword, filters, jobIdFromJobPage, getSalaryFilter]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
@@ -467,7 +481,9 @@ export default function CompanyApplicants() {
   const canLoadMore = visibleCount < filteredApplicants.length;
 
   const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredApplicants.length));
+    setVisibleCount((prev) =>
+      Math.min(prev + PAGE_SIZE, filteredApplicants.length)
+    );
   };
   const handleViewProfile = (applicant) => {
     setSelectedApplicant(applicant);
@@ -535,7 +551,8 @@ export default function CompanyApplicants() {
 
           {/* Result count */}
           <div className="mb-3 text-muted">
-            Showing {visibleApplicants.length} of {filteredApplicants.length} candidates
+            Showing {visibleApplicants.length} of {filteredApplicants.length}{" "}
+            candidates
           </div>
 
           {/* Applicant cards */}
@@ -575,7 +592,7 @@ export default function CompanyApplicants() {
         <Modal
           applicant={selectedApplicant}
           onClose={handleCloseModal}
-          showHireButton={isJobContext}       //show hire button
+          showHireButton={isJobContext} //show hire button
           jobTitle={jobTitleFromJobPage}
           isFavorite={getApplicantFlags(selectedApplicant.id).favorite}
           isWarning={getApplicantFlags(selectedApplicant.id).warning}
@@ -633,7 +650,10 @@ export default function CompanyApplicants() {
                             }))
                           }
                         />
-                        <label className="form-check-label" htmlFor="locationCity">
+                        <label
+                          className="form-check-label"
+                          htmlFor="locationCity"
+                        >
                           City
                         </label>
                       </div>
@@ -651,7 +671,10 @@ export default function CompanyApplicants() {
                             }))
                           }
                         />
-                        <label className="form-check-label" htmlFor="locationCountry">
+                        <label
+                          className="form-check-label"
+                          htmlFor="locationCountry"
+                        >
                           Country
                         </label>
                       </div>
@@ -730,7 +753,9 @@ export default function CompanyApplicants() {
                           <input
                             className="form-check-input"
                             type="checkbox"
-                            checked={draftFilters.employmentTypes.includes(type)}
+                            checked={draftFilters.employmentTypes.includes(
+                              type
+                            )}
                             onChange={() => toggleEmploymentType(type)}
                           />
                           <span className="form-check-label">{type}</span>
@@ -776,7 +801,8 @@ export default function CompanyApplicants() {
                           </div>
                         </div>
                         <div className="form-text">
-                          Applicants with undeclared preferred salary are included.
+                          Applicants with undeclared preferred salary are
+                          included.
                         </div>
                       </>
                     ) : (
@@ -797,7 +823,9 @@ export default function CompanyApplicants() {
                             onClick={fetchSavedProfile}
                             disabled={profileLoading}
                           >
-                            {profileLoading ? "Loading..." : "Load Saved Profile"}
+                            {profileLoading
+                              ? "Loading..."
+                              : "Load Saved Profile"}
                           </button>
                           <button
                             type="button"
@@ -809,7 +837,9 @@ export default function CompanyApplicants() {
                           </button>
                         </div>
                         {profileNotice && (
-                          <div className="small text-muted">{profileNotice}</div>
+                          <div className="small text-muted">
+                            {profileNotice}
+                          </div>
                         )}
                       </div>
                     ) : (
