@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Modal, Button, Form, Badge} from "react-bootstrap";
-import countryList from 'react-select-country-list';
+import React, { useEffect, useState } from "react";
+import { Modal, Button, Form, Badge } from "react-bootstrap";
 
 export default function JobPostFormModal({
   show,
@@ -15,7 +14,8 @@ export default function JobPostFormModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
-  
+  const [employmentType, setEmploymentType] = useState("FULL_TIME");
+  const [categories, setCategories] = useState([]);
   const [salaryType, setSalaryType] = useState("RANGE");
   const [salaryMin, setSalaryMin] = useState("");
   const [salaryMax, setSalaryMax] = useState("");
@@ -25,27 +25,22 @@ export default function JobPostFormModal({
   const [skillInput, setSkillInput] = useState("");
   const [technicalSkills, setTechnicalSkills] = useState([]);
 
-  const [employmentTag, setEmploymentTag] = useState([]);
- 
-  // generated country list once
-  const options = useMemo(() => countryList().getData(), []);
-
   // ---------------------------
   // PREFILL FOR EDIT MODE
   // ---------------------------
-
   useEffect(() => {
     if (mode === "edit" && initialData) {
       setTitle(initialData.title || "");
       setDescription(initialData.description || "");
       setLocation(initialData.location || "");
+      setEmploymentType(initialData.employmentType || "FULL_TIME");
+      setCategories(initialData.categories || []);
       setSalaryType(initialData.salaryType || "RANGE");
       setSalaryMin(initialData.salaryMin ?? "");
       setSalaryMax(initialData.salaryMax ?? "");
       setExpiryDate(initialData.expiryDate || "");
       setIsPublished(initialData.isPublished ?? false);
       setTechnicalSkills(initialData.technicalSkills || []);
-      setEmploymentTag(initialData.employmentTag || []);
     }
 
     if (mode === "create") {
@@ -57,13 +52,14 @@ export default function JobPostFormModal({
     setTitle("");
     setDescription("");
     setLocation("");
+    setEmploymentType("FULL_TIME");
+    setCategories([]);
     setSalaryType("RANGE");
     setSalaryMin("");
     setSalaryMax("");
     setExpiryDate("");
     setIsPublished(false);
     setTechnicalSkills([]);
-    setEmploymentTag([]);
     setSkillInput("");
   };
 
@@ -80,47 +76,11 @@ export default function JobPostFormModal({
   const removeSkill = (skill) => {
     setTechnicalSkills(technicalSkills.filter((s) => s !== skill));
   };
-  // ---------------------------
-  // EMPLOYMENT TYPE
-  // ---------------------------
-  const addEmploy = (tag) => {
-    const value = tag.trim();
-    if (!value) return;
 
-    setEmploymentTag((prev) => {
-    let basket = [...prev];
-
-    // FULL_TIME & PART_TIME are mutually exclusive by remove other emp type already in the list
-    if (value === "FULL_TIME") {
-      basket = basket.filter((v) => v !== "PART_TIME");
-    }
-
-    if (value === "PART_TIME") {
-      basket = basket.filter((v) => v !== "FULL_TIME");
-    }
-
-    // Avoid duplicates
-    if (!basket.includes(value)) {
-      basket.push(value);
-    }
-
-    return basket;
-  });
-  };
-
-  const removeEmploy = (emp) => {
-    setEmploymentTag((prev) => prev.filter((v) => v !== emp));
-  }
   // ---------------------------
   // SUBMIT
   // ---------------------------
   const handleSubmit = () => {
-    const  employmentType = employmentTag.filter(
-      (type) => type === "FULL_TIME" || type === "PART_TIME"
-    )[0];
-    const categories = employmentTag.filter(
-      (type) => type === "CONTRACT" || type === "INTERNSHIP"
-    );
     const payload = {
       title,
       description,
@@ -172,44 +132,34 @@ export default function JobPostFormModal({
           {/* LOCATION */}
           <Form.Group className="mb-3">
             <Form.Label>Location</Form.Label>
-            <Form.Select
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            >
-              <option value="">Select a country</option>
-              {options.map((country) => (
-                <option key={country.value} value={country.label}>
-                  {country.label}
-                </option>
-              ))}
-            </Form.Select>
+            <Form.Control value={location} onChange={(e) => setLocation(e.target.value)} />
           </Form.Group>
 
-          {/* EMPLOYMENT TYPE */}
-            <Form.Group className="mb-3">
+          {/* EMPLOYMENT + CATEGORY */}
+          <div className="row">
+            <div className="col-md-6">
               <Form.Label>Employment Type</Form.Label>
-              <Form.Select value={salaryType} onChange={(e) => addEmploy(e.target.value)} >
-                <option value = "" >Selectinbg</option>
-                <option value = "FULL_TIME" >Full Time</option>
-                <option value ="PART_TIME">Part Time</option>
-                <option value ="CONTRACT" >Contract</option>
-                <option value ="INTERNSHIP" >Internship</option>
-              </Form.Select>
-            </Form.Group>
-
-          <div className="mt-2">
-            {employmentTag.map((tag) => (
-              <Badge
-                key={tag}
-                pill
-                bg="primary"
-                className="me-2"
-                style={{ cursor: "pointer" }}
-                onClick={() => removeEmploy(tag)}
+              <Form.Select
+                value={employmentType}
+                onChange={(e) => setEmploymentType(e.target.value)}
               >
-                {tag} ✕
-              </Badge>
-            ))}
+                <option value="FULL_TIME">Full-time</option>
+                <option value="PART_TIME">Part-time</option>
+                <option value="INTERN">Internship</option>
+              </Form.Select>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Label>Category</Form.Label>
+              <Form.Select
+                value={categories[0] || ""}
+                onChange={(e) => setCategories([e.target.value])}
+              >
+                <option value="">Select</option>
+                <option value="CONTRACT">Contract</option>
+                <option value="INTERNSHIP">Internship</option>
+              </Form.Select>
+            </div>
           </div>
 
           {/* SALARY */}
@@ -230,7 +180,6 @@ export default function JobPostFormModal({
                   placeholder="Min"
                   type="number"
                   value={salaryMin}
-                  disabled={salaryType === "UP_TO"}
                   onChange={(e) => setSalaryMin(e.target.value)}
                 />
               </div>
@@ -239,7 +188,6 @@ export default function JobPostFormModal({
                   placeholder="Max"
                   type="number"
                   value={salaryMax}
-                  disabled={salaryType === "FROM"}
                   onChange={(e) => setSalaryMax(e.target.value)}
                 />
               </div>
