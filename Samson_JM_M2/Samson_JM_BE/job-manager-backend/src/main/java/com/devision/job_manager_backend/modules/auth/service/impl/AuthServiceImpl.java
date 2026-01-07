@@ -56,7 +56,7 @@ public class AuthServiceImpl implements AuthInternalService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        String token = jwtService.generateToken(auth.getId(), auth.getEmail(), auth.getRole());
+        String token = jwtService.generateToken(auth.getId(), auth.getRole());
 
         return new AuthResponse(token, auth.getRole(), auth.getCompanyName());
     }
@@ -82,7 +82,6 @@ public class AuthServiceImpl implements AuthInternalService {
         // 3. Issue JWT
         String token = jwtService.generateToken(
                 saved.getId(),
-                saved.getEmail(),
                 saved.getRole()
         );
 

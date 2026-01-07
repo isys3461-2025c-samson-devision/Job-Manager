@@ -1,15 +1,13 @@
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../auth/context/AuthContext";
 import CompanyHeader from "../../company/components/CompanyHeader";
 import SubscriptionPlanCard from "../components/SubscriptionPlanCard";
-import { useSubscription } from "../hooks/useSubscription";
-import { Button } from "react-bootstrap";
-import { useState } from "react";
-import PaymentHistoryModal from "../components/PaymentHistoryModal";
 
 export default function SubscriptionPage() {
-  const { isPremium, loading } = useSubscription();
+  const { auth, login } = useContext(AuthContext);
+  const isPremium = auth?.subscription === "premium";
   const navigate = useNavigate();
-  const [showPayments, setShowPayments] = useState(false);
 
   const FEATURES = [
     { label: "Post up to 3 job listings", free: true, premium: true },
@@ -20,53 +18,46 @@ export default function SubscriptionPage() {
     { label: "Advanced applicant search filters", free: false, premium: true },
     { label: "Priority job listing placement", free: false, premium: true },
     { label: "Unlimited job posts visibility", free: false, premium: true },
+    { label: "Tech background matching", free: false, premium: true },
+    { label: "Education, salary, employment filters", free: false, premium: true }
   ];
 
-  if (loading) {
-    return (
-      <>
-        <CompanyHeader />
-        <div className="container py-5 text-center">
-          Loading subscription...
-        </div>
-      </>
-    );
-  }
+  // const handleUpgrade = () => {
+  //   login({ ...auth, subscription: "premium" });
+  //   alert("You are now subscribed to Premium!");
+  // };
+
+  const handleCancel = () => {
+    login({ ...auth, subscription: "free" });
+    alert("Your subscription has been cancelled.");
+  };
 
   return (
     <>
       <CompanyHeader />
 
       <div className="container py-5" style={{ maxWidth: "1000px" }}>
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <div>
-            <h2 className="fw-bold mb-1">Subscription Plans</h2>
-            <p className="text-muted mb-0">
-              Choose the best plan for your company.
-            </p>
-          </div>
+        <h2 className="fw-bold mb-2">Subscription Plans</h2>
+        <p className="text-muted">Choose the best plan for your company.</p>
 
-          <Button variant="primary" onClick={() => setShowPayments(true)}>
-            <i className="bi bi-receipt me-2"></i>
-            View Payment History
-          </Button>
-        </div>
         <div className="row g-4 mt-4">
-          {/* FREE */}
+
+          {/* FREE PLAN */}
           <div className="col-md-6">
             <SubscriptionPlanCard
               title="Free Plan"
               price="$0"
               description="Basic features for all companies."
               featureList={FEATURES}
-              planType="FREE"
+              isPremium={false}
               isCurrent={!isPremium}
-              buttonLabel="Free Plan"
-              buttonDisabled
+              buttonLabel={!isPremium ? "Current Plan" : "Switch to Free"}
+              buttonDisabled={!isPremium}
+              onButtonClick={!isPremium ? null : handleCancel}
             />
           </div>
 
-          {/* PREMIUM */}
+          {/* PREMIUM PLAN */}
           <div className="col-md-6">
             <SubscriptionPlanCard
               title="Premium Plan"
@@ -74,19 +65,20 @@ export default function SubscriptionPage() {
               description="Unlock powerful hiring features."
               premium
               featureList={FEATURES}
-              planType="PREMIUM"
+              isPremium={true}
               isCurrent={isPremium}
-              buttonLabel={isPremium ? "Active" : "Upgrade to Premium"}
-              buttonDisabled={isPremium}
-              onButtonClick={() => navigate("/subscription/payment")}
+              buttonLabel={isPremium ? "Cancel Subscription" : "Upgrade to Premium"}
+              buttonDisabled={false}
+              onButtonClick={
+                isPremium
+                  ? () => {}                          // do nothing for now
+                  : () => navigate("/subscription/payment") // go to payment page
+              }
             />
           </div>
+
         </div>
       </div>
-      <PaymentHistoryModal
-        show={showPayments}
-        onHide={() => setShowPayments(false)}
-      />
     </>
   );
 }

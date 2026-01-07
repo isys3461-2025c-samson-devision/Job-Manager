@@ -1,131 +1,44 @@
 [
   {
     "id": 1,
-    "authId": "auth-001",
-    "firstName": "Nguyen",
-    "lastName": "Van A",
     "name": "Nguyen Van A",
-    "email": "nguyenvana@example.com",
-    "birthday": "1996-05-12",
-    "address": "12 Nguyen Hue",
-    "city": "Ho Chi Minh City",
-    "country": "Vietnam",
-    "createdAt": "2025-12-17T03:56:57.459Z",
-    "updatedAt": "2026-01-05T14:10:13.605Z",
-    "phone": "0901111222",
     "title": "Senior Frontend Developer",
     "rating": 4.8,
+    "location": "Ho Chi Minh City, Vietnam",
     "yearsExperience": 6,
-    "education": [
-      {
-        "degree": "Bachelor",
-        "institution": "HCMUT",
-        "from": "2016",
-        "to": "2020",
-        "GPA": 3.6
-      }
-    ],
+    "education": "B.S. Computer Science",
     "skills": ["React", "TypeScript", "Tailwind CSS", "Next.js", "Node.js"],
-    "employmentTypes": ["Full-time"],
-    "summary": "Frontend engineer focused on React, design systems, and accessible UI.",
-    "workExperiences": [
-      {
-        "title": "Senior Frontend Developer",
-        "description": "Built scalable UI with React and TypeScript.",
-        "startDate": "2021-01",
-        "endDate": "2025-12"
-      }
-    ],
     "expectedSalary": "2500 - 3500 USD",
     "availability": "Immediate",
     "avatarUrl": "https://i.pravatar.cc/80?img=3",
-    "mediaId": "media-001",
     "appliedJobIds": [1, 2]
   },
   {
     "id": 2,
-    "authId": "auth-002",
-    "firstName": "Le",
-    "lastName": "Thi B",
-    "name": "Le Thi B",
-    "email": "lethib@example.com",
-    "birthday": "1998-03-22",
-    "address": "45 Tran Hung Dao",
-    "city": "Hanoi",
-    "country": "Vietnam",
-    "createdAt": "2025-12-18T08:12:00.000Z",
-    "updatedAt": "2026-01-04T09:30:45.000Z",
-    "phone": "0902333444",
+    "name": "Nguyen Van A",
     "title": "UI/UX Designer",
     "rating": 4.9,
+    "location": "Hanoi, Vietnam",
     "yearsExperience": 4,
-    "education": [
-      {
-        "degree": "Bachelor",
-        "institution": "FPT University",
-        "from": "2017",
-        "to": "2021",
-        "GPA": 3.7
-      }
-    ],
+    "education": "B.A. Design",
     "skills": ["Figma", "Adobe XD", "User Research", "Prototyping", "Design System"],
-    "employmentTypes": ["Fresher", "Internship"],
-    "summary": "Product designer with a focus on research-driven UX and clean UI.",
-    "workExperiences": [
-      {
-        "title": "UI/UX Designer",
-        "description": "Led design systems and user testing.",
-        "startDate": "2021-06",
-        "endDate": "2025-10"
-      }
-    ],
     "expectedSalary": "1800 - 2800 USD",
     "availability": "2 Weeks",
     "avatarUrl": "https://i.pravatar.cc/80?img=5",
-    "mediaId": "media-002",
     "appliedJobIds": [2]
   },
   {
     "id": 3,
-    "authId": "auth-003",
-    "firstName": "Tran",
-    "lastName": "Van B",
     "name": "Tran Van B",
-    "email": "tranvanb@example.com",
-    "birthday": "1995-12-07",
-    "address": "300 Lien Phuong H",
-    "city": "Da Nang",
-    "country": "Vietnam",
-    "createdAt": "2025-12-17T03:56:57.459Z",
-    "updatedAt": "2026-01-05T14:10:13.605Z",
-    "phone": "0909999999",
     "title": "Backend Engineer",
     "rating": 4.7,
+    "location": "Da Nang, Vietnam",
     "yearsExperience": 5,
-    "education": [
-      {
-        "degree": "Master",
-        "institution": "RMIT",
-        "from": "2019",
-        "to": "2022",
-        "GPA": 3.5
-      }
-    ],
+    "education": "B.S. Software Engineering",
     "skills": ["Java", "Spring Boot", "PostgreSQL", "Docker"],
-    "employmentTypes": ["Full-time", "Contract"],
-    "summary": "Backend engineer with experience in Java services and data systems.",
-    "workExperiences": [
-      {
-        "title": "Intern",
-        "description": "Java BE",
-        "startDate": "2021-02",
-        "endDate": "2022-12"
-      }
-    ],
     "expectedSalary": "2300 - 3200 USD",
     "availability": "1 Month",
     "avatarUrl": "https://i.pravatar.cc/80?img=8",
-    "mediaId": "media-003",
     "appliedJobIds": [1]
   }
 ]

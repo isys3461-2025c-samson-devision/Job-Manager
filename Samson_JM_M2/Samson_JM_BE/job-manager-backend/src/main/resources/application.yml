@@ -16,14 +16,6 @@ spring:
               - openid
               - email
               - profile
-stripe:
-  secret-key: sk_test_51ScUfpBB6o3QuzcAussrpixCQfUijPKcU9Eo3feMtV8eieqVV55X4sHNA6YEIRtVZk0AiqpETy0WTdpiypFRwTrw00u95dA9ps
-  webhook-secret: whsec_d1d63da6ddd9bda4b242abc1578f7f33c60704a03283cc95f9e5e474f71adf7f
-  success-url: http://localhost:3000/subscription/payment/success
-  cancel-url: http://localhost:3000/subscription/payment/cancel
-  premium-price-id: price_1SjksMBB6o3QuzcAG9YHOoqK
-
-
       
 jwt:
   secret: devision-super-secret-key-change-later

@@ -1,7 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../auth/context/AuthContext";
-import { useSubscription } from "../../subscription/hooks/useSubscription";
 import NavButton from "./NavButtons";
 import NotificationModal from "./NotificationModal";
 import mockNotifications from "../data/mockNotification";
@@ -10,10 +9,9 @@ import mockNotifications from "../data/mockNotification";
 export default function CompanyHeader() {
 const navigate = useNavigate();
 const location = useLocation();
-const { logout } = useContext(AuthContext); 
+const { auth, logout } = useContext(AuthContext);
 
-const { isPremium, loading } = useSubscription();
-
+const isPremium = auth?.subscription === "premium";
 const dollarColor = isPremium ? "#FFD700" : "#0054FF";
 
 const [openNotif, setOpenNotif] = useState(false);
@@ -74,7 +72,6 @@ DEV<span style={{ color: "#0054FF" }}>ision</span>
           fontSize: "22px",
           color: dollarColor,
           cursor: "pointer",
-          opacity: loading ? 0.5 : 1,
         }}
         title={isPremium ? "Premium Subscription" : "Upgrade to Premium"}
         onClick={() => navigate("/company/subscription")}

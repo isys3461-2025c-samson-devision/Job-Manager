@@ -9,7 +9,6 @@ export default function SubscriptionPlanCard({
   buttonDisabled,
   onButtonClick
 }) {
-
   return (
     <div
       className="p-4 bg-white rounded-4 shadow-sm border"

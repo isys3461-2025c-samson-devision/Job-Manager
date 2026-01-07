@@ -58,12 +58,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/companies/**").permitAll()
                 .requestMatchers("/api/jobposts/**").permitAll()   // 👈 PUBLIC
 
-                // ===== WEBHOOK =====
-                .requestMatchers("/api/payments/webhook/**").permitAll()
-
-                // ===== SUBSCRIPTION =====
-                .requestMatchers("/api/subscriptions/**").authenticated()
-
 
                 // ===== DEFAULT =====
                 .anyRequest().authenticated()

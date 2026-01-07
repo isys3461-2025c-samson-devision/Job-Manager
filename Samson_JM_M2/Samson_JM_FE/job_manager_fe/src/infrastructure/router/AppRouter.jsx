@@ -22,6 +22,7 @@ export default function AppRouter() {
         <Route path="/oauth/success" element={<OAuthSuccessPage />} />
         <Route path="/oauth/complete-profile" element={<CompleteProfilePage />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
+        <Route path="/company/dashboard" element={<CompanyDashboard />} />
         <Route path="/company/applicants" element={<CompanyApplicants />} /> 
         <Route path="/company/profile" element={<CompanyProfile />} />
         <Route path="/company/subscription" element={<SubscriptionPage />} />
