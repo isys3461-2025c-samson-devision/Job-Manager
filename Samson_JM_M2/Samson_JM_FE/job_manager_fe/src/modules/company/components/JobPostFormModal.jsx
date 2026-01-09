@@ -16,7 +16,7 @@ export default function JobPostFormModal({
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   
-  const [salaryType, setSalaryType] = useState("RANGE");
+  const [salaryType, setSalaryType] = useState("");
   const [salaryMin, setSalaryMin] = useState("");
   const [salaryMax, setSalaryMax] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
@@ -26,7 +26,8 @@ export default function JobPostFormModal({
   const [technicalSkills, setTechnicalSkills] = useState([]);
 
   const [employmentTag, setEmploymentTag] = useState([]);
- 
+
+  const [valMessage, setValMessage] = useState(["", "", "", "", ""]);
   // generated country list once
   const options = useMemo(() => countryList().getData(), []);
 
@@ -46,6 +47,7 @@ export default function JobPostFormModal({
       setIsPublished(initialData.isPublished ?? false);
       setTechnicalSkills(initialData.technicalSkills || []);
       setEmploymentTag(initialData.employmentTag || []);
+      setValMessage(initialData || []);
     }
 
     if (mode === "create") {
@@ -65,6 +67,7 @@ export default function JobPostFormModal({
     setTechnicalSkills([]);
     setEmploymentTag([]);
     setSkillInput("");
+    setValMessage(["", "", "", "", ""]);
   };
 
   // ---------------------------
@@ -111,32 +114,104 @@ export default function JobPostFormModal({
   const removeEmploy = (emp) => {
     setEmploymentTag((prev) => prev.filter((v) => v !== emp));
   }
+  // add validation message
+  const changeValidationMessage = (index, message) => {
+    setValMessage((prev) => {
+      const next = [...prev];
+      next[index] = message;
+      return next;
+    });
+  }
   // ---------------------------
   // SUBMIT
   // ---------------------------
-  const handleSubmit = () => {
-    const  employmentType = employmentTag.filter(
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setValMessage(["", "", "", "", ""]);
+
+    let hasError = false;
+    const employmentType =
+    employmentTag.find(
       (type) => type === "FULL_TIME" || type === "PART_TIME"
-    )[0];
+    ) ?? "NOT_SPECIFIED";
+
     const categories = employmentTag.filter(
       (type) => type === "CONTRACT" || type === "INTERNSHIP"
     );
-    const payload = {
-      title,
-      description,
-      location,
-      employmentType,
-      categories,
-      salaryType,
-      salaryMin: salaryMin ? Number(salaryMin) : null,
-      salaryMax: salaryMax ? Number(salaryMax) : null,
-      expiryDate: expiryDate || null,
-      technicalSkills,
-      isPublished,
-    };
+    if(categories.length === 0){
+      categories.push("NOT_SPECIFIED");
+    }
 
-    onSubmit(payload);
-    onClose();
+    //check validity
+    if (!title.trim()) {
+      changeValidationMessage(0, "Please choose a title.");
+      hasError = true;
+    }
+    if (!location.trim()) {
+      changeValidationMessage(1, "Select a location.");
+      hasError = true;
+    }
+    if (employmentTag.length === 0) {
+      changeValidationMessage(2, "Choose at least 1 employment type (full time or part time).");
+      hasError = true;
+    }
+    if (!salaryType.trim()) {
+      changeValidationMessage(3, "Choose a salary type.");
+      hasError = true;
+    }
+    else {
+      switch (salaryType) {
+        case "RANGE":
+          if (!salaryMin || !salaryMax || Number(salaryMin) >= Number(salaryMax)) {
+            changeValidationMessage(3, "For range, ensure min and max salary are filled correctly.");
+            hasError = true;
+          }
+          break;
+        case "FROM":
+          if (!salaryMin) {
+            changeValidationMessage(3, "For from, ensure min salary is filled.");
+            hasError = true;
+          }
+          break;
+        case "UP_TO":
+          if (!salaryMax) {
+            changeValidationMessage(3, "For up to, ensure max salary is filled.");
+            hasError = true;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    if (technicalSkills.length === 0) {
+      changeValidationMessage(4, "Add at least 1 skill.");
+      hasError = true;
+    }
+
+    if(!hasError){
+      const payload = {
+        title,
+        description,
+        location,
+        employmentType,
+        categories,
+        salaryType,
+        salaryMin: salaryMin ? Number(salaryMin) : null,
+        salaryMax: salaryMax ? Number(salaryMax) : null,
+        expiryDate: expiryDate || null,
+        technicalSkills,
+        isPublished,
+      };
+
+      onSubmit(payload);
+      onClose();
+    }
+    else{
+      return;
+    }
+
+    // prepare payload
+
   };
 
   // ---------------------------
@@ -151,11 +226,17 @@ export default function JobPostFormModal({
       </Modal.Header>
 
       <Modal.Body>
-        <Form>
+        <Form noValidate> 
           {/* TITLE */}
           <Form.Group className="mb-3">
             <Form.Label>Job Title</Form.Label>
-            <Form.Control value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Form.Control 
+            isInvalid={!!valMessage[0]} 
+            value={title} 
+            onChange={(e) => {
+              setTitle(e.target.value); 
+              changeValidationMessage(0, "") ;} }/>
+            <Form.Control.Feedback type="invalid">{valMessage[0]}</Form.Control.Feedback>
           </Form.Group>
 
           {/* DESCRIPTION */}
@@ -172,9 +253,12 @@ export default function JobPostFormModal({
           {/* LOCATION */}
           <Form.Group className="mb-3">
             <Form.Label>Location</Form.Label>
-            <Form.Select
+            <Form.Select 
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                changeValidationMessage(1, "");}}
+              isInvalid={!!valMessage[1]}
             >
               <option value="">Select a country</option>
               {options.map((country) => (
@@ -183,18 +267,25 @@ export default function JobPostFormModal({
                 </option>
               ))}
             </Form.Select>
+            <Form.Control.Feedback type="invalid">{valMessage[1]}</Form.Control.Feedback>
           </Form.Group>
 
           {/* EMPLOYMENT TYPE */}
             <Form.Group className="mb-3">
               <Form.Label>Employment Type</Form.Label>
-              <Form.Select value={salaryType} onChange={(e) => addEmploy(e.target.value)} >
-                <option value = "" >Selectinbg</option>
+              <Form.Select 
+              value = "" 
+              onChange={(e) => {
+                addEmploy(e.target.value); 
+                changeValidationMessage(2, "");}} 
+              isInvalid={!!valMessage[2]}>
+                <option value = "" >Selecting</option>
                 <option value = "FULL_TIME" >Full Time</option>
                 <option value ="PART_TIME">Part Time</option>
                 <option value ="CONTRACT" >Contract</option>
                 <option value ="INTERNSHIP" >Internship</option>
               </Form.Select>
+            <Form.Control.Feedback type="invalid">{valMessage[2]}</Form.Control.Feedback>
             </Form.Group>
 
           <div className="mt-2">
@@ -215,12 +306,19 @@ export default function JobPostFormModal({
           {/* SALARY */}
           <Form.Group className="mt-3">
             <Form.Label>Salary Type</Form.Label>
-            <Form.Select value={salaryType} onChange={(e) => setSalaryType(e.target.value)}>
+            <Form.Select
+            isInvalid={!!valMessage[3]} 
+            value={salaryType} 
+            onChange={(e) => {
+              setSalaryType(e.target.value);
+              changeValidationMessage(3, "");}}>
+              <option value="">Selecting</option>
               <option value="RANGE">Range</option>
               <option value="FROM">From</option>
               <option value="UP_TO">Up to</option>
               <option value="NEGOTIABLE">Negotiable</option>
             </Form.Select>
+            <Form.Control.Feedback type="invalid">{valMessage[3]}</Form.Control.Feedback>
           </Form.Group>
 
           {salaryType !== "NEGOTIABLE" && (
@@ -249,13 +347,21 @@ export default function JobPostFormModal({
           {/* SKILLS */}
           <Form.Group className="mt-3">
             <Form.Label>Technical Skills</Form.Label>
-            <div className="d-flex gap-2">
+            <div className={`d-flex gap-2 ${valMessage[4] ? "is-invalid" : ""}`}>
               <Form.Control
                 value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
+                onChange={(e) => {
+                  setSkillInput(e.target.value)
+                  changeValidationMessage(4, "");
+                }}
               />
               <Button onClick={addSkill}>Add</Button>
             </div>
+            {valMessage[4] && (
+              <div className="invalid-feedback d-block">
+                {valMessage[4]}
+              </div>
+            )}
           </Form.Group>
 
           <div className="mt-2">
