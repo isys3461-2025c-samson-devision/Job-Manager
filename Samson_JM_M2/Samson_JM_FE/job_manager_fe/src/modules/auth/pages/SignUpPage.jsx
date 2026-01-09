@@ -4,11 +4,15 @@ import AuthLayout from "../components/AuthLayout";
 import AuthLogo from "../components/AuthLogo";
 import { AuthContext } from "../context/AuthContext";
 import { authService } from "../service/authService";
+import { getNames } from "country-list";
+import { allCountries } from "country-telephone-data";
 
 export default function SignUpPage() {
-  const {signup} = useContext(AuthContext)
+  const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
   const passwordInputRef = useRef(null);
+  const countryOptions = getNames(); // ["Vietnam", "Singapore", ...]
+
 
   const [form, setForm] = useState({
     companyName: "",
@@ -64,7 +68,6 @@ export default function SignUpPage() {
 
       await signup(form);
       navigate("/signin");
-
     } catch (e) {
       console.error(e);
       setError("Sign up failed. Please try again.");
@@ -115,12 +118,13 @@ export default function SignUpPage() {
         </button>
 
         <div className="mb-3">
-            <label className="form-label small">Company Name</label>
-            <input
-              className="form-control"
-              value={form.companyName}
-              onChange={handleChange("companyName")}
-            />
+          <label className="form-label small">Company Name</label>
+          <input
+            className="form-control"
+            value={form.companyName}
+            onChange={handleChange("companyName")}
+            placeholder="Enter your company name"
+          />
         </div>
 
         <div className="mb-3">
@@ -132,9 +136,14 @@ export default function SignUpPage() {
                 value={form.phoneCode}
                 onChange={handleChange("phoneCode")}
               >
-                <option value="+084">🇻🇳 +084</option>
+                {allCountries.map((c) => (
+                  <option key={c.iso2} value={`+${c.dialCode}`}>
+                    {c.iso2.toUpperCase()} +{c.dialCode}
+                  </option>
+                ))}
               </select>
             </div>
+
             <div className="col-8">
               <input
                 className="form-control"
@@ -154,10 +163,11 @@ export default function SignUpPage() {
             onChange={handleChange("country")}
           >
             <option value="">Select your country</option>
-            <option value="Vietnam">Vietnam</option>
-            <option value="Singapore">Singapore</option>
-            <option value="Australia">Australia</option>
-            <option value="United States">United States</option>
+            {countryOptions.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
           </select>
         </div>
 

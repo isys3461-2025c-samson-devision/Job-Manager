@@ -5,6 +5,7 @@ import AuthLogo from "../components/AuthLogo";
 import { authService } from "../service/authService";
 import OAuthCompleteRequest from "../models/OAuthCompleteRequest";
 import { localStorageUtil } from "../../../infrastructure/storage/localStorageUtil";
+import { allCountries } from "country-telephone-data";
 
 export default function CompleteProfilePage() {
   const [searchParams] = useSearchParams();
@@ -12,10 +13,17 @@ export default function CompleteProfilePage() {
 
   const [form, setForm] = useState({
     companyName: "",
-    phoneCode: "+084",
+    phoneCode: "+84",
     phoneNumber: "",
-    country: "",
+    country: "Vietnam",
   });
+
+  const countryOptions = allCountries.map((c) => ({
+    name: c.name,
+    dialCode: `+${c.dialCode}`,
+    iso2: c.iso2,
+    flag: c.flag,
+  }));
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +35,20 @@ export default function CompleteProfilePage() {
   }, [emailFromOAuth]);
 
   const handleChange = (field) => (e) => {
-    setForm({ ...form, [field]: e.target.value });
+    const value = e.target.value;
+
+    if (field === "country") {
+      const selected = countryOptions.find((c) => c.name === value);
+
+      setForm((prev) => ({
+        ...prev,
+        country: value,
+        phoneCode: selected ? selected.dialCode : prev.phoneCode,
+      }));
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
@@ -104,7 +125,11 @@ export default function CompleteProfilePage() {
                 value={form.phoneCode}
                 onChange={handleChange("phoneCode")}
               >
-                <option value="+084">🇻🇳 +084</option>
+                {countryOptions.map((c) => (
+                  <option key={c.iso2} value={c.dialCode}>
+                    {c.flag} {c.dialCode}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="col-8">
@@ -126,10 +151,11 @@ export default function CompleteProfilePage() {
             onChange={handleChange("country")}
           >
             <option value="">Select your country</option>
-            <option value="Vietnam">Vietnam</option>
-            <option value="Singapore">Singapore</option>
-            <option value="Australia">Australia</option>
-            <option value="United States">United States</option>
+            {countryOptions.map((c) => (
+              <option key={c.iso2} value={c.name}>
+                {c.flag} {c.name}
+              </option>
+            ))}
           </select>
         </div>
 
