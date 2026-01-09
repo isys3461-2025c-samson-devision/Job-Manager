@@ -166,7 +166,6 @@ export default function CompanyDashboard() {
           filterStatus={filterStatus}
           setFilterStatus={setFilterStatus}
         />
-
         {/* =======================
             JOB LIST
         ======================== */}
