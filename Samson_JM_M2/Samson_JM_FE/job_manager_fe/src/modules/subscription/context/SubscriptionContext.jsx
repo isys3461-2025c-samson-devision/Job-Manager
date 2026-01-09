@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import { getMySubscription } from "../api/subscriptionApi";
 
 export const SubscriptionContext = createContext();
@@ -7,23 +7,26 @@ export function SubscriptionProvider({ children }) {
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchSubscription = async () => {
+  const fetchSubscription = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await getMySubscription();
-      console.log("SUB RESPONSE:", res.data); // 👈 ADD THIS
-      setIsPremium(res.status === "ACTIVE");
+
+      // ✅ res can be null (204) or not what you expect
+      const status = res?.status; // safe
+      setIsPremium(status === "ACTIVE");
     } catch (err) {
-      console.error("SUB ERROR:", err); // 👈 ADD THIS
+      // ✅ This will never crash now
+      console.error("SUB ERROR:", err);
       setIsPremium(false);
     } finally {
       setLoading(false);
     }
-  };
-
-  // 🔥 This is the missing piece
-  useEffect(() => {
-    fetchSubscription(); // runs on app load & refresh
   }, []);
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [fetchSubscription]);
 
   return (
     <SubscriptionContext.Provider

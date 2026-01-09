@@ -9,9 +9,15 @@ import JobPostFormModal from "../components/JobPostFormModal";
 
 import { companyService } from "../service/companyService";
 import { jobPostService } from "../service/jobPostService";
+import { localStorageUtil } from "../../../infrastructure/storage/localStorageUtil";
+
 
 export default function CompanyDashboard() {
   const [stats, setStats] = useState(null);
+
+  const [companyName, setCompanyName] = useState(
+    localStorageUtil.getCompanyName() || "Company"
+  );
 
   const [jobPosts, setJobPosts] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -23,10 +29,22 @@ export default function CompanyDashboard() {
   const [editingJob, setEditingJob] = useState(null);
 
   // =======================
-  // LOAD COMPANY STATS
+  // LOAD COMPANY STATS + COMPANY NAME
   // =======================
   useEffect(() => {
     companyService.getCompanyStats().then(setStats);
+
+    // fetch company profile to get real name on dashboard load
+    companyService
+      .getCompanyMe?.()
+      ?.then((me) => {
+        const name =
+          me?.companyName || me?.name || me?.company?.name || "Company";
+        setCompanyName(name);
+        localStorageUtil.setCompanyName(name);
+      })
+      .catch(() => {
+      });
   }, []);
 
   // =======================
@@ -80,8 +98,9 @@ export default function CompanyDashboard() {
       <CompanyHeader />
 
       <div className="container py-4">
+        {/* Pass companyName */}
         <WelcomeBanner />
-
+        
         {/* =======================
             STAT CARDS
         ======================== */}
@@ -122,7 +141,6 @@ export default function CompanyDashboard() {
             />
           </div>
         </div>
-
         {/* =======================
             HEADER
         ======================== */}
@@ -139,7 +157,6 @@ export default function CompanyDashboard() {
             + Create Job Post
           </button>
         </div>
-
         {/* =======================
             FILTER BAR
         ======================== */}
@@ -172,7 +189,6 @@ export default function CompanyDashboard() {
           </div>
         )}
       </div>
-
       {/* =======================
           CREATE MODAL
       ======================== */}
@@ -186,7 +202,6 @@ export default function CompanyDashboard() {
           fetchJobPosts();
         }}
       />
-
       {/* =======================
           EDIT MODAL
       ======================== */}

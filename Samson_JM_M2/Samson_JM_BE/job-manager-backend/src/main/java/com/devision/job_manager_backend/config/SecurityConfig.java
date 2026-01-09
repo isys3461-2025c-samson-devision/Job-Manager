@@ -10,73 +10,67 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.core.annotation.Order;
+
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtFilter;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+  private final JwtAuthenticationFilter jwtFilter;
+  private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public SecurityConfig(
-        JwtAuthenticationFilter jwtFilter,
-        OAuth2SuccessHandler oAuth2SuccessHandler
-    ) {
-        this.jwtFilter = jwtFilter;
-        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
-    }
+  public SecurityConfig(JwtAuthenticationFilter jwtFilter, OAuth2SuccessHandler oAuth2SuccessHandler) {
+    this.jwtFilter = jwtFilter;
+    this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+  }
 
+  @Bean
+  @Order(1)
+  public SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
+    http
+      .securityMatcher("/api/**")
+      .csrf(csrf -> csrf.disable())
+      .cors(cors -> {})
+      .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .exceptionHandling(e -> e.authenticationEntryPoint((req, res, ex) -> {
+        res.setStatus(401);
+        res.setContentType("application/json");
+        res.getWriter().write("{\"message\":\"Unauthorized\"}");
+      }))
+      .authorizeHttpRequests(auth -> auth
+        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+        .requestMatchers("/api/auth/**").permitAll()
+        .requestMatchers("/api/payments/webhook/**").permitAll()
+        .requestMatchers("/api/companies/**").permitAll()
+        .requestMatchers("/api/jobposts/**").permitAll()
+        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+        .requestMatchers("/api/company/**").hasRole("COMPANY")
+        .requestMatchers("/api/subscriptions/**").authenticated()
+        .anyRequest().authenticated()
+      )
+      .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+      .httpBasic(b -> b.disable());
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    return http.build();
+  }
 
-        http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> {})
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-            )
-            .authorizeHttpRequests(auth -> auth
+  @Bean
+  @Order(2)
+  public SecurityFilterChain webChain(HttpSecurity http) throws Exception {
+    http
+      .csrf(csrf -> csrf.disable())
+      .cors(cors -> {})
+      .authorizeHttpRequests(auth -> auth
+        .requestMatchers("/oauth2/**", "/oauth2/authorization/**", "/login/**").permitAll()
+        .anyRequest().authenticated()
+      )
+      .oauth2Login(oauth -> oauth
+        .successHandler(oAuth2SuccessHandler)
+        .failureUrl("/oauth2/error")
+      );
 
-                // ===== PUBLIC AUTH / OAUTH =====
-                .requestMatchers(
-                    "/api/auth/**",
-                    "/oauth2/**",
-                    "/oauth2/authorization/**",
-                    "/login/**"
-                ).permitAll()
-
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                // ===== ADMIN =====
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                // ===== COMPANY =====
-                .requestMatchers("/api/company/**").hasRole("COMPANY")
-
-                // ===== JA - PUBLIC =====
-                .requestMatchers("/api/companies/**").permitAll()
-                .requestMatchers("/api/jobposts/**").permitAll()   // 👈 PUBLIC
-
-                // ===== WEBHOOK =====
-                .requestMatchers("/api/payments/webhook/**").permitAll()
-
-                // ===== SUBSCRIPTION =====
-                .requestMatchers("/api/subscriptions/**").authenticated()
-
-
-                // ===== DEFAULT =====
-                .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth -> oauth 
-                .successHandler(oAuth2SuccessHandler)
-                .failureUrl("/oauth2/error")
-
-            )
-            
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .httpBasic(basic -> basic.disable());
-
-        return http.build();
-    }
+    return http.build();
+  }
 }
+
