@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Badge } from "react-bootstrap";
+import { getNames } from "country-list";
 
 export default function JobPostFormModal({
   show,
@@ -13,7 +14,9 @@ export default function JobPostFormModal({
   // ---------------------------
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+
   const [employmentType, setEmploymentType] = useState("FULL_TIME");
   const [categories, setCategories] = useState([]);
   const [salaryType, setSalaryType] = useState("RANGE");
@@ -25,6 +28,8 @@ export default function JobPostFormModal({
   const [skillInput, setSkillInput] = useState("");
   const [technicalSkills, setTechnicalSkills] = useState([]);
 
+  const countryOptions = getNames(); // ["Vietnam", "Singapore", ...]
+
   // ---------------------------
   // PREFILL FOR EDIT MODE
   // ---------------------------
@@ -32,7 +37,11 @@ export default function JobPostFormModal({
     if (mode === "edit" && initialData) {
       setTitle(initialData.title || "");
       setDescription(initialData.description || "");
-      setLocation(initialData.location || "");
+      if (initialData.location) {
+        const [savedCity, savedCountry] = initialData.location.split(", ");
+        setCity(savedCity || "");
+        setCountry(savedCountry || "");
+      }
       setEmploymentType(initialData.employmentType || "FULL_TIME");
       setCategories(initialData.categories || []);
       setSalaryType(initialData.salaryType || "RANGE");
@@ -51,7 +60,8 @@ export default function JobPostFormModal({
   const resetForm = () => {
     setTitle("");
     setDescription("");
-    setLocation("");
+    setCity("");
+    setCountry("");
     setEmploymentType("FULL_TIME");
     setCategories([]);
     setSalaryType("RANGE");
@@ -62,6 +72,20 @@ export default function JobPostFormModal({
     setTechnicalSkills([]);
     setSkillInput("");
   };
+
+  const toggleCategory = (category) => {
+    setCategories(
+      (prev) =>
+        prev.includes(category)
+          ? prev.filter((c) => c !== category) // remove
+          : [...prev, category] // add
+    );
+  };
+
+  const CATEGORY_OPTIONS = [
+    { value: "CONTRACT", label: "Contract" },
+    { value: "INTERNSHIP", label: "Internship" },
+  ];
 
   // ---------------------------
   // SKILLS
@@ -84,7 +108,7 @@ export default function JobPostFormModal({
     const payload = {
       title,
       description,
-      location,
+      location: city && country ? `${city}, ${country}` : null,
       employmentType,
       categories,
       salaryType,
@@ -115,7 +139,10 @@ export default function JobPostFormModal({
           {/* TITLE */}
           <Form.Group className="mb-3">
             <Form.Label>Job Title</Form.Label>
-            <Form.Control value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Form.Control
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </Form.Group>
 
           {/* DESCRIPTION */}
@@ -130,10 +157,31 @@ export default function JobPostFormModal({
           </Form.Group>
 
           {/* LOCATION */}
-          <Form.Group className="mb-3">
-            <Form.Label>Location</Form.Label>
-            <Form.Control value={location} onChange={(e) => setLocation(e.target.value)} />
-          </Form.Group>
+          <div className="row mb-3">
+            <div className="col-md-6">
+              <Form.Label>City</Form.Label>
+              <Form.Control
+                placeholder="e.g. Ho Chi Minh City"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <Form.Label>Country</Form.Label>
+              <Form.Select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              >
+                <option value="">Select country</option>
+                {countryOptions.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Form.Select>
+            </div>
+          </div>
 
           {/* EMPLOYMENT + CATEGORY */}
           <div className="row">
@@ -145,27 +193,35 @@ export default function JobPostFormModal({
               >
                 <option value="FULL_TIME">Full-time</option>
                 <option value="PART_TIME">Part-time</option>
-                <option value="INTERN">Internship</option>
               </Form.Select>
             </div>
 
             <div className="col-md-6">
-              <Form.Label>Category</Form.Label>
-              <Form.Select
-                value={categories[0] || ""}
-                onChange={(e) => setCategories([e.target.value])}
-              >
-                <option value="">Select</option>
-                <option value="CONTRACT">Contract</option>
-                <option value="INTERNSHIP">Internship</option>
-              </Form.Select>
+              <div className="col-md-6">
+                <Form.Label>Category</Form.Label>
+
+                <div className="d-flex flex-column gap-1 mt-1">
+                  {CATEGORY_OPTIONS.map((cat) => (
+                    <Form.Check
+                      key={cat.value}
+                      type="checkbox"
+                      label={cat.label}
+                      checked={categories.includes(cat.value)}
+                      onChange={() => toggleCategory(cat.value)}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* SALARY */}
           <Form.Group className="mt-3">
             <Form.Label>Salary Type</Form.Label>
-            <Form.Select value={salaryType} onChange={(e) => setSalaryType(e.target.value)}>
+            <Form.Select
+              value={salaryType}
+              onChange={(e) => setSalaryType(e.target.value)}
+            >
               <option value="RANGE">Range</option>
               <option value="FROM">From</option>
               <option value="UP_TO">Up to</option>
