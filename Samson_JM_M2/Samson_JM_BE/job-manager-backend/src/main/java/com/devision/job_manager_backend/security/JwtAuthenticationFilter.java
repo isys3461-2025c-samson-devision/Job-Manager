@@ -1,12 +1,15 @@
 package com.devision.job_manager_backend.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,37 +32,82 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        // If already authenticated, don’t override
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        // No Bearer token -> just continue (security config will decide 401/permit)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
-        var claims = jwtService.extractClaims(token);
+        String token = authHeader.substring(7).trim();
+        if (token.isEmpty()) {
+            unauthorized(response, "Missing JWT token");
+            return;
+        }
 
-        String userId = claims.getSubject();
-        String role = claims.get("role", String.class);
+        try {
+            var claims = jwtService.extractClaims(token);
 
-        var auth = new UsernamePasswordAuthenticationToken(
-                userId,
-                null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + role))
-        );
+            String userId = claims.getSubject();
+            String email = claims.get("email", String.class);
+            String role = claims.get("role", String.class);
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        filterChain.doFilter(request, response);
+            if (userId == null || userId.isBlank() || role == null || role.isBlank()) {
+                SecurityContextHolder.clearContext();
+                unauthorized(response, "Invalid JWT claims");
+                return;
+            }
+
+            var auth = new UsernamePasswordAuthenticationToken(
+                    userId,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+            );
+
+            // Your code stores email as details; keep it for compatibility
+            auth.setDetails(email);
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            filterChain.doFilter(request, response);
+
+        } catch (JwtException | IllegalArgumentException ex) {
+            // Expired/invalid/signature/etc.
+            SecurityContextHolder.clearContext();
+            unauthorized(response, "Invalid or expired token");
+        }
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
+        // Always skip preflight
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
 
+        String path = request.getRequestURI();
         return path.startsWith("/api/auth/")
-            || path.startsWith("/oauth2/")
-            || path.startsWith("/login/");
+                || path.startsWith("/oauth2/")
+                || path.startsWith("/login/")
+                || path.startsWith("/error");
     }
 
+    private void unauthorized(HttpServletResponse response, String message) throws IOException {
+        if (response.isCommitted()) return;
 
+        response.resetBuffer();
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write("{\"message\":\"" + escapeJson(message) + "\"}");
+        response.flushBuffer();
+    }
+
+    private String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
 }

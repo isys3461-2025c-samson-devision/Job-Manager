@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom"; // ✅ ADD
 
 import CompanyHeader from "../components/CompanyHeader";
 import WelcomeBanner from "../components/WelcomeBanner";
@@ -9,9 +10,20 @@ import JobPostFormModal from "../components/JobPostFormModal";
 
 import { companyService } from "../service/companyService";
 import { jobPostService } from "../service/jobPostService";
+import { localStorageUtil } from "../../../infrastructure/storage/localStorageUtil";
+
+// ✅ ADD
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export default function CompanyDashboard() {
+  const location = useLocation(); // ✅ ADD
+  const [booting, setBooting] = useState(false); // ✅ ADD
+
   const [stats, setStats] = useState(null);
+
+  const [, setCompanyName] = useState(
+    localStorageUtil.getCompanyName() || "Company"
+  );
 
   const [jobPosts, setJobPosts] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -22,27 +34,100 @@ export default function CompanyDashboard() {
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
 
+  // ✅ ADD: capture token if backend redirects to /company/dashboard?token=...
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+    if (!token) return;
+
+    const run = async () => {
+      setBooting(true);
+
+      // store token for httpClient
+      localStorage.setItem("accessToken", token);
+
+      // remove token from URL
+      window.history.replaceState({}, document.title, "/company/dashboard");
+
+      // give backend time to create/link company/subscription data
+      await sleep(800);
+
+      setBooting(false);
+    };
+
+    run();
+  }, [location.search]);
+
   // =======================
-  // LOAD COMPANY STATS
+  // LOAD COMPANY STATS + COMPANY NAME
   // =======================
   useEffect(() => {
     companyService.getCompanyStats().then(setStats);
+
+    // fetch company profile to get real name on dashboard load
+    companyService
+      .getCompanyMe?.()
+      ?.then((me) => {
+        const name =
+          me?.companyName || me?.name || me?.company?.name || "Company";
+        setCompanyName(name);
+        localStorageUtil.setCompanyName(name);
+      })
+      .catch(() => {});
   }, []);
 
   // =======================
   // LOAD JOB POSTS
   // =======================
-  const fetchJobPosts = () => {
+  const fetchJobPosts = async () => {
     setLoadingJobs(true);
-    jobPostService
-      .getCompanyJobPosts()
-      .then(setJobPosts)
-      .finally(() => setLoadingJobs(false));
+
+    // ✅ ADD: retry once when 401 happens right after signup (race condition)
+    const tryOnce = async () => {
+      return jobPostService.getCompanyJobPosts();
+    };
+
+    try {
+      const data = await tryOnce();
+      setJobPosts(data);
+    } catch (err) {
+      if (err?.status === 401) {
+        // first 401: wait a bit and retry one time
+        await sleep(800);
+        try {
+          const data2 = await tryOnce();
+          setJobPosts(data2);
+        } catch (err2) {
+          if (err2?.status === 401) {
+            // ✅ account vừa tạo chưa ready -> fail mềm
+            setJobPosts([]);
+          } else {
+            console.error("JOBPOSTS ERROR:", err2);
+          }
+        }
+      } else {
+        console.error("JOBPOSTS ERROR:", err);
+      }
+    } finally {
+      setLoadingJobs(false);
+    }
   };
 
   useEffect(() => {
     fetchJobPosts();
   }, []);
+
+  // ✅ ADD: show friendly screen while booting (avoid immediate API calls)
+  if (booting) {
+    return (
+      <>
+        <CompanyHeader />
+        <div className="container py-4">
+          <p className="text-muted">Setting up your account...</p>
+        </div>
+      </>
+    );
+  }
 
   if (!stats) return <p>Loading...</p>;
 
@@ -80,6 +165,7 @@ export default function CompanyDashboard() {
       <CompanyHeader />
 
       <div className="container py-4">
+        {/* Pass companyName */}
         <WelcomeBanner />
 
         {/* =======================

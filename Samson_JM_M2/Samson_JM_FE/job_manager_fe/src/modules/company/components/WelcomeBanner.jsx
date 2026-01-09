@@ -1,10 +1,20 @@
-import { useContext } from "react";
-import { AuthContext } from "../../auth/context/AuthContext";
+import { useEffect, useMemo, useState } from "react";
 
 export default function WelcomeBanner() {
-  const {user} = useContext(AuthContext);
+  // ✅ always read from localStorage cache
+  const [cachedCompanyName, setCachedCompanyName] = useState(
+    () => localStorage.getItem("companyName") || "Company"
+  );
 
-  const companyName = user?.companyName || "Company";
+  // ✅ in case companyName gets set after redirect, update once
+  useEffect(() => {
+    const name = localStorage.getItem("companyName");
+    if (name && name !== cachedCompanyName) setCachedCompanyName(name);
+  }, [cachedCompanyName]);
+
+  const companyName = useMemo(() => {
+    return cachedCompanyName || "Company";
+  }, [cachedCompanyName]);
 
   return (
     <div
@@ -14,9 +24,7 @@ export default function WelcomeBanner() {
         color: "white",
       }}
     >
-      <h3 className="fw-semibold mb-1">
-        Welcome Back, {companyName} 👋
-      </h3>
+      <h3 className="fw-semibold mb-1">Welcome Back, {companyName} 👋</h3>
       <p className="mb-0" style={{ opacity: 0.9 }}>
         Here’s what’s happening with your job posts today.
       </p>
