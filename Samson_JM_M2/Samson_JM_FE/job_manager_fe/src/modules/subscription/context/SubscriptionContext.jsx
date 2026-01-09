@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { getMySubscription } from "../api/subscriptionApi";
+import { hasValidToken } from "../../../infrastructure/http/httpClient";
 
 export const SubscriptionContext = createContext();
 
@@ -22,6 +23,9 @@ export function SubscriptionProvider({ children }) {
 
   // 🔥 This is the missing piece
   useEffect(() => {
+    if (!hasValidToken()) return;
+
+
     fetchSubscription(); // runs on app load & refresh
   }, []);
 
