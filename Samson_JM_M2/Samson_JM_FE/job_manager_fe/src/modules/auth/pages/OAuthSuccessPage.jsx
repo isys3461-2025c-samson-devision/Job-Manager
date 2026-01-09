@@ -14,39 +14,39 @@ export default function OAuthSuccessPage() {
         return;
       }
 
-      // ✅ must match httpClient/localStorageUtil key
+      // must match httpClient/localStorageUtil key
       localStorage.setItem("accessToken", token);
 
+      // clear old cache to avoid mixing
+      localStorage.removeItem("companyName");
+
       try {
-        // ✅ fetch company profile using the token we just stored
+        // fetch company profile using the token we just stored
         const res = await fetch("http://localhost:8080/api/company/me", {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`
           },
         });
 
         if (res.ok) {
           const me = await res.json();
 
-          // try common fields; adjust if your backend uses a different name
+          // company name
           const companyName =
             me?.companyName ||
-            me?.name ||
             me?.company?.name ||
+            me?.company?.companyName ||
             "Company";
 
           localStorage.setItem("companyName", companyName);
         } else {
-          // if not ok, still allow login to proceed (name will default)
           localStorage.setItem("companyName", "Company");
         }
       } catch (e) {
-        // network error: still proceed
         localStorage.setItem("companyName", "Company");
       }
 
-      // ✅ remove token from URL (safer)
       window.history.replaceState({}, document.title, "/company/dashboard");
       navigate("/company/dashboard", { replace: true });
     };

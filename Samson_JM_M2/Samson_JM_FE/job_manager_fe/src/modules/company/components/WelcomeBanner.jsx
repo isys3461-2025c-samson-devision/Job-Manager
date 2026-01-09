@@ -1,26 +1,20 @@
-import { useContext, useEffect, useMemo, useState } from "react";
-import { AuthContext } from "../../auth/context/AuthContext";
+import { useEffect, useMemo, useState } from "react";
 
 export default function WelcomeBanner() {
-  const { user } = useContext(AuthContext);
-
-  // ✅ instant fallback from localStorage on refresh
-  const [cachedName, setCachedName] = useState(
+  // ✅ always read from localStorage cache
+  const [cachedCompanyName, setCachedCompanyName] = useState(
     () => localStorage.getItem("companyName") || "Company"
   );
 
-  // ✅ when user loads, update cache + localStorage
+  // ✅ in case companyName gets set after redirect, update once
   useEffect(() => {
-    const name = user?.companyName || user?.name;
-    if (name) {
-      localStorage.setItem("companyName", name);
-      setCachedName(name);
-    }
-  }, [user]);
+    const name = localStorage.getItem("companyName");
+    if (name && name !== cachedCompanyName) setCachedCompanyName(name);
+  }, [cachedCompanyName]);
 
   const companyName = useMemo(() => {
-    return user?.companyName || user?.name || cachedName || "Company";
-  }, [user, cachedName]);
+    return cachedCompanyName || "Company";
+  }, [cachedCompanyName]);
 
   return (
     <div
