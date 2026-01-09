@@ -5,10 +5,13 @@ import {
   EMPLOYMENT_TYPE_LABELS,
   formatSalary,
   formatPostedDate,
+  formatExpiryDate, // 👈 ADD
+
 } from "../config/jobPostConfig";
 
 export default function JobPostCard({ post, onEdit, onDelete }) {
   const navigate = useNavigate();
+  console.log("expiryDate:", post.expiryDate);
 
   // ---------------------------
   // DERIVED VALUES
@@ -97,8 +100,16 @@ export default function JobPostCard({ post, onEdit, onDelete }) {
           )}
 
           {/* DATE */}
-          <div className="text-muted small">
-            Posted: {formatPostedDate(post.postedDate)}
+          <div className="text-muted small d-flex flex-column gap-1">
+            <span>
+              <i className="bi bi-calendar-check me-1"></i>
+              Posted Date: {formatPostedDate(post.postedDate)}
+            </span>
+
+            <span>
+              <i className="bi bi-calendar-x me-1 text-danger"></i>
+              Expiry Date: {formatExpiryDate(post.expiryDate)}
+            </span>
           </div>
         </div>
 

@@ -31,13 +31,39 @@ export default function CompanyDashboard() {
   }, []);
 
   // =======================
-  // LOAD JOB POSTS
+  // LOAD JOB POSTS (SAFE)
   // =======================
   const fetchJobPosts = () => {
     setLoadingJobs(true);
+
     jobPostService
       .getCompanyJobPosts()
-      .then(setJobPosts)
+      .then((res) => {
+        console.log("JOB POSTS RESPONSE:", res);
+
+        // res is ALREADY the JSON payload
+        let posts = [];
+
+        if (Array.isArray(res)) {
+          posts = res;
+        } else if (Array.isArray(res?.content)) {
+          posts = res.content;
+        } else if (Array.isArray(res?.data)) {
+          posts = res.data;
+        }
+
+        setJobPosts(
+          posts.map((p) => ({
+            // normalize ID
+            ...p,
+            id: p._id,
+          }))
+        );
+      })
+      .catch((err) => {
+        console.error("Failed to load job posts:", err);
+        setJobPosts([]);
+      })
       .finally(() => setLoadingJobs(false));
   };
 

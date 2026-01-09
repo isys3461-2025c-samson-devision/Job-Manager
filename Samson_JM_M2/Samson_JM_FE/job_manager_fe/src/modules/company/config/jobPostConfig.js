@@ -46,3 +46,13 @@ export const formatPostedDate = (postedDate) => {
   if (!postedDate) return "—";
   return new Date(postedDate).toLocaleDateString();
 };
+
+export const formatExpiryDate = (expiryDate) => {
+  if (!expiryDate) return "No expiry";
+
+  return new Date(expiryDate).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};

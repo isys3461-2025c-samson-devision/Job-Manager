@@ -26,6 +26,7 @@ public class JobPostSummaryResponse {
     private Double salaryMin;
     private Double salaryMax;
 
+    private LocalDate expiryDate;
     private LocalDate postedDate;
     private Boolean isPublished;
     private List<String> technicalSkills;
@@ -41,6 +42,7 @@ public class JobPostSummaryResponse {
             Double salaryMin,
             Double salaryMax,
             List<String> technicalSkills,
+            LocalDate expiryDate,
             LocalDate postedDate,
             Boolean isPublished
     ) {
@@ -54,6 +56,7 @@ public class JobPostSummaryResponse {
         this.salaryMin = salaryMin;
         this.salaryMax = salaryMax;
         this.technicalSkills = technicalSkills;
+        this.expiryDate = expiryDate;
         this.postedDate = postedDate;
         this.isPublished = isPublished;
     }

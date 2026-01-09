@@ -110,6 +110,7 @@ public class JobPostMapper {
                 jobPost.getSalaryMin(),
                 jobPost.getSalaryMax(),
                 jobPost.getTechnicalSkills(),
+                jobPost.getExpiryDate(),
                 jobPost.getPostedDate(),
                 jobPost.getIsPublished()
         );
