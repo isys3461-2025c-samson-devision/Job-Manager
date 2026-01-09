@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import AuthLogo from "../components/AuthLogo";
 import { authService } from "../service/authService";
 import OAuthCompleteRequest from "../models/OAuthCompleteRequest";
+import { localStorageUtil } from "../../../infrastructure/storage/localStorageUtil";
 
 export default function CompleteProfilePage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-
   const emailFromOAuth = searchParams.get("email");
 
   const [form, setForm] = useState({
@@ -41,22 +40,22 @@ export default function CompleteProfilePage() {
       setError("");
       setLoading(true);
 
-    const payload = new OAuthCompleteRequest({
+      const payload = new OAuthCompleteRequest({
         email: emailFromOAuth,
         companyName: form.companyName,
         country: form.country,
         phoneNumber: `${form.phoneCode}${form.phoneNumber}`,
-    });
-
-
+      });
 
       const res = await authService.completeOAuthProfile(payload);
 
-      // ✅ Save JWT
-      localStorage.setItem("authToken", res.accessToken);
+      // ✅ CORRECT: use shared storage util
+      localStorageUtil.setToken(res.accessToken);
+      localStorageUtil.setRole(res.role);
+      localStorageUtil.setCompanyName(res.companyName);
 
-      // ✅ Redirect after OAuth completion
-      navigate("/company/dashboard");
+      // ✅ IMPORTANT: force app re-hydration
+      window.location.href = "/company/dashboard";
     } catch (e) {
       console.error(e);
       setError("Failed to complete profile. Please try again.");

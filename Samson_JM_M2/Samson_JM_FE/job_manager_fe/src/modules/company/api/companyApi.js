@@ -1,27 +1,9 @@
-import axios from "axios";
+import { httpClient } from "../../../infrastructure/http/httpClient";
 
-const BASE_URL = "http://localhost:8080/api/company";
-
-export const getMyCompany = async () => {
-  const token = localStorage.getItem("accessToken");
-
-  const res = await axios.get(`${BASE_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return res.data;
+export const getMyCompany = () => {
+  return httpClient.get("/api/company/me");
 };
 
-export const updateMyCompany = async (payload) => {
-  const token = localStorage.getItem("accessToken");
-
-  const res = await axios.patch(`${BASE_URL}/me`, payload, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return res.data;
+export const updateMyCompany = (payload) => {
+  return httpClient.patch("/api/company/me", payload);
 };

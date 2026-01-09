@@ -9,6 +9,8 @@ import java.util.Map;
 import com.devision.job_manager_backend.modules.auth.repository.CompanyAuthRepository;
 import com.devision.job_manager_backend.modules.auth.service.internal.AuthInternalService;
 import com.devision.job_manager_backend.security.JwtService;
+import com.devision.job_manager_backend.modules.company.model.Company;
+import com.devision.job_manager_backend.modules.company.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class AuthServiceImpl implements AuthInternalService {
 
     private final CompanyAuthRepository companyAuthRepository;
+    private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService; // ✅ INJECTED
 
@@ -67,21 +70,33 @@ public class AuthServiceImpl implements AuthInternalService {
         CompanyAuth auth = companyAuthRepository.findByEmail(request.getEmail())
             .orElseThrow(() -> new RuntimeException("OAuth account not found"));
 
-        // ✅ Update existing OAuth account
+        // ❗ Prevent double creation
+        if (companyRepository.findByUserId(auth.getId()).isPresent()) {
+            throw new RuntimeException("Company profile already exists");
+        }
+
+        Company company = new Company();
+        company.setUserId(auth.getId());
+        company.setEmail(request.getEmail());
+        company.setCompanyName(request.getCompanyName());
+        company.setCountry(request.getCountry());
+        company.setPhoneNumber(request.getPhoneNumber());
+
+        companyRepository.save(company);
+
+        // Optional: sync name to auth
         auth.setCompanyName(request.getCompanyName());
-        auth.setCountry(request.getCountry());
-        auth.setPhoneNumber(request.getPhoneNumber());
+        companyAuthRepository.save(auth);
 
-        CompanyAuth saved = companyAuthRepository.save(auth);
-
-        String token = jwtService.generateToken(
-                saved.getId(),
-                saved.getEmail(),
-                saved.getRole()
+        String accessToken = jwtService.generateToken(
+            auth.getId(),
+            auth.getEmail(),
+            auth.getRole()
         );
 
-        return new AuthResponse(token, saved.getRole(), saved.getCompanyName());
+        return new AuthResponse(accessToken, auth.getRole(), auth.getCompanyName());
     }
+
 
 
 

@@ -42,43 +42,37 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("name");
 
-        // 1. Ensure CompanyAuth exists
         CompanyAuth auth = companyAuthRepository.findByEmail(email)
             .orElseGet(() -> {
                 CompanyAuth a = new CompanyAuth();
                 a.setEmail(email);
-                a.setCompanyName(name != null ? name : "New Company");
                 a.setRole("COMPANY");
                 return companyAuthRepository.save(a);
             });
 
-        // 2. Ensure Company exists
-        companyRepository.findByUserId(auth.getId())
-            .orElseGet(() -> {
-                Company company = new Company();
-                company.setUserId(auth.getId());
-                company.setCompanyName(auth.getCompanyName());
-                company.setEmail(auth.getEmail());
-                company.setPhoneNumber(auth.getPhoneNumber());
-                company.setAboutUs("");
-                company.setCountry(auth.getCountry());
-                company.setWhoWeAreLookingFor("");
-                return companyRepository.save(company);
-            });
+        boolean hasCompanyProfile =
+            companyRepository.findByUserId(auth.getId()).isPresent();
 
-        // 3. Issue JWT
+        if (!hasCompanyProfile) {
+            // ⛔ NO JWT YET
+            response.sendRedirect(
+                "http://localhost:3000/oauth/complete-profile?email=" + email
+            );
+            return;
+        }
+
+        // ✅ Only issue JWT if profile exists
         String token = jwtService.generateToken(
-                auth.getId(),
-                auth.getEmail(),
-                auth.getRole()
+            auth.getId(),
+            auth.getEmail(),
+            auth.getRole()
         );
 
-        // 4. Redirect
         response.sendRedirect(
-                "http://localhost:3000/oauth/success?token=" + token
+            "http://localhost:3000/oauth/success?accessToken=" + token
         );
     }
+
 
 }

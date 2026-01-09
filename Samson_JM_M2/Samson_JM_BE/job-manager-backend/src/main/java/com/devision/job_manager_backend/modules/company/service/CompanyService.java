@@ -8,42 +8,49 @@ import com.devision.job_manager_backend.modules.auth.service.external.AuthExtern
 import com.devision.job_manager_backend.modules.company.dto.request.UpdateCompanyRequest;
 import com.devision.job_manager_backend.modules.company.model.Company;
 import com.devision.job_manager_backend.modules.company.repository.CompanyRepository;
+import com.devision.job_manager_backend.modules.auth.repository.CompanyAuthRepository;
+
 
 @Service
 @RequiredArgsConstructor
 public class CompanyService {
+
     private final CompanyRepository companyRepository;
     private final AuthExternalService authExternalService;
-    /**
-     * Get current user's company profile.
-     * Auto-create if it does not exist.
-     */
+
     public Company getOrCreateMyCompany(String userId) {
-    return companyRepository.findByUserId(userId)
-        .orElseGet(() -> {
-            CompanyAuth auth = authExternalService.getAuthByUserId(userId);
-            Instant now = Instant.now();
-            Company company = Company.builder()
-                .userId(userId)
-                .email(auth.getEmail())
-                .companyName(auth.getCompanyName())
-                .phoneNumber(auth.getPhoneNumber())
-                .country(auth.getCountry())
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
-            return companyRepository.save(company);
-        });
+
+        return companyRepository.findByUserId(userId)
+            .orElseGet(() -> {
+
+                CompanyAuth auth = authExternalService
+                    .getAuthByUserId(userId)
+                    .orElseThrow(() ->
+                        new RuntimeException("User must complete company profile")
+                    );
+
+                Instant now = Instant.now();
+
+                Company company = Company.builder()
+                    .userId(userId)
+                    .email(auth.getEmail())
+                    .companyName(auth.getCompanyName())
+                    .phoneNumber(auth.getPhoneNumber())
+                    .country(auth.getCountry())
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build();
+
+                return companyRepository.save(company);
+            });
     }
-    /**
-     * Update company profile
-     */
-        public Company updateCompany(
-            String userId,
-            UpdateCompanyRequest request
-    ) {
+
+
+    public Company updateCompany(String userId, UpdateCompanyRequest request) {
+
         Company company = companyRepository.findByUserId(userId)
             .orElseThrow(() -> new RuntimeException("Company not found"));
+
         if (request.getCompanyName() != null)
             company.setCompanyName(request.getCompanyName());
         if (request.getPhoneNumber() != null)
@@ -61,11 +68,12 @@ public class CompanyService {
         if (request.getLogoUrl() != null)
             company.setLogoUrl(request.getLogoUrl());
         if (request.getSkillsNeeded() != null)
-        company.setSkillsNeeded(request.getSkillsNeeded());
+            company.setSkillsNeeded(request.getSkillsNeeded());
         if (request.getAchievements() != null)
-        company.setAchievements(request.getAchievements());
+            company.setAchievements(request.getAchievements());
         if (request.getMediaUrls() != null)
-        company.setMediaUrls(request.getMediaUrls());
+            company.setMediaUrls(request.getMediaUrls());
+
         company.setUpdatedAt(Instant.now());
         return companyRepository.save(company);
     }

@@ -1,20 +1,21 @@
 import { useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { localStorageUtil } from "../../../infrastructure/storage/localStorageUtil";
 
 export default function OAuthSuccessPage() {
-  const [searchParams] = useSearchParams();
+  const [params] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    const token = params.get("token");
 
     if (token) {
-      localStorage.setItem("accessToken", token);
+      localStorageUtil.setToken(token);
       navigate("/company/dashboard", { replace: true });
     } else {
-      navigate("/signin", { replace: true });
+      navigate("/login", { replace: true });
     }
-  }, [navigate, searchParams]);
+  }, [navigate, params]);
 
   return <p>Signing you in...</p>;
 }

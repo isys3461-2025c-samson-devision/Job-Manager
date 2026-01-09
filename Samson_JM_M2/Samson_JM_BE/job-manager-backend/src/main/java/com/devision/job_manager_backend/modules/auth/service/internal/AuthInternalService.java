@@ -7,7 +7,7 @@ import com.devision.job_manager_backend.modules.auth.dto.response.AuthResponse;
 
 public interface AuthInternalService {
 
-    Object completeOAuthRegistration(OAuthCompleteRequest request);
+    AuthResponse completeOAuthRegistration(OAuthCompleteRequest request);
 
     void registerCompany(RegisterRequest request);
 

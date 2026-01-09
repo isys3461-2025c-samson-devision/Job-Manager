@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import AuthLogo from "../components/AuthLogo";
 import { AuthContext } from "../context/AuthContext";
+import { authService } from "../service/authService";
 
 export default function SignUpPage() {
   const {signup} = useContext(AuthContext)
@@ -107,9 +108,7 @@ export default function SignUpPage() {
         <button
           className="btn w-100 mb-3 d-flex align-items-center justify-content-center"
           style={{ backgroundColor: "#D5FFD5" }}
-          onClick={() => {
-            window.location.href = "http://localhost:8080/oauth2/authorization/google";
-          }}
+          onClick={() => authService.loginWithGoogle()}
         >
           <i className="bi bi-google me-2" />
           Continue with Google
