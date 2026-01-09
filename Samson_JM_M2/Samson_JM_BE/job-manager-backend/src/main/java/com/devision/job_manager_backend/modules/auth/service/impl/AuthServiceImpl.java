@@ -34,6 +34,7 @@ public class AuthServiceImpl implements AuthInternalService {
         CompanyAuth auth = new CompanyAuth();
         auth.setCompanyName(request.getCompanyName());
         auth.setEmail(request.getEmail());
+        auth.setCountry(request.getCountry());
         auth.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         auth.setRole("COMPANY");
 
@@ -70,23 +71,32 @@ public class AuthServiceImpl implements AuthInternalService {
         CompanyAuth auth = companyAuthRepository.findByEmail(request.getEmail())
             .orElseThrow(() -> new RuntimeException("OAuth account not found"));
 
-        // ❗ Prevent double creation
+        // Prevent double creation
         if (companyRepository.findByUserId(auth.getId()).isPresent()) {
             throw new RuntimeException("Company profile already exists");
         }
 
+        // ✅ Generate internal system password for OAuth user
+        String systemPassword = java.util.UUID.randomUUID().toString();
+        String passwordHash = passwordEncoder.encode(systemPassword);
+
+        // ✅ Update CompanyAuth (THIS is what you wanted)
+        auth.setCompanyName(request.getCompanyName());
+        auth.setCountry(request.getCountry());
+        auth.setPhoneNumber(request.getPhoneNumber());
+        auth.setPasswordHash(passwordHash);
+
+        companyAuthRepository.save(auth);
+
+        // ✅ Create Company profile
         Company company = new Company();
         company.setUserId(auth.getId());
-        company.setEmail(request.getEmail());
+        company.setEmail(auth.getEmail());
         company.setCompanyName(request.getCompanyName());
         company.setCountry(request.getCountry());
         company.setPhoneNumber(request.getPhoneNumber());
 
         companyRepository.save(company);
-
-        // Optional: sync name to auth
-        auth.setCompanyName(request.getCompanyName());
-        companyAuthRepository.save(auth);
 
         String accessToken = jwtService.generateToken(
             auth.getId(),
@@ -94,8 +104,13 @@ public class AuthServiceImpl implements AuthInternalService {
             auth.getRole()
         );
 
-        return new AuthResponse(accessToken, auth.getRole(), auth.getCompanyName());
+        return new AuthResponse(
+            accessToken,
+            auth.getRole(),
+            auth.getCompanyName()
+        );
     }
+
 
 
 
