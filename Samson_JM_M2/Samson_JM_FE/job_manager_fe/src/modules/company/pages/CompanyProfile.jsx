@@ -8,9 +8,6 @@ export default function CompanyProfile() {
   const [loading, setLoading] = useState(true);
   const [logoPreview, setLogoPreview] = useState(null);
 
-  // =========================
-  // Fetch company profile
-  // =========================
   useEffect(() => {
     fetchCompany();
   }, []);
@@ -129,9 +126,6 @@ export default function CompanyProfile() {
     alert("Achievements editing not implemented yet.");
   };
 
-  // =========================
-  // Loading guard
-  // =========================
   if (loading) return <p>Loading profile...</p>;
   if (!profile) return <p>No company profile</p>;
 
