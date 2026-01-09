@@ -25,6 +25,8 @@ export default function JobPostFormModal({
   const [expiryDate, setExpiryDate] = useState("");
   const [isPublished, setIsPublished] = useState(false);
 
+  const [errors, setErrors] = useState({});
+
   const [skillInput, setSkillInput] = useState("");
   const [technicalSkills, setTechnicalSkills] = useState([]);
 
@@ -55,7 +57,12 @@ export default function JobPostFormModal({
     if (mode === "create") {
       resetForm();
     }
-  }, [mode, initialData]);
+
+    if (!show) {
+      resetForm();
+      setErrors({});
+    }
+  }, [mode, initialData, show]);
 
   const resetForm = () => {
     setTitle("");
@@ -87,6 +94,67 @@ export default function JobPostFormModal({
     { value: "INTERNSHIP", label: "Internship" },
   ];
 
+  const validate = () => {
+    const newErrors = {};
+
+    if (!title.trim() || title.length < 3) {
+      newErrors.title = "Job title must be at least 3 characters";
+    }
+
+    if (!description.trim() || description.length < 20) {
+      newErrors.description = "Description must be at least 20 characters";
+    }
+
+    if (!city.trim()) {
+      newErrors.city = "City is required";
+    }
+
+    if (!country) {
+      newErrors.country = "Country is required";
+    }
+
+    if (!employmentType) {
+      newErrors.employmentType = "Employment type is required";
+    }
+
+    if (!categories.length) {
+      newErrors.categories = "Select at least one category";
+    }
+
+    if (!technicalSkills.length) {
+      newErrors.technicalSkills = "Add at least three technical skill";
+    }
+
+    if (salaryType !== "NEGOTIABLE") {
+      if (!salaryMin && salaryType !== "UP_TO") {
+        newErrors.salaryMin = "Minimum salary required";
+      }
+
+      if (!salaryMax && salaryType !== "FROM") {
+        newErrors.salaryMax = "Maximum salary required";
+      }
+
+      if (salaryMin && salaryMax && Number(salaryMin) > Number(salaryMax)) {
+        newErrors.salaryMax = "Max salary must be greater than min salary";
+      }
+    }
+
+    if (!expiryDate) {
+      newErrors.expiryDate = "Expiry date is required";
+    } else {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const exp = new Date(expiryDate);
+      if (exp < today) {
+        newErrors.expiryDate = "Expiry date must be in the future";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // ---------------------------
   // SKILLS
   // ---------------------------
@@ -105,10 +173,12 @@ export default function JobPostFormModal({
   // SUBMIT
   // ---------------------------
   const handleSubmit = () => {
+    if (!validate()) return;
+
     const payload = {
       title,
       description,
-      location: city && country ? `${city}, ${country}` : null,
+      location: `${city}, ${country}`,
       employmentType,
       categories,
       salaryType,
@@ -141,8 +211,12 @@ export default function JobPostFormModal({
             <Form.Label>Job Title</Form.Label>
             <Form.Control
               value={title}
+              isInvalid={!!errors.title}
               onChange={(e) => setTitle(e.target.value)}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.title}
+            </Form.Control.Feedback>
           </Form.Group>
 
           {/* DESCRIPTION */}
@@ -152,8 +226,12 @@ export default function JobPostFormModal({
               as="textarea"
               rows={4}
               value={description}
+              isInvalid={!!errors.description}
               onChange={(e) => setDescription(e.target.value)}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.description}
+            </Form.Control.Feedback>
           </Form.Group>
 
           {/* LOCATION */}
@@ -161,16 +239,20 @@ export default function JobPostFormModal({
             <div className="col-md-6">
               <Form.Label>City</Form.Label>
               <Form.Control
-                placeholder="e.g. Ho Chi Minh City"
                 value={city}
+                isInvalid={!!errors.city}
                 onChange={(e) => setCity(e.target.value)}
               />
+              <Form.Control.Feedback type="invalid">
+                {errors.city}
+              </Form.Control.Feedback>
             </div>
 
             <div className="col-md-6">
               <Form.Label>Country</Form.Label>
               <Form.Select
                 value={country}
+                isInvalid={!!errors.country}
                 onChange={(e) => setCountry(e.target.value)}
               >
                 <option value="">Select country</option>
@@ -180,6 +262,9 @@ export default function JobPostFormModal({
                   </option>
                 ))}
               </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                {errors.country}
+              </Form.Control.Feedback>
             </div>
           </div>
 
@@ -189,11 +274,15 @@ export default function JobPostFormModal({
               <Form.Label>Employment Type</Form.Label>
               <Form.Select
                 value={employmentType}
+                isInvalid={!!errors.employmentType}
                 onChange={(e) => setEmploymentType(e.target.value)}
               >
                 <option value="FULL_TIME">Full-time</option>
                 <option value="PART_TIME">Part-time</option>
               </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                {errors.employmentType}
+              </Form.Control.Feedback>
             </div>
 
             <div className="col-md-6">
@@ -211,6 +300,11 @@ export default function JobPostFormModal({
                     />
                   ))}
                 </div>
+                {errors.categories && (
+                  <div className="text-danger small mt-1">
+                    {errors.categories}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -236,16 +330,24 @@ export default function JobPostFormModal({
                   placeholder="Min"
                   type="number"
                   value={salaryMin}
+                  isInvalid={!!errors.salaryMin}
                   onChange={(e) => setSalaryMin(e.target.value)}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.salaryMin}
+                </Form.Control.Feedback>
               </div>
               <div className="col">
                 <Form.Control
                   placeholder="Max"
                   type="number"
                   value={salaryMax}
+                  isInvalid={!!errors.salaryMax}
                   onChange={(e) => setSalaryMax(e.target.value)}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.salaryMax}
+                </Form.Control.Feedback>
               </div>
             </div>
           )}
@@ -260,6 +362,24 @@ export default function JobPostFormModal({
               />
               <Button onClick={addSkill}>Add</Button>
             </div>
+            {errors.technicalSkills && (
+              <div className="text-danger small mt-1">
+                {errors.technicalSkills}
+              </div>
+            )}
+          </Form.Group>
+
+          <Form.Group className="mt-3">
+            <Form.Label>Expiry Date</Form.Label>
+            <Form.Control
+              type="date"
+              value={expiryDate}
+              isInvalid={!!errors.expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+            />
+            <Form.Control.Feedback type="invalid">
+              {errors.expiryDate}
+            </Form.Control.Feedback>
           </Form.Group>
 
           <div className="mt-2">
