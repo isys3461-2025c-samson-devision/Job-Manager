@@ -114,12 +114,6 @@ DEV<span style={{ color: "#0054FF" }}>ision</span>
         ) : null}
       </div>
 
-      {/* LightMode/DarkMode Icon */}
-      <i
-        className="bi bi-sun-fill"
-        style={{ fontSize: "22px", cursor: "pointer" }}
-      />
-
       {/* LOG OUT BUTTON */}
       <button
         className="btn btn-outline-secondary btn-sm"

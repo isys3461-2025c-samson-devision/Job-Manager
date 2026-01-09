@@ -113,22 +113,19 @@ Notification for apply jobs
       )}
     </div>
 
-    <button
-    className="btn w-100"
-    style={{
-        backgroundColor: "#f97316",
-        color: "white",
-        borderRadius: 10,
-        height: 42,
-        fontWeight: 600,
-    }}
-    onClick={() => {
-        onClose();
-        navigate("/signin");
-    }}
-    >
-    Sign in
-    </button>
+<button
+  className="btn w-100"
+  style={{
+    backgroundColor: "#64748b",
+    color: "white",
+    borderRadius: 10,
+    height: 42,
+    fontWeight: 600,
+  }}
+  onClick={onClose}   // just close notification
+>
+  Close
+</button>
   </div>
 </div>
 );
