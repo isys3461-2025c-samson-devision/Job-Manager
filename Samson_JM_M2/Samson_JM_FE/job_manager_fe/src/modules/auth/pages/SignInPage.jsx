@@ -5,6 +5,7 @@ import AuthInput from "../components/AuthInput";
 import AuthLayout from "../components/AuthLayout";
 import { AuthContext } from "../context/AuthContext";
 import { LoginRequest } from "../models/LoginRequest";
+import { authService } from "../service/authService";
 
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -73,9 +74,7 @@ export default function SignInPage() {
 
         <button className="btn btn-light border w-100 d-flex justify-content-center align-items-center"
         style={{ backgroundColor: "#D5FFD5" }}
-        onClick={() => {
-          window.location.href = "http://localhost:8080/oauth2/authorization/google";
-        }}
+        onClick={() => authService.loginWithGoogle()}
         >
           <i className="bi bi-google me-2"></i>
           Continue with Google

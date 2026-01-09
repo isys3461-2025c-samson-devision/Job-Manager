@@ -1,6 +1,5 @@
 import { localStorageUtil } from "../storage/localStorageUtil";
 
-
 const BASE_URL = "http://localhost:8080"; // Change for deployment
 
 async function request(method, path, body, options = {}) {
@@ -9,10 +8,12 @@ async function request(method, path, body, options = {}) {
     ...options.headers,
   };
 
-  // ✅ DO NOT attach token to auth endpoints
-  if (!path.startsWith("/api/auth")) {
+  // ✅ DO NOT attach token to auth or oauth endpoints
+  if (!path.startsWith("/api/auth") && !path.startsWith("/oauth2")) {
     const token = localStorageUtil.getToken();
-    if (token) {
+
+    // ✅ Only attach REAL JWTs
+    if (token && token.split(".").length === 3) {
       headers["Authorization"] = `Bearer ${token}`;
     }
   }
@@ -27,7 +28,6 @@ async function request(method, path, body, options = {}) {
     throw new Error(`HTTP error ${response.status}`);
   }
 
-  // ✅ Handle empty responses (DELETE, 204)
   if (response.status === 204) {
     return null;
   }
@@ -35,11 +35,15 @@ async function request(method, path, body, options = {}) {
   return response.json();
 }
 
-
 export const httpClient = {
   get: (path) => request("GET", path),
   post: (path, body) => request("POST", path, body),
   put: (path, body) => request("PUT", path, body),
   patch: (path, body) => request("PATCH", path, body),
   delete: (path) => request("DELETE", path),
+};
+
+export const hasValidToken = () => {
+  const token = localStorage.getItem("accessToken");
+  return token && token.split(".").length === 3;
 };

@@ -11,22 +11,31 @@ export function SubscriptionProvider({ children }) {
   const fetchSubscription = async () => {
     try {
       const res = await getMySubscription();
-      console.log("SUB RESPONSE:", res.data); // 👈 ADD THIS
+
+      console.log("SUB RESPONSE:", res);
+
+      // ✅ No subscription = FREE user
+      if (!res) {
+        setIsPremium(false);
+        return;
+      }
+
       setIsPremium(res.status === "ACTIVE");
     } catch (err) {
-      console.error("SUB ERROR:", err); // 👈 ADD THIS
+      console.warn("No subscription found");
       setIsPremium(false);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔥 This is the missing piece
   useEffect(() => {
-    if (!hasValidToken()) return;
+    if (!hasValidToken()) {
+      setLoading(false);
+      return;
+    }
 
-
-    fetchSubscription(); // runs on app load & refresh
+    fetchSubscription();
   }, []);
 
   return (

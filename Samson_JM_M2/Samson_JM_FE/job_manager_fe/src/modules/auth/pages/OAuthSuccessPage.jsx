@@ -9,7 +9,7 @@ export default function OAuthSuccessPage() {
     const token = searchParams.get("token");
 
     if (token) {
-      localStorage.setItem("authToken", token);
+      localStorage.setItem("accessToken", token);
       navigate("/company/dashboard", { replace: true });
     } else {
       navigate("/signin", { replace: true });

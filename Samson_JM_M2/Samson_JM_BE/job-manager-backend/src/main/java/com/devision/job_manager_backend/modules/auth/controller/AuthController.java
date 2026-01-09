@@ -21,7 +21,7 @@ public class AuthController {
 
     @PostMapping("/oauth/complete-profile")
     public ResponseEntity<?> completeOAuth(
-            @RequestBody OAuthCompleteRequest request
+           @Valid @RequestBody OAuthCompleteRequest request
     ) {
         return ResponseEntity.ok(authService.completeOAuthRegistration(request));
     }

@@ -7,18 +7,17 @@ const BASE_URL = "http://localhost:8080/api/auth";
 
 export const authService = {
   async login(loginRequest) {
-    const res = await httpClient.post(
-      AUTH_ENDPOINTS.AUTH.LOGIN,
-      loginRequest
-    );
+    const res = await httpClient.post(AUTH_ENDPOINTS.AUTH.LOGIN, loginRequest);
     return new AuthUser(res.accessToken, res.role, res.companyName);
   },
 
   async signup(signupRequest) {
-    return httpClient.post(
-      AUTH_ENDPOINTS.AUTH.REGISTER,
-      signupRequest
-    );
+    return httpClient.post(AUTH_ENDPOINTS.AUTH.REGISTER, signupRequest);
+  },
+
+  // ✅ Google OAuth = browser redirect ONLY
+  loginWithGoogle() {
+    window.location.href = "http://localhost:8080/oauth2/authorization/google";
   },
 
   // ✅ NEW: Complete OAuth registration (NO JWT required)
@@ -34,5 +33,5 @@ export const authService = {
     );
 
     return res.data; // { token }
-  }
+  },
 };

@@ -6,6 +6,7 @@ import StatCard from "../components/StatCard";
 import JobPostCard from "../components/JobPostCard";
 import JobFilterBar from "../components/JobFilterBar";
 import JobPostFormModal from "../components/JobPostFormModal";
+import { hasValidToken } from "../../../infrastructure/http/httpClient";
 
 import { companyService } from "../service/companyService";
 import { jobPostService } from "../service/jobPostService";
@@ -41,6 +42,7 @@ export default function CompanyDashboard() {
   };
 
   useEffect(() => {
+    if (!hasValidToken()) return;
     fetchJobPosts();
   }, []);
 

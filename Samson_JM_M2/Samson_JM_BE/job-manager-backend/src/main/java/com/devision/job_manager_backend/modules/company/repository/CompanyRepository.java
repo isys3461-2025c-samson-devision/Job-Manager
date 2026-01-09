@@ -11,4 +11,6 @@ import com.devision.job_manager_backend.modules.company.model.Company;
 public interface CompanyRepository extends MongoRepository<Company, String> {
 
     Optional<Company> findByUserId(String userId);
+
+    
 }

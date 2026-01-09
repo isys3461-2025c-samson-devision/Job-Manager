@@ -62,31 +62,27 @@ public class AuthServiceImpl implements AuthInternalService {
     }
 
     @Override
-    public Object completeOAuthRegistration(OAuthCompleteRequest request) {
+    public AuthResponse completeOAuthRegistration(OAuthCompleteRequest request) {
 
-        // 1. Check duplicate
-        if (companyAuthRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Company already exists");
-        }
+        CompanyAuth auth = companyAuthRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new RuntimeException("OAuth account not found"));
 
-        // 2. Create CompanyAuth
-        CompanyAuth auth = new CompanyAuth();
-        auth.setEmail(request.getEmail());
+        // ✅ Update existing OAuth account
         auth.setCompanyName(request.getCompanyName());
         auth.setCountry(request.getCountry());
         auth.setPhoneNumber(request.getPhoneNumber());
-        auth.setRole("COMPANY");
 
         CompanyAuth saved = companyAuthRepository.save(auth);
 
-        // 3. Issue JWT
         String token = jwtService.generateToken(
                 saved.getId(),
                 saved.getEmail(),
                 saved.getRole()
         );
 
-        return Map.of("token", token);
+        return new AuthResponse(token, saved.getRole(), saved.getCompanyName());
     }
+
+
 
 }

@@ -31,26 +31,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        // ✅ 1. No header OR not Bearer → skip JWT
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
-        var claims = jwtService.extractClaims(token);
+        try {
+            // ✅ 2. Safe to substring now
+            String token = authHeader.substring(7);
 
-        String userId = claims.getSubject();
-        String email = claims.get("email", String.class);
-        String role = claims.get("role", String.class);
+            // ✅ 3. Basic JWT structure check
+            if (token.split("\\.").length != 3) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-        var auth = new UsernamePasswordAuthenticationToken(
-                userId,
-                null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + role))
-        );
-        auth.setDetails(email);
+            var claims = jwtService.extractClaims(token);
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
+            String userId = claims.getSubject();
+            String role = claims.get("role", String.class);
+            String email = claims.get("email", String.class);
+
+            var auth = new UsernamePasswordAuthenticationToken(
+                    userId,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+            );
+            auth.setDetails(email);
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+        } catch (Exception e) {
+            // ✅ 4. Never crash on bad tokens
+            SecurityContextHolder.clearContext();
+        }
+
         filterChain.doFilter(request, response);
     }
 
@@ -62,6 +78,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             || path.startsWith("/oauth2/")
             || path.startsWith("/login/");
     }
-
-
 }

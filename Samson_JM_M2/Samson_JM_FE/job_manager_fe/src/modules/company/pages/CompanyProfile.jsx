@@ -4,6 +4,8 @@ import CompanyHeader from "../components/CompanyHeader";
 import { getMyCompany, updateMyCompany } from "../api/companyApi";
 import { useContext } from "react";
 import { SubscriptionContext } from "../../subscription/context/SubscriptionContext";
+import { hasValidToken } from "../../../infrastructure/http/httpClient";
+
 
 
 /* -----------------------------
@@ -628,6 +630,7 @@ export default function CompanyProfile() {
   }, [isPremium, showToast]);
 
   useEffect(() => {
+    if (!hasValidToken()) return;
     fetchCompany();
   }, [fetchCompany]);
 
