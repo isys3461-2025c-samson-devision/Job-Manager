@@ -15,13 +15,17 @@ export function SubscriptionProvider({ children }) {
       // ✅ res can be null (204) or not what you expect
       const status = res?.status; // safe
       setIsPremium(status === "ACTIVE");
-    } catch (err) {
-      // ✅ This will never crash now
+  } catch (err) {
+    if (err?.status === 401) {
+      setIsPremium(false); // ✅ normal case
+    } else {
       console.error("SUB ERROR:", err);
       setIsPremium(false);
-    } finally {
-      setLoading(false);
     }
+  } finally {
+    setLoading(false);
+  }
+
   }, []);
 
   useEffect(() => {
