@@ -76,21 +76,6 @@ export default function ApplicantCard({
               >
                 {a.title}
               </div>
-              <div className="d-flex align-items-center">
-                <i
-                  className="bi bi-star-fill"
-                  style={{ color: "#FDBA3C", fontSize: "0.8rem" }}
-                />
-                <span
-                  style={{
-                    fontSize: "0.8rem",
-                    marginLeft: 4,
-                    color: "#111827",
-                  }}
-                >
-                  {a.rating}
-                </span>
-              </div>
               {showFlags && (
                 <div className="d-flex align-items-center gap-2 mt-1">
                   {isWarning && (

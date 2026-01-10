@@ -1,10 +1,9 @@
 // src/app/modules/company/pages/CompanyApplicants.jsx
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import CompanyHeader from "../components/CompanyHeader";
 import ApplicantCard from "../components/ApplicantsCard";
 import Modal from "../components/Modal";
-import mockApplicants from "../data/mockApplicants.json";
 import { useSubscription } from "../../subscription/hooks/useSubscription";
 import { httpClient } from "../../../infrastructure/http/httpClient";
 
@@ -21,6 +20,9 @@ export default function CompanyApplicants() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileNotice, setProfileNotice] = useState("");
+  const [applicants, setApplicants] = useState([]);
+  const [applicantsLoading, setApplicantsLoading] = useState(false);
+  const [applicantsError, setApplicantsError] = useState("");
   const [applicantFlags, setApplicantFlags] = useState(() => {
     if (typeof window === "undefined") {
       return {};
@@ -146,6 +148,9 @@ export default function CompanyApplicants() {
         [applicantId]: {
           ...current,
           [key]: nextValue,
+          ...(nextValue
+            ? { [key === "favorite" ? "warning" : "favorite"]: false }
+            : {}),
         },
       };
     });
@@ -159,37 +164,6 @@ export default function CompanyApplicants() {
     toggleApplicantFlag(applicantId, "warning");
   };
 
-  const getHighestEducationDegree = (education) => {
-    const rank = {
-      Bachelor: 1,
-      Master: 2,
-      Doctorate: 3,
-    };
-
-    if (!education) {
-      return "";
-    }
-
-    const degrees = Array.isArray(education)
-      ? education.map((e) => e.degree)
-      : [education];
-
-    let topDegree = "";
-    let topRank = 0;
-
-    degrees.forEach((degree) => {
-      if (!degree || !rank[degree]) {
-        return;
-      }
-      if (rank[degree] > topRank) {
-        topRank = rank[degree];
-        topDegree = degree;
-      }
-    });
-
-    return topDegree;
-  };
-
   const parseSalaryInput = (value) => {
     if (value === null || value === undefined || value === "") {
       return null;
@@ -199,86 +173,33 @@ export default function CompanyApplicants() {
     return Number.isFinite(parsed) ? parsed : null;
   };
 
-  const parseExpectedSalary = (expectedSalary) => {
-    if (expectedSalary === null || expectedSalary === undefined) {
-      return null;
+  const mapProfileToFilters = (profile) => {
+    if (!profile) {
+      return defaultFilters;
     }
 
-    if (typeof expectedSalary === "number") {
-      return { min: expectedSalary, max: expectedSalary };
-    }
-
-    const matches = String(expectedSalary).match(/\d+(\.\d+)?/g);
-    if (!matches || matches.length === 0) {
-      return null;
-    }
-
-    const values = matches
-      .map((value) => Number(value))
-      .filter((value) => Number.isFinite(value));
-
-    if (values.length === 0) {
-      return null;
-    }
-
-    if (values.length === 1) {
-      return { min: values[0], max: values[0] };
-    }
-
-    const min = Math.min(values[0], values[1]);
-    const max = Math.max(values[0], values[1]);
-    return { min, max };
-  };
-
-  const getSalaryFilter = useCallback(() => {
-    if (!isPremium) {
-      return { hasFilter: false, min: 0, max: Infinity };
-    }
-
-    const minValue = parseSalaryInput(filters.salaryMin);
-    const maxValue = parseSalaryInput(filters.salaryMax);
-
-    if (minValue === null && maxValue === null) {
-      return { hasFilter: false, min: 0, max: Infinity };
-    }
-
+    const countryValue = profile.country || "";
     return {
-      hasFilter: true,
-      min: minValue ?? 0,
-      max: maxValue ?? Infinity,
+      ...defaultFilters,
+      locationType: countryValue ? "country" : defaultFilters.locationType,
+      locationValue: countryValue,
+      educationDegree: profile.highestEducationDegree || "",
+      employmentTypes: Array.isArray(profile.employmentStatuses)
+        ? profile.employmentStatuses
+        : [],
+      skillTags: Array.isArray(profile.technicalBackground)
+        ? profile.technicalBackground
+        : [],
+      salaryMin:
+        profile.salaryMin !== null && profile.salaryMin !== undefined
+          ? String(profile.salaryMin)
+          : "",
+      salaryMax:
+        profile.salaryMax !== null && profile.salaryMax !== undefined
+          ? String(profile.salaryMax)
+          : "",
     };
-  }, [isPremium, filters.salaryMin, filters.salaryMax]);
-
-  const mapProfileToFilters = useCallback(
-    (profile) => {
-      if (!profile) {
-        return defaultFilters;
-      }
-
-      const countryValue = profile.country || "";
-      return {
-        ...defaultFilters,
-        locationType: countryValue ? "country" : defaultFilters.locationType,
-        locationValue: countryValue,
-        educationDegree: profile.highestEducationDegree || "",
-        employmentTypes: Array.isArray(profile.employmentStatuses)
-          ? profile.employmentStatuses
-          : [],
-        skillTags: Array.isArray(profile.technicalBackground)
-          ? profile.technicalBackground
-          : [],
-        salaryMin:
-          profile.salaryMin !== null && profile.salaryMin !== undefined
-            ? String(profile.salaryMin)
-            : "",
-        salaryMax:
-          profile.salaryMax !== null && profile.salaryMax !== undefined
-            ? String(profile.salaryMax)
-            : "",
-      };
-    },
-    [defaultFilters]
-  );
+  };
 
   const buildProfilePayload = (profileFilters) => {
     const countryValue =
@@ -296,7 +217,7 @@ export default function CompanyApplicants() {
     };
   };
 
-  const fetchSavedProfile = useCallback(async () => {
+  const fetchSavedProfile = async () => {
     setProfileLoading(true);
     setProfileNotice("");
     try {
@@ -307,15 +228,14 @@ export default function CompanyApplicants() {
       }
 
       const nextFilters = mapProfileToFilters(res);
-      setFilters(nextFilters);
       setDraftFilters(nextFilters);
-      setProfileNotice("Saved search profile loaded.");
-    } catch {
+      setProfileNotice("Saved search profile loaded. Click Apply Filters to use it.");
+    } catch (error) {
       setProfileNotice("Failed to load search profile.");
     } finally {
       setProfileLoading(false);
     }
-  }, [mapProfileToFilters]);
+  };
 
   const saveProfile = async () => {
     setProfileSaving(true);
@@ -331,139 +251,37 @@ export default function CompanyApplicants() {
     }
   };
 
+  const fetchApplicants = async () => {
+    setApplicantsLoading(true);
+    setApplicantsError("");
+    try {
+      const payload = {
+        keyword,
+        locationType: filters.locationType,
+        locationValue: filters.locationValue,
+        educationDegree: filters.educationDegree,
+        workExperience: filters.workExperience,
+        workExperienceKeyword: filters.workExperienceKeyword,
+        employmentTypes: filters.employmentTypes,
+        skillTags: filters.skillTags,
+        salaryMin: isPremium ? parseSalaryInput(filters.salaryMin) : null,
+        salaryMax: isPremium ? parseSalaryInput(filters.salaryMax) : null,
+        jobId: jobIdFromJobPage,
+      };
+
+      const res = await httpClient.post("/api/applicants/search", payload);
+      setApplicants(Array.isArray(res) ? res : []);
+    } catch (error) {
+      setApplicants([]);
+      setApplicantsError("Failed to load applicants.");
+    } finally {
+      setApplicantsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (subscriptionLoading || !isPremium) return;
-    fetchSavedProfile();
-  }, [subscriptionLoading, isPremium, fetchSavedProfile]);
-
-  // Filter applicants
-  const filteredApplicants = useMemo(() => {
-    const kw = keyword.trim().toLowerCase();
-    const locationValue = filters.locationValue.trim().toLowerCase();
-    const experienceKeyword = filters.workExperienceKeyword
-      .trim()
-      .toLowerCase();
-    const salaryFilter = getSalaryFilter();
-
-    return mockApplicants
-      .filter((a) => {
-        if (!jobIdFromJobPage) return true;
-        return (
-          Array.isArray(a.appliedJobIds) &&
-          a.appliedJobIds.includes(Number(jobIdFromJobPage))
-        );
-      })
-      .filter((a) => {
-        const experienceText = (a.workExperiences || [])
-          .map((exp) => `${exp.title || ""} ${exp.description || ""}`)
-          .join(" ")
-          .toLowerCase();
-
-        const summaryText = (a.summary || "").toLowerCase();
-        const skillsText = (a.skills || []).join(" ").toLowerCase();
-
-        const matchKeyword =
-          !kw ||
-          a.name.toLowerCase().includes(kw) ||
-          a.title.toLowerCase().includes(kw) ||
-          skillsText.includes(kw) ||
-          summaryText.includes(kw) ||
-          experienceText.includes(kw);
-
-        return matchKeyword;
-      })
-      .filter((a) => {
-        if (!locationValue) {
-          return true;
-        }
-
-        if (filters.locationType === "city") {
-          return (a.city || "").toLowerCase().includes(locationValue);
-        }
-
-        return (a.country || "").toLowerCase().includes(locationValue);
-      })
-      .filter((a) => {
-        if (!filters.educationDegree) {
-          return true;
-        }
-
-        const highestDegree = getHighestEducationDegree(a.education);
-        return highestDegree === filters.educationDegree;
-      })
-      .filter((a) => {
-        if (!filters.workExperience) {
-          return true;
-        }
-
-        const hasExperience =
-          Array.isArray(a.workExperiences) && a.workExperiences.length > 0;
-
-        if (filters.workExperience === "none") {
-          return !hasExperience;
-        }
-
-        if (filters.workExperience === "any") {
-          return hasExperience;
-        }
-
-        if (filters.workExperience === "keyword") {
-          if (!experienceKeyword) {
-            return false;
-          }
-
-          const experienceText = (a.workExperiences || [])
-            .map((exp) => `${exp.title || ""} ${exp.description || ""}`)
-            .join(" ")
-            .toLowerCase();
-
-          return experienceText.includes(experienceKeyword);
-        }
-
-        return true;
-      })
-      .filter((a) => {
-        if (filters.employmentTypes.length === 0) {
-          return true;
-        }
-
-        const applicantTypes = Array.isArray(a.employmentTypes)
-          ? a.employmentTypes.map((t) => t.toLowerCase())
-          : [];
-
-        return filters.employmentTypes.some((type) =>
-          applicantTypes.includes(type.toLowerCase())
-        );
-      })
-      .filter((a) => {
-        if (filters.skillTags.length === 0) {
-          return true;
-        }
-
-        const applicantSkills = Array.isArray(a.skills)
-          ? a.skills.map((s) => s.toLowerCase())
-          : [];
-
-        return filters.skillTags.some((tag) =>
-          applicantSkills.includes(tag.toLowerCase())
-        );
-      })
-      .filter((a) => {
-        if (!salaryFilter.hasFilter) {
-          return true;
-        }
-
-        const applicantSalary = parseExpectedSalary(a.expectedSalary);
-        if (!applicantSalary) {
-          return true;
-        }
-
-        return (
-          applicantSalary.min <= salaryFilter.max &&
-          applicantSalary.max >= salaryFilter.min
-        );
-      });
-  }, [keyword, filters, jobIdFromJobPage, getSalaryFilter]);
+    fetchApplicants();
+  }, [keyword, filters, jobIdFromJobPage, isPremium]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
@@ -477,13 +295,11 @@ export default function CompanyApplicants() {
     localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(applicantFlags));
   }, [applicantFlags]);
 
-  const visibleApplicants = filteredApplicants.slice(0, visibleCount);
-  const canLoadMore = visibleCount < filteredApplicants.length;
+  const visibleApplicants = applicants.slice(0, visibleCount);
+  const canLoadMore = visibleCount < applicants.length;
 
   const handleLoadMore = () => {
-    setVisibleCount((prev) =>
-      Math.min(prev + PAGE_SIZE, filteredApplicants.length)
-    );
+    setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, applicants.length));
   };
   const handleViewProfile = (applicant) => {
     setSelectedApplicant(applicant);
@@ -551,8 +367,12 @@ export default function CompanyApplicants() {
 
           {/* Result count */}
           <div className="mb-3 text-muted">
-            Showing {visibleApplicants.length} of {filteredApplicants.length}{" "}
-            candidates
+            {applicantsLoading
+              ? "Loading applicants..."
+              : `Showing ${visibleApplicants.length} of ${applicants.length} candidates`}
+            {applicantsError && (
+              <div className="text-danger small mt-1">{applicantsError}</div>
+            )}
           </div>
 
           {/* Applicant cards */}

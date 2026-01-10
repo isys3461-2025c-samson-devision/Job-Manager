@@ -28,3 +28,8 @@ stripe:
 jwt:
   secret: devision-super-secret-key-change-later
   expiration: 86400000 # 24 hours
+
+jobapplicant:
+  profile:
+    base-url: http://localhost:3002/api/profile
+    auth-token: ""
