@@ -6,7 +6,6 @@ import {
   formatSalary,
   formatPostedDate,
   formatExpiryDate, // 👈 ADD
-
 } from "../config/jobPostConfig";
 
 export default function JobPostCard({ post, onEdit, onDelete }) {
@@ -39,7 +38,7 @@ export default function JobPostCard({ post, onEdit, onDelete }) {
   const handleViewApplicants = () => {
     navigate("/company/applicants", {
       state: {
-        jobId: post.id,
+        jobId: jobId,
         jobTitle: post.title,
       },
     });

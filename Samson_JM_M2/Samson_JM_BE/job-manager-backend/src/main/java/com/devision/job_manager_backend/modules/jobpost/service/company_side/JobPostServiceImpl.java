@@ -47,6 +47,7 @@ public class JobPostServiceImpl implements JobPostInternalService {
 
     @Override
     public List<JobPostSummaryResponse> getCompanyJobPosts(String companyId) {
+
         return jobPostRepository.findByCompanyId(companyId)
                 .stream()
                 .map(jobPostMapper::toSummary)

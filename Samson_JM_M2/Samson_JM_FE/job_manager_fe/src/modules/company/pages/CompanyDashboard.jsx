@@ -55,7 +55,7 @@ export default function CompanyDashboard() {
           posts.map((p) => ({
             // normalize ID
             ...p,
-            id: p._id,
+            id: p._id || p.id || p.jobId,
           }))
         );
       })
@@ -82,6 +82,21 @@ export default function CompanyDashboard() {
 
     await jobPostService.deleteJobPost(jobId);
     fetchJobPosts();
+  };
+
+  const handleEditJob = (post) => {
+    if (!post.id) {
+      console.error("No job ID found!", post);
+      alert("Cannot edit job – missing ID");
+      return;
+    }
+
+    setEditingJob({
+      ...post,
+      expiryDate: post.expiryDate
+        ? new Date(post.expiryDate).toISOString().slice(0, 10)
+        : "",
+    });
   };
 
   // =======================
@@ -144,9 +159,9 @@ export default function CompanyDashboard() {
         ) : filteredPosts.length > 0 ? (
           filteredPosts.map((post) => (
             <JobPostCard
-              key={post.id}
+              key={post.id || post._id}
               post={post}
-              onEdit={setEditingJob}
+              onEdit={handleEditJob}
               onDelete={handleDeleteJob}
             />
           ))
@@ -182,7 +197,19 @@ export default function CompanyDashboard() {
         initialData={editingJob}
         onClose={() => setEditingJob(null)}
         onSubmit={async (payload) => {
-          await jobPostService.updateJobPost(editingJob.id, payload);
+          console.log("EDITING JOB AT SUBMIT:", editingJob);
+
+          // Try multiple ID fields
+          const jobId = editingJob?.id || editingJob?._id || editingJob?.jobId;
+
+          if (!jobId) {
+            console.error("No job ID found!", editingJob);
+            alert("Error: Cannot update job - no ID found");
+            return;
+          }
+
+          console.log("Using job ID:", jobId); // 👈 Confirm what ID we're using
+          await jobPostService.updateJobPost(jobId, payload);
           setEditingJob(null);
           fetchJobPosts();
         }}
