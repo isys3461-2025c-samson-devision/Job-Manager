@@ -269,7 +269,7 @@ export default function CompanyApplicants() {
         jobId: jobIdFromJobPage,
       };
 
-      const res = await httpClient.post("/api/applicants/search", payload);
+    const res = await httpClient.post("/api/applicants/search", payload);
       setApplicants(Array.isArray(res) ? res : []);
     } catch (error) {
       setApplicants([]);
