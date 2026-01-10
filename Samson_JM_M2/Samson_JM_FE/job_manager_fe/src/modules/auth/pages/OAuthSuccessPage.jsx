@@ -7,10 +7,13 @@ export default function OAuthSuccessPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = params.get("token");
+    const companyName = localStorageUtil.getCompanyName();
 
-    if (token) {
-      localStorageUtil.setToken(token);
+    const accessToken = params.get("accessToken");
+
+    if (accessToken) {
+      localStorageUtil.setToken(accessToken);
+      localStorageUtil.setCompanyName(companyName);
       navigate("/company/dashboard", { replace: true });
     } else {
       navigate("/login", { replace: true });

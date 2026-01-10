@@ -34,6 +34,15 @@ export const AuthProvider = ({ children }) => {
     await authService.signup(signupRequest);
   };
 
+  // ✅ NEW: hydrate auth state (used by OAuth)
+  const hydrateUser = ({ accessToken, role, companyName }) => {
+    localStorageUtil.setToken(accessToken);
+    localStorageUtil.setRole(role);
+    localStorageUtil.setCompanyName(companyName);
+
+    setUser({ accessToken, role, companyName });
+  };
+
   const logout = () => {
     localStorageUtil.removeToken();
     localStorageUtil.removeRole();
@@ -42,7 +51,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, hydrateUser }}>
       {children}
     </AuthContext.Provider>
   );
