@@ -20,6 +20,8 @@ public class JobPost {
     @Id
     private String id;
 
+    private boolean fresher_flag;
+
     /** Ownership */
     private String companyId;
 
@@ -47,4 +49,6 @@ public class JobPost {
 
     /** Visibility */
     private Boolean isPublished;
+
+    //private List<applicantFiles> applicantRecords;
 }

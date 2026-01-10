@@ -1,4 +1,48 @@
-export default function ApplicantCard({ applicant: a, onViewProfile }) {
+export default function ApplicantCard({
+  applicant: a,
+  onViewProfile,
+  isFavorite = false,
+  isWarning = false,
+}) {
+  const nameParts = (a.name || "").trim().split(/\s+/);
+  const firstName = a.firstName || nameParts[0] || "Unknown";
+  const lastName = a.lastName || nameParts.slice(1).join(" ") || "";
+  const displayName = `${firstName} ${lastName}`.trim();
+  const showFlags = isWarning || isFavorite;
+
+  const getHighestEducationDegree = (education) => {
+    const rank = {
+      Bachelor: 1,
+      Master: 2,
+      Doctorate: 3,
+    };
+
+    if (!education) {
+      return "Not specified";
+    }
+
+    const degrees = Array.isArray(education)
+      ? education.map((edu) => edu.degree)
+      : [education];
+
+    let highest = "";
+    let highestRank = 0;
+
+    degrees.forEach((degree) => {
+      if (!degree || !rank[degree]) {
+        return;
+      }
+      if (rank[degree] > highestRank) {
+        highestRank = rank[degree];
+        highest = degree;
+      }
+    });
+
+    return highest || degrees[0] || "Not specified";
+  };
+
+  const highestEducation = getHighestEducationDegree(a.education);
+
   return (
     <div
       className="card border-0 h-100"
@@ -21,7 +65,7 @@ export default function ApplicantCard({ applicant: a, onViewProfile }) {
             />
             <div>
               <div style={{ fontSize: "0.95rem", fontWeight: 600 }}>
-                {a.name}
+                {displayName}
               </div>
               <div
                 style={{
@@ -47,6 +91,26 @@ export default function ApplicantCard({ applicant: a, onViewProfile }) {
                   {a.rating}
                 </span>
               </div>
+              {showFlags && (
+                <div className="d-flex align-items-center gap-2 mt-1">
+                  {isWarning && (
+                    <span
+                      title="Warning"
+                      style={{ color: "#ef4444", fontSize: "0.85rem" }}
+                    >
+                      <i className="bi bi-exclamation-triangle-fill" />
+                    </span>
+                  )}
+                  {isFavorite && (
+                    <span
+                      title="Favorite"
+                      style={{ color: "#ec4899", fontSize: "0.85rem" }}
+                    >
+                      <i className="bi bi-heart-fill" />
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -71,15 +135,15 @@ export default function ApplicantCard({ applicant: a, onViewProfile }) {
           {/* info */}
           <div className="mb-2 d-flex align-items-center">
             <i className="bi bi-geo-alt me-2" />
-            {a.location}
+            {a.city}, {a.country}
           </div>
           <div className="mb-2 d-flex align-items-center">
-            <i className="bi bi-briefcase me-2" />
-            {a.yearsExperience} years experience
+            <i className="bi bi-envelope me-2" />
+            {a.email || "Email not provided"}
           </div>
           <div className="mb-2 d-flex align-items-center">
             <i className="bi bi-mortarboard me-2" />
-            {a.education}
+            Highest Education: {highestEducation}
           </div>
 
           {/* Skills */}

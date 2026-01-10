@@ -2,17 +2,16 @@ import { useEffect, useState } from "react";
 
 import CompanyHeader from "../components/CompanyHeader";
 import WelcomeBanner from "../components/WelcomeBanner";
-import StatCard from "../components/StatCard";
 import JobPostCard from "../components/JobPostCard";
 import JobFilterBar from "../components/JobFilterBar";
 import JobPostFormModal from "../components/JobPostFormModal";
 import { hasValidToken } from "../../../infrastructure/http/httpClient";
 
-import { companyService } from "../service/companyService";
+// import { companyService } from "../service/companyService";
 import { jobPostService } from "../service/jobPostService";
 
 export default function CompanyDashboard() {
-  const [stats, setStats] = useState(null);
+  // const [stats, setStats] = useState(null);
 
   const [jobPosts, setJobPosts] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -23,12 +22,12 @@ export default function CompanyDashboard() {
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
 
-  // =======================
-  // LOAD COMPANY STATS
-  // =======================
-  useEffect(() => {
-    companyService.getCompanyStats().then(setStats);
-  }, []);
+  // // =======================
+  // // LOAD COMPANY STATS
+  // // =======================
+  // useEffect(() => {
+  //   companyService.getCompanyStats().then(setStats);
+  // }, []);
 
   // =======================
   // LOAD JOB POSTS (SAFE)
@@ -72,7 +71,7 @@ export default function CompanyDashboard() {
     fetchJobPosts();
   }, []);
 
-  if (!stats) return <p>Loading...</p>;
+  // if (!stats) return <p>Loading...</p>;
 
   // =======================
   // DELETE JOB
@@ -109,47 +108,6 @@ export default function CompanyDashboard() {
 
       <div className="container py-4">
         <WelcomeBanner />
-
-        {/* =======================
-            STAT CARDS
-        ======================== */}
-        <div className="row mb-4 g-4">
-          <div className="col-md-3 col-sm-6">
-            <StatCard
-              icon="bi-briefcase"
-              iconColor="#2d68ff"
-              value={stats.publishedJobs}
-              label="Published Jobs"
-            />
-          </div>
-
-          <div className="col-md-3 col-sm-6">
-            <StatCard
-              icon="bi-people"
-              iconColor="#555"
-              value={stats.totalApplicants}
-              label="Total Applicants"
-            />
-          </div>
-
-          <div className="col-md-3 col-sm-6">
-            <StatCard
-              icon="bi-eye"
-              iconColor="#C063E6"
-              value={stats.totalViews}
-              label="Total Views"
-            />
-          </div>
-
-          <div className="col-md-3 col-sm-6">
-            <StatCard
-              icon="bi-file-earmark-text"
-              iconColor="#E88F2A"
-              value={stats.drafts}
-              label="Drafts"
-            />
-          </div>
-        </div>
 
         {/* =======================
             HEADER
