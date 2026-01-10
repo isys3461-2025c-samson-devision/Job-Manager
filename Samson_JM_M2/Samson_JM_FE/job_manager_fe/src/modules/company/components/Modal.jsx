@@ -291,12 +291,12 @@ const Modal = ({
                 <i className="bi bi-cash-coin me-2" />
                 <span>Salary: {applicant.expectedSalary}</span>
               </div>
-              {applicant.rating && (
+              {/* {applicant.rating && (
                 <div className="d-flex align-items-center mb-1">
                   <i className="bi bi-star-fill me-2" style={{ color: "#FDBA3C" }} />
                   <span>Rating: {applicant.rating}</span>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* EDUCATION */}
