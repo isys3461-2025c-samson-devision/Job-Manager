@@ -22,6 +22,7 @@ stripe:
   success-url: http://localhost:3000/subscription/payment/success
   cancel-url: http://localhost:3000/subscription/payment/cancel
   premium-price-id: price_1SjksMBB6o3QuzcAG9YHOoqK
+  applicant-price-id: price_1Snu7iBB6o3QuzcAJ5MwD5Oo
 
 
       
