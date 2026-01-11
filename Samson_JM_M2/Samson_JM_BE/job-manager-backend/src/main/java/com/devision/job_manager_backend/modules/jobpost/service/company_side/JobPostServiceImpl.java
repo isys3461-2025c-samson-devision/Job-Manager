@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import com.devision.job_manager_backend.modules.company.service.CompanyService;
+import com.devision.job_manager_backend.modules.company.model.Company;
 import com.devision.job_manager_backend.modules.jobpost.dto.request.CreateJobPostRequest;
 import com.devision.job_manager_backend.modules.jobpost.dto.request.JobPostFilterRequest;
 import com.devision.job_manager_backend.modules.jobpost.dto.request.UpdateJobPostRequest;
@@ -23,6 +25,7 @@ public class JobPostServiceImpl implements JobPostInternalService {
 
     private final JobPostRepository jobPostRepository;
     private final JobPostMapper jobPostMapper;
+    private final CompanyService companyService;
 
     /* =========================
        COMPANY SIDE
@@ -37,7 +40,12 @@ public class JobPostServiceImpl implements JobPostInternalService {
         validateCreateRequest(request);
 
         JobPost jobPost = jobPostMapper.toEntity(request);
+
+        Company company = companyService.getOrCreateMyCompany(companyId);
+
+
         jobPost.setCompanyId(companyId);
+        jobPost.setCompanyName(company.getCompanyName());
         jobPost.setPostedDate(LocalDate.now());
 
         return jobPostMapper.toDetail(

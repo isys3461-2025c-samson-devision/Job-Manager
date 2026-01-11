@@ -20,6 +20,10 @@ public class UpdateJobPostRequest {
     private EmploymentType employmentType;
     private List<JobCategory> categories;
 
+    private Boolean fresherFlag;
+    private String companyId;
+    private String companyName;
+
     private LocalDate expiryDate;
 
     private SalaryType salaryType;

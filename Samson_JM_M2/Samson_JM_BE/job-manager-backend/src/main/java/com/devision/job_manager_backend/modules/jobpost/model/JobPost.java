@@ -25,6 +25,8 @@ public class JobPost {
     /** Ownership */
     private String companyId;
 
+    private String companyName;
+
     /** Core info */
     private String title;
     private String description;
