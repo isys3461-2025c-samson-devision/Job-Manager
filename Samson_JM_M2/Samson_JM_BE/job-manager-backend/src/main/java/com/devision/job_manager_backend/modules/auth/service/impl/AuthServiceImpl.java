@@ -5,15 +5,18 @@ import com.devision.job_manager_backend.modules.auth.dto.request.OAuthCompleteRe
 import com.devision.job_manager_backend.modules.auth.dto.request.RegisterRequest;
 import com.devision.job_manager_backend.modules.auth.dto.response.AuthResponse;
 import com.devision.job_manager_backend.modules.auth.model.CompanyAuth;
-import java.util.Map;
 import com.devision.job_manager_backend.modules.auth.repository.CompanyAuthRepository;
 import com.devision.job_manager_backend.modules.auth.service.internal.AuthInternalService;
-import com.devision.job_manager_backend.security.JwtService;
 import com.devision.job_manager_backend.modules.company.model.Company;
 import com.devision.job_manager_backend.modules.company.repository.CompanyRepository;
+import com.devision.job_manager_backend.security.JwtService;
+import java.time.Duration;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,9 @@ public class AuthServiceImpl implements AuthInternalService {
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService; // ✅ INJECTED
+
+    private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final Duration FAIL_WINDOW = Duration.ofSeconds(60);
 
     @Override
     public void registerCompany(RegisterRequest request) {
@@ -41,9 +47,12 @@ public class AuthServiceImpl implements AuthInternalService {
         auth.setPhoneNumber(request.getPhoneNumber());
         auth.setCountry(request.getCountry());
 
+        auth.setFailedLoginCount(0);
+        auth.setFirstFailedAt(null);
+        auth.setLockUntil(null);
+
         companyAuthRepository.save(auth);
     }
-
 
     @Override
     public AuthResponse login(LoginRequest request) {
@@ -51,17 +60,51 @@ public class AuthServiceImpl implements AuthInternalService {
         CompanyAuth auth = companyAuthRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
+        Instant now = Instant.now();
+
+        if (isLocked(auth, now)) {
+            long remaining = Math.max(0, Duration.between(now, auth.getLockUntil()).getSeconds());
+            throw new ResponseStatusException(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    "Your account is locked until " + auth.getLockUntil() + " (" + remaining + "s remaining)."
+            );
+        }
+
         boolean matches = passwordEncoder.matches(
                 request.getPassword(),
                 auth.getPasswordHash()
         );
 
         if (!matches) {
-            throw new RuntimeException("Invalid credentials");
+            registerFailedAttempt(auth, now);
+            companyAuthRepository.save(auth);
+
+            int count = auth.getFailedLoginCount() == null ? 0 : auth.getFailedLoginCount();
+            Instant first = auth.getFirstFailedAt();
+            long windowLeft = 0;
+            if (first != null) {
+                long used = Duration.between(first, now).getSeconds();
+                windowLeft = Math.max(0, FAIL_WINDOW.getSeconds() - used);
+            }
+
+            if (auth.getLockUntil() != null && auth.getLockUntil().isAfter(now)) {
+                long remaining = Math.max(0, Duration.between(now, auth.getLockUntil()).getSeconds());
+                throw new ResponseStatusException(
+                        HttpStatus.TOO_MANY_REQUESTS,
+                        "Your account is locked until " + auth.getLockUntil() + " (" + remaining + "s remaining)."
+                );
+            }
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid credentials. Attempt " + count + "/" + MAX_FAILED_ATTEMPTS + ". Window resets in " + windowLeft + "s."
+            );
         }
 
-        String token = jwtService.generateToken(auth.getId(), auth.getEmail(), auth.getRole());
+        resetFailedAttempts(auth);
+        companyAuthRepository.save(auth);
 
+        String token = jwtService.generateToken(auth.getId(), auth.getEmail(), auth.getRole());
         return new AuthResponse(token, auth.getRole());
     }
 
@@ -69,18 +112,15 @@ public class AuthServiceImpl implements AuthInternalService {
     public AuthResponse completeOAuthRegistration(OAuthCompleteRequest request) {
 
         CompanyAuth auth = companyAuthRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new RuntimeException("OAuth account not found"));
+                .orElseThrow(() -> new RuntimeException("OAuth account not found"));
 
-        // Prevent double creation
         if (companyRepository.findByUserId(auth.getId()).isPresent()) {
             throw new RuntimeException("Company profile already exists");
         }
 
-        // ✅ Generate internal system password for OAuth user
         String systemPassword = java.util.UUID.randomUUID().toString();
         String passwordHash = passwordEncoder.encode(systemPassword);
 
-        // ✅ Update CompanyAuth (THIS is what you wanted)
         auth.setCompanyName(request.getCompanyName());
         auth.setCountry(request.getCountry());
         auth.setPhoneNumber(request.getPhoneNumber());
@@ -88,7 +128,6 @@ public class AuthServiceImpl implements AuthInternalService {
 
         companyAuthRepository.save(auth);
 
-        // ✅ Create Company profile
         Company company = new Company();
         company.setUserId(auth.getId());
         company.setEmail(auth.getEmail());
@@ -99,20 +138,48 @@ public class AuthServiceImpl implements AuthInternalService {
         companyRepository.save(company);
 
         String accessToken = jwtService.generateToken(
-            auth.getId(),
-            auth.getEmail(),
-            auth.getRole()
+                auth.getId(),
+                auth.getEmail(),
+                auth.getRole()
         );
 
         return new AuthResponse(
-            accessToken,
-            auth.getRole()
-            // auth.getCompanyName()
+                accessToken,
+                auth.getRole()
         );
     }
 
+    private boolean isLocked(CompanyAuth auth, Instant now) {
+        return auth.getLockUntil() != null && auth.getLockUntil().isAfter(now);
+    }
 
+    private void resetFailedAttempts(CompanyAuth auth) {
+        auth.setFailedLoginCount(0);
+        auth.setFirstFailedAt(null);
+        auth.setLockUntil(null);
+    }
 
+    private void registerFailedAttempt(CompanyAuth auth, Instant now) {
+        Integer currentCount = auth.getFailedLoginCount();
+        if (currentCount == null) currentCount = 0;
 
+        Instant firstFailedAt = auth.getFirstFailedAt();
 
+        boolean windowExpired =
+                firstFailedAt == null || Duration.between(firstFailedAt, now).compareTo(FAIL_WINDOW) > 0;
+
+        if (windowExpired) {
+            auth.setFirstFailedAt(now);
+            auth.setFailedLoginCount(1);
+            auth.setLockUntil(null);
+            return;
+        }
+
+        int newCount = currentCount + 1;
+        auth.setFailedLoginCount(newCount);
+
+        if (newCount >= MAX_FAILED_ATTEMPTS) {
+            auth.setLockUntil(firstFailedAt.plus(FAIL_WINDOW));
+        }
+    }
 }

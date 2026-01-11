@@ -1,11 +1,20 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthLogo from "../components/AuthLogo";
-import AuthInput from "../components/AuthInput";
 import AuthLayout from "../components/AuthLayout";
 import { AuthContext } from "../context/AuthContext";
 import { LoginRequest } from "../models/LoginRequest";
 import { authService } from "../service/authService";
+
+const MAX_ATTEMPTS = 5;
+const LOCK_SECONDS = 60;
+
+function formatMMSS(totalSeconds) {
+  const s = Math.max(0, Math.floor(totalSeconds || 0));
+  const mm = String(Math.floor(s / 60)).padStart(2, "0");
+  const ss = String(s % 60).padStart(2, "0");
+  return `${mm}:${ss}`;
+}
 
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -13,19 +22,76 @@ export default function SignInPage() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState(new LoginRequest("", ""));
-  const [error, setError] = useState("");
+
+  const [message, setMessage] = useState("");
+  const [attempts, setAttempts] = useState(0);
+
+  const [locked, setLocked] = useState(false);
+  const [lockLeft, setLockLeft] = useState(0);
+
+  useEffect(() => {
+    if (!locked) return;
+
+    const t = setInterval(() => {
+      setLockLeft((prev) => {
+        const next = prev > 0 ? prev - 1 : 0;
+        if (next === 0) {
+          setLocked(false);
+          setAttempts(0);
+          setMessage("");
+        }
+        return next;
+      });
+    }, 1000);
+
+    return () => clearInterval(t);
+  }, [locked]);
+
+  const startLock = (seconds) => {
+    setLocked(true);
+    setLockLeft(seconds);
+  };
 
   const handleSubmit = async () => {
     if (!form.email || !form.password) {
-      setError("Please fill in both fields.");
+      setMessage("Please fill in both fields.");
+      return;
+    }
+
+    if (locked) {
+      setMessage(`Account locked. Try again in ${formatMMSS(lockLeft)}.`);
       return;
     }
 
     try {
+      setMessage("");
       await login(form);
+
+      setAttempts(0);
+      setLocked(false);
+      setLockLeft(0);
+
       navigate("/company/dashboard");
     } catch (err) {
-      setError("Invalid email or password.");
+      const status = err?.response?.status;
+
+      if (status === 429) {
+        startLock(LOCK_SECONDS);
+        setMessage(`Too many failed attempts. Account locked for ${LOCK_SECONDS} seconds.`);
+        setAttempts(MAX_ATTEMPTS);
+        return;
+      }
+
+      const nextAttempts = Math.min(MAX_ATTEMPTS, attempts + 1);
+      setAttempts(nextAttempts);
+
+      if (nextAttempts >= MAX_ATTEMPTS) {
+        startLock(LOCK_SECONDS);
+        setMessage(`Too many failed attempts. Account locked for ${LOCK_SECONDS} seconds.`);
+        return;
+      }
+
+      setMessage(`Invalid email or password. Attempt ${nextAttempts} of ${MAX_ATTEMPTS}.`);
     }
   };
 
@@ -51,7 +117,8 @@ export default function SignInPage() {
               className="form-control"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="Enter your Gmail"
+              placeholder="Enter your email"
+              disabled={locked}
             />
           </div>
         </div>
@@ -70,6 +137,7 @@ export default function SignInPage() {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="Enter your password"
+              disabled={locked}
             />
 
             <span
@@ -85,11 +153,27 @@ export default function SignInPage() {
           </div>
         </div>
 
-        {error && <p className="text-danger small">{error}</p>}
+        {message && (
+          <p className={locked ? "text-warning small mb-2" : "text-danger small mb-2"}>
+            {message}
+          </p>
+        )}
+
+        {!locked && attempts > 0 && attempts < MAX_ATTEMPTS && (
+          <div className="small text-muted mb-2">
+            Attempts: <b>{attempts}</b> / <b>{MAX_ATTEMPTS}</b>
+          </div>
+        )}
+
+        {locked && (
+          <div className="small text-muted mb-3">
+            Time remaining: <b>{formatMMSS(lockLeft)}</b>
+          </div>
+        )}
 
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div>
-            <input type="checkbox" className="me-2" />
+            <input type="checkbox" className="me-2" disabled={locked} />
             <small>Remember Me</small>
           </div>
           <small className="text-primary" style={{ cursor: "pointer" }}>
@@ -97,8 +181,12 @@ export default function SignInPage() {
           </small>
         </div>
 
-        <button className="btn btn-primary w-100 mb-3" onClick={handleSubmit}>
-          Sign In
+        <button
+          className="btn btn-primary w-100 mb-3"
+          onClick={handleSubmit}
+          disabled={locked}
+        >
+          {locked ? `Try again in ${formatMMSS(lockLeft)}` : "Sign In"}
         </button>
 
         <div className="text-center text-muted mb-3">Or</div>
@@ -107,6 +195,7 @@ export default function SignInPage() {
           className="btn btn-light border w-100 d-flex justify-content-center align-items-center"
           style={{ backgroundColor: "#D5FFD5" }}
           onClick={() => authService.loginWithGoogle()}
+          disabled={locked}
         >
           <i className="bi bi-google me-2"></i>
           Continue with Google
