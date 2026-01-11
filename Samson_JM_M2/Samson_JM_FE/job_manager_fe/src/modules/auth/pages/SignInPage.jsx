@@ -16,6 +16,10 @@ function formatMMSS(totalSeconds) {
   return `${mm}:${ss}`;
 }
 
+function lockKey(email) {
+  return `auth_lock_until:${String(email || "").trim().toLowerCase()}`;
+}
+
 export default function SignInPage() {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
@@ -29,28 +33,66 @@ export default function SignInPage() {
   const [locked, setLocked] = useState(false);
   const [lockLeft, setLockLeft] = useState(0);
 
+  const syncLockFromStorage = (email) => {
+    const key = lockKey(email);
+    const raw = localStorage.getItem(key);
+    const untilMs = raw ? Number(raw) : 0;
+    const now = Date.now();
+
+    if (untilMs && untilMs > now) {
+      const left = Math.ceil((untilMs - now) / 1000);
+      setLocked(true);
+      setLockLeft(left);
+      setAttempts(MAX_ATTEMPTS);
+      setMessage(`Too many failed attempts. Account locked for ${LOCK_SECONDS} seconds.`);
+      return true;
+    }
+
+    localStorage.removeItem(key);
+    return false;
+  };
+
+  const startLock = (email, seconds) => {
+    const key = lockKey(email);
+    const untilMs = Date.now() + seconds * 1000;
+    localStorage.setItem(key, String(untilMs));
+
+    setLocked(true);
+    setLockLeft(seconds);
+    setAttempts(MAX_ATTEMPTS);
+  };
+
+  useEffect(() => {
+    syncLockFromStorage(form.email);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!form.email) return;
+    syncLockFromStorage(form.email);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.email]);
+
   useEffect(() => {
     if (!locked) return;
 
     const t = setInterval(() => {
       setLockLeft((prev) => {
         const next = prev > 0 ? prev - 1 : 0;
+
         if (next === 0) {
           setLocked(false);
           setAttempts(0);
           setMessage("");
+          localStorage.removeItem(lockKey(form.email));
         }
+
         return next;
       });
     }, 1000);
 
     return () => clearInterval(t);
-  }, [locked]);
-
-  const startLock = (seconds) => {
-    setLocked(true);
-    setLockLeft(seconds);
-  };
+  }, [locked, form.email]);
 
   const handleSubmit = async () => {
     if (!form.email || !form.password) {
@@ -58,7 +100,7 @@ export default function SignInPage() {
       return;
     }
 
-    if (locked) {
+    if (syncLockFromStorage(form.email)) {
       setMessage(`Account locked. Try again in ${formatMMSS(lockLeft)}.`);
       return;
     }
@@ -70,15 +112,15 @@ export default function SignInPage() {
       setAttempts(0);
       setLocked(false);
       setLockLeft(0);
+      localStorage.removeItem(lockKey(form.email));
 
       navigate("/company/dashboard");
     } catch (err) {
       const status = err?.response?.status;
 
       if (status === 429) {
-        startLock(LOCK_SECONDS);
+        startLock(form.email, LOCK_SECONDS);
         setMessage(`Too many failed attempts. Account locked for ${LOCK_SECONDS} seconds.`);
-        setAttempts(MAX_ATTEMPTS);
         return;
       }
 
@@ -86,7 +128,7 @@ export default function SignInPage() {
       setAttempts(nextAttempts);
 
       if (nextAttempts >= MAX_ATTEMPTS) {
-        startLock(LOCK_SECONDS);
+        startLock(form.email, LOCK_SECONDS);
         setMessage(`Too many failed attempts. Account locked for ${LOCK_SECONDS} seconds.`);
         return;
       }
