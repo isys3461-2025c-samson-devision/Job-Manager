@@ -1,15 +1,17 @@
 package com.devision.job_manager_backend.modules.company.service;
 
 import java.time.Instant;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.devision.job_manager_backend.modules.auth.model.CompanyAuth;
+import com.devision.job_manager_backend.modules.auth.repository.CompanyAuthRepository;
 import com.devision.job_manager_backend.modules.auth.service.external.AuthExternalService;
 import com.devision.job_manager_backend.modules.company.dto.request.UpdateCompanyRequest;
 import com.devision.job_manager_backend.modules.company.model.Company;
 import com.devision.job_manager_backend.modules.company.repository.CompanyRepository;
-import com.devision.job_manager_backend.modules.auth.repository.CompanyAuthRepository;
-
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +19,9 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final AuthExternalService authExternalService;
+
+    private final CompanyAuthRepository companyAuthRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public Company getOrCreateMyCompany(String userId) {
 
@@ -45,11 +50,36 @@ public class CompanyService {
             });
     }
 
-
     public Company updateCompany(String userId, UpdateCompanyRequest request) {
 
         Company company = companyRepository.findByUserId(userId)
             .orElseThrow(() -> new RuntimeException("Company not found"));
+
+        String oldEmail = company.getEmail();
+
+        boolean needAuthUpdate =
+            (request.getEmail() != null && !request.getEmail().equals(oldEmail)) ||
+            (request.getPassword() != null && !request.getPassword().isBlank());
+
+        if (needAuthUpdate) {
+            CompanyAuth auth = companyAuthRepository.findByEmail(oldEmail)
+                .orElseGet(() -> authExternalService.getAuthByUserId(userId)
+                    .orElseThrow(() -> new RuntimeException("Auth not found")));
+
+            if (request.getEmail() != null && !request.getEmail().equals(oldEmail)) {
+                if (companyAuthRepository.existsByEmail(request.getEmail())) {
+                    throw new RuntimeException("Email already in use");
+                }
+                auth.setEmail(request.getEmail());
+                company.setEmail(request.getEmail());
+            }
+
+            if (request.getPassword() != null && !request.getPassword().isBlank()) {
+                auth.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+            }
+
+            companyAuthRepository.save(auth);
+        }
 
         if (request.getCompanyName() != null)
             company.setCompanyName(request.getCompanyName());

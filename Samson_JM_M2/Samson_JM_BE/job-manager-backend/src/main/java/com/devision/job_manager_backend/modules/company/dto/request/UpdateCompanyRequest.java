@@ -1,13 +1,16 @@
 package com.devision.job_manager_backend.modules.company.dto.request;
 
 import java.util.List;
-import com.devision.job_manager_backend.modules.company.model.CompanyMediaItem;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class UpdateCompanyRequest {
+
+    private String email;
+    private String password;
+
     private String companyName;
     private String phoneNumber;
     private String street;

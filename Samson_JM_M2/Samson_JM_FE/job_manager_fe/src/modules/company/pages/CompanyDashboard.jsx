@@ -7,11 +7,15 @@ import JobFilterBar from "../components/JobFilterBar";
 import JobPostFormModal from "../components/JobPostFormModal";
 import { hasValidToken } from "../../../infrastructure/http/httpClient";
 
-// import { companyService } from "../service/companyService";
 import { jobPostService } from "../service/jobPostService";
 
+import { getMyCompany } from "../api/companyApi";
+import { localStorageUtil } from "../../../infrastructure/storage/localStorageUtil";
+
 export default function CompanyDashboard() {
-  // const [stats, setStats] = useState(null);
+  const [companyName, setCompanyName] = useState(
+    localStorageUtil.getCompanyName() || "Company"
+  );
 
   const [jobPosts, setJobPosts] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -22,16 +26,6 @@ export default function CompanyDashboard() {
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
 
-  // // =======================
-  // // LOAD COMPANY STATS
-  // // =======================
-  // useEffect(() => {
-  //   companyService.getCompanyStats().then(setStats);
-  // }, []);
-
-  // =======================
-  // LOAD JOB POSTS (SAFE)
-  // =======================
   const fetchJobPosts = () => {
     setLoadingJobs(true);
 
@@ -40,7 +34,6 @@ export default function CompanyDashboard() {
       .then((res) => {
         console.log("JOB POSTS RESPONSE:", res);
 
-        // res is ALREADY the JSON payload
         let posts = [];
 
         if (Array.isArray(res)) {
@@ -53,7 +46,6 @@ export default function CompanyDashboard() {
 
         setJobPosts(
           posts.map((p) => ({
-            // normalize ID
             ...p,
             id: p._id || p.id || p.jobId,
           }))
@@ -66,16 +58,32 @@ export default function CompanyDashboard() {
       .finally(() => setLoadingJobs(false));
   };
 
+  const syncCompanyNameFromApi = async () => {
+    try {
+      const data = await getMyCompany();
+      const name = data?.companyName || "Company";
+      setCompanyName(name);
+      localStorageUtil.setCompanyName(name);
+    } catch (e) {}
+  };
+
   useEffect(() => {
     if (!hasValidToken()) return;
+
     fetchJobPosts();
+
+    setCompanyName(localStorageUtil.getCompanyName() || "Company");
+    syncCompanyNameFromApi();
+
+    const onUpdated = () => {
+      setCompanyName(localStorageUtil.getCompanyName() || "Company");
+      syncCompanyNameFromApi();
+    };
+
+    window.addEventListener("companyNameUpdated", onUpdated);
+    return () => window.removeEventListener("companyNameUpdated", onUpdated);
   }, []);
 
-  // if (!stats) return <p>Loading...</p>;
-
-  // =======================
-  // DELETE JOB
-  // =======================
   const handleDeleteJob = async (jobId) => {
     if (!window.confirm("Are you sure you want to delete this job post?"))
       return;
@@ -99,9 +107,6 @@ export default function CompanyDashboard() {
     });
   };
 
-  // =======================
-  // SEARCH + FILTER
-  // =======================
   const filteredPosts = jobPosts.filter((post) => {
     const search = searchTerm.toLowerCase();
 
@@ -122,11 +127,8 @@ export default function CompanyDashboard() {
       <CompanyHeader />
 
       <div className="container py-4">
-        <WelcomeBanner />
+        <WelcomeBanner companyName={companyName} />
 
-        {/* =======================
-            HEADER
-        ======================== */}
         <div className="d-flex justify-content-between align-items-center mt-4 mb-2">
           <div>
             <h4 className="fw-bold">Job Posting</h4>
@@ -141,9 +143,6 @@ export default function CompanyDashboard() {
           </button>
         </div>
 
-        {/* =======================
-            FILTER BAR
-        ======================== */}
         <JobFilterBar
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -151,9 +150,6 @@ export default function CompanyDashboard() {
           setFilterStatus={setFilterStatus}
         />
 
-        {/* =======================
-            JOB LIST
-        ======================== */}
         {loadingJobs ? (
           <p className="text-muted mt-4">Loading job posts...</p>
         ) : filteredPosts.length > 0 ? (
@@ -174,9 +170,6 @@ export default function CompanyDashboard() {
         )}
       </div>
 
-      {/* =======================
-          CREATE MODAL
-      ======================== */}
       <JobPostFormModal
         show={showCreateJobModal}
         mode="create"
@@ -188,9 +181,6 @@ export default function CompanyDashboard() {
         }}
       />
 
-      {/* =======================
-          EDIT MODAL
-      ======================== */}
       <JobPostFormModal
         show={!!editingJob}
         mode="edit"
@@ -199,7 +189,6 @@ export default function CompanyDashboard() {
         onSubmit={async (payload) => {
           console.log("EDITING JOB AT SUBMIT:", editingJob);
 
-          // Try multiple ID fields
           const jobId = editingJob?.id || editingJob?._id || editingJob?.jobId;
 
           if (!jobId) {
@@ -208,7 +197,7 @@ export default function CompanyDashboard() {
             return;
           }
 
-          console.log("Using job ID:", jobId); // 👈 Confirm what ID we're using
+          console.log("Using job ID:", jobId);
           await jobPostService.updateJobPost(jobId, payload);
           setEditingJob(null);
           fetchJobPosts();

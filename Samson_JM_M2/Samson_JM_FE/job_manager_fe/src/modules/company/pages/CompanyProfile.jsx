@@ -1,13 +1,10 @@
-// CompanyProfile.jsx
 import { useCallback, useEffect, useRef, useState } from "react";
 import CompanyHeader from "../components/CompanyHeader";
 import { getMyCompany, updateMyCompany } from "../api/companyApi";
 import { useContext } from "react";
 import { SubscriptionContext } from "../../subscription/context/SubscriptionContext";
 import { hasValidToken } from "../../../infrastructure/http/httpClient";
-
-
-
+import { localStorageUtil } from "../../../infrastructure/storage/localStorageUtil";
 /* -----------------------------
   Helpers
 ------------------------------ */
@@ -56,9 +53,6 @@ const buildMediaObjects = (urls) => {
     label: `Media ${i + 1}`
   }));
 };
-
-
-
 
 /* -----------------------------
   UI: Toast
@@ -569,9 +563,8 @@ function MediaThumb({ m, onOpen }) {
   Main Component
 ------------------------------ */
 export default function CompanyProfile() {
-  const { isPremium, loading: subscriptionLoading } =
-  useContext(SubscriptionContext);
-  
+  const { isPremium, loading: subscriptionLoading } = useContext(SubscriptionContext);
+
   const [profile, setProfile] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -582,6 +575,18 @@ export default function CompanyProfile() {
   const [draftSkills, setDraftSkills] = useState([]);
   const [draftAchievements, setDraftAchievements] = useState([]);
   const [draftMediaUrls, setDraftMediaUrls] = useState([]);
+
+  const [draftContact, setDraftContact] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    street: "",
+    city: "",
+    country: ""
+  });
+
+  const [draftPassword, setDraftPassword] = useState({ password: "", confirm: "" });
+  const [pendingPassword, setPendingPassword] = useState("");
 
   const [toast, setToast] = useState({ show: false, kind: "success", message: "" });
   const toastTimerRef = useRef(null);
@@ -615,6 +620,9 @@ export default function CompanyProfile() {
         title: "Employer",
         email: data.email || "",
         phone: data.phoneNumber || "",
+        street: data.street || "",
+        city: data.city || "",
+        country: data.country || "",
         location: [data.city, data.country].filter(Boolean).join(", "),
         about: data.aboutUs || "",
         skillsNeeded: data.skillsNeeded || [],
@@ -647,7 +655,12 @@ export default function CompanyProfile() {
 
         await updateMyCompany({
           companyName: profile.name,
+          email: profile.email,
           phoneNumber: profile.phone,
+          street: profile.street,
+          city: profile.city,
+          country: profile.country,
+          password: pendingPassword || undefined,
           aboutUs: profile.about,
           logoUrl: logoPreview,
           skillsNeeded: profile.skillsNeeded || [],
@@ -656,6 +669,11 @@ export default function CompanyProfile() {
         });
 
         showToast("Profile updated successfully.", "success");
+
+        localStorageUtil.setCompanyName(profile.name);
+        window.dispatchEvent(new Event("companyNameUpdated"));
+
+        setPendingPassword("");
         await fetchCompany();
         setIsEditMode(false);
         return;
@@ -725,6 +743,21 @@ export default function CompanyProfile() {
       setDraftMediaUrls(urls);
     }
 
+    if (type === "contact") {
+      setDraftContact({
+        name: profile.name || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        street: profile.street || "",
+        city: profile.city || "",
+        country: profile.country || ""
+      });
+    }
+
+    if (type === "password") {
+      setDraftPassword({ password: "", confirm: "" });
+    }
+
     setModal({ open: true, type });
   };
 
@@ -742,6 +775,27 @@ export default function CompanyProfile() {
       setProfile((prev) => ({ ...prev, media: buildMediaObjects(combined) }));
     }
 
+    if (modal.type === "contact") {
+      setProfile((prev) => ({
+        ...prev,
+        name: draftContact.name,
+        email: draftContact.email,
+        phone: draftContact.phone,
+        street: draftContact.street,
+        city: draftContact.city,
+        country: draftContact.country,
+        location: [draftContact.city, draftContact.country].filter(Boolean).join(", ")
+      }));
+    }
+
+    if (modal.type === "password") {
+      if (!draftPassword.password || draftPassword.password !== draftPassword.confirm) {
+        showToast("Password confirmation does not match.", "error");
+        return;
+      }
+      setPendingPassword(draftPassword.password);
+    }
+
     closeModal();
   };
 
@@ -754,6 +808,10 @@ export default function CompanyProfile() {
       ? "Edit Achievements"
       : modal.type === "media"
       ? "Edit Images & Video"
+      : modal.type === "contact"
+      ? "Edit Contact Info"
+      : modal.type === "password"
+      ? "Change Password"
       : "Edit";
 
   const iconBtnStyle = {
@@ -841,6 +899,96 @@ export default function CompanyProfile() {
         )}
 
         {modal.type === "media" && <MediaEditor items={draftMediaUrls} setItems={setDraftMediaUrls} />}
+
+        {modal.type === "contact" && (
+          <div className="row g-3">
+            <div className="col-md-6">
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>Company Name</div>
+              <input
+                className="form-control"
+                value={draftContact.name}
+                onChange={(e) => setDraftContact((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="Company name"
+              />
+            </div>
+
+            <div className="col-md-6">
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>Email</div>
+              <input
+                className="form-control"
+                value={draftContact.email}
+                onChange={(e) => setDraftContact((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="Email"
+              />
+            </div>
+
+            <div className="col-md-6">
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>Phone</div>
+              <input
+                className="form-control"
+                value={draftContact.phone}
+                onChange={(e) => setDraftContact((prev) => ({ ...prev, phone: e.target.value }))}
+                placeholder="Phone number"
+              />
+            </div>
+
+            <div className="col-md-6">
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>Street</div>
+              <input
+                className="form-control"
+                value={draftContact.street}
+                onChange={(e) => setDraftContact((prev) => ({ ...prev, street: e.target.value }))}
+                placeholder="Street"
+              />
+            </div>
+
+            <div className="col-md-6">
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>City</div>
+              <input
+                className="form-control"
+                value={draftContact.city}
+                onChange={(e) => setDraftContact((prev) => ({ ...prev, city: e.target.value }))}
+                placeholder="City"
+              />
+            </div>
+
+            <div className="col-md-6">
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>Country</div>
+              <input
+                className="form-control"
+                value={draftContact.country}
+                onChange={(e) => setDraftContact((prev) => ({ ...prev, country: e.target.value }))}
+                placeholder="Country"
+              />
+            </div>
+          </div>
+        )}
+
+        {modal.type === "password" && (
+          <div className="row g-3">
+            <div className="col-12">
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>New Password</div>
+              <input
+                type="password"
+                className="form-control"
+                value={draftPassword.password}
+                onChange={(e) => setDraftPassword((prev) => ({ ...prev, password: e.target.value }))}
+                placeholder="New password"
+              />
+            </div>
+
+            <div className="col-12">
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>Confirm Password</div>
+              <input
+                type="password"
+                className="form-control"
+                value={draftPassword.confirm}
+                onChange={(e) => setDraftPassword((prev) => ({ ...prev, confirm: e.target.value }))}
+                placeholder="Confirm password"
+              />
+            </div>
+          </div>
+        )}
       </ModalShell>
 
       <div style={{ backgroundColor: "#f3f6fb", minHeight: "100vh" }}>
@@ -937,6 +1085,30 @@ export default function CompanyProfile() {
                   {isEditMode ? "Done" : "Edit Profile"}
                 </button>
               </div>
+
+              {isEditMode && (
+                <div className="d-flex justify-content-end gap-2 mt-3">
+                  <button
+                    type="button"
+                    className="btn btn-light btn-sm"
+                    style={iconBtnStyle}
+                    onClick={() => openModal("contact")}
+                    title="Edit contact info"
+                  >
+                    <i className="bi bi-pencil" />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-light btn-sm"
+                    style={iconBtnStyle}
+                    onClick={() => openModal("password")}
+                    title="Change password"
+                  >
+                    <i className="bi bi-lock" />
+                  </button>
+                </div>
+              )}
 
               <div
                 className="d-flex flex-wrap justify-content-between mt-3 pt-3"
