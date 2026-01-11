@@ -12,5 +12,10 @@ public interface CompanyRepository extends MongoRepository<Company, String> {
 
     Optional<Company> findByUserId(String userId);
 
+    boolean existsByUserId(String userId);
+
+    Optional<Company> deleteByUserId(String userId);
+
+
     
 }

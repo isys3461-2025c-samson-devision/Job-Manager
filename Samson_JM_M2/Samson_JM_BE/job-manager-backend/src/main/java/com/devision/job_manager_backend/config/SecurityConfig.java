@@ -1,6 +1,7 @@
 package com.devision.job_manager_backend.config;
 
 import com.devision.job_manager_backend.security.JwtAuthenticationFilter;
+import com.devision.job_manager_backend.security.applicant_integration.IntegrationAuthFilter;
 import com.devision.job_manager_backend.security.oauth.OAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,13 +18,16 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final IntegrationAuthFilter integrationAuthFilter;
 
     public SecurityConfig(
         JwtAuthenticationFilter jwtFilter,
-        OAuth2SuccessHandler oAuth2SuccessHandler
+        OAuth2SuccessHandler oAuth2SuccessHandler,
+        IntegrationAuthFilter integrationAuthFilter
     ) {
         this.jwtFilter = jwtFilter;
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        this.integrationAuthFilter = integrationAuthFilter;
     }
 
 
@@ -51,6 +55,10 @@ public class SecurityConfig {
                 // ===== ADMIN =====
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
+                // ===== INTEGRATION =====
+                .requestMatchers("/api/integration/companies/**").permitAll()
+                .requestMatchers("/api/integration/job-posts/**").permitAll()
+
                 // ===== COMPANY =====
                 .requestMatchers("/api/company/**").hasRole("COMPANY")
 
@@ -73,7 +81,7 @@ public class SecurityConfig {
                 .failureUrl("/oauth2/error")
 
             )
-            
+            .addFilterBefore(integrationAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .httpBasic(basic -> basic.disable());
 

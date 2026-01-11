@@ -29,8 +29,10 @@ stripe:
   applicant-price-id: price_1Snu7iBB6o3QuzcAJ5MwD5Oo
 
 integration:
-  company:
-    api-key: DEVVISION-INTERNAL-COMPANY-KEY
+  x-api-key: jm_applicant_partner_2026_secure
+
+  # company:
+  #   api-key: DEVVISION-INTERNAL-COMPANY-KEY
 
       
 jwt:
