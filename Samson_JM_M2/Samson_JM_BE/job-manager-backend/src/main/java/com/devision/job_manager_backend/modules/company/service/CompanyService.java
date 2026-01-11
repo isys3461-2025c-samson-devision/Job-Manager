@@ -12,6 +12,7 @@ import com.devision.job_manager_backend.modules.auth.service.external.AuthExtern
 import com.devision.job_manager_backend.modules.company.dto.request.UpdateCompanyRequest;
 import com.devision.job_manager_backend.modules.company.model.Company;
 import com.devision.job_manager_backend.modules.company.repository.CompanyRepository;
+import com.devision.job_manager_backend.modules.jobpost.repository.JobPostRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final AuthExternalService authExternalService;
+    private final JobPostRepository jobPostRepository;
 
     private final CompanyAuthRepository companyAuthRepository;
     private final PasswordEncoder passwordEncoder;
@@ -60,6 +62,16 @@ public class CompanyService {
         boolean needAuthUpdate =
             (request.getEmail() != null && !request.getEmail().equals(oldEmail)) ||
             (request.getPassword() != null && !request.getPassword().isBlank());
+
+        if (request.getCompanyName() != null) {
+            company.setCompanyName(request.getCompanyName());
+
+            jobPostRepository.updateCompanyNameByCompanyId(
+                userId,
+                request.getCompanyName()
+            );
+        }
+
 
         if (needAuthUpdate) {
             CompanyAuth auth = companyAuthRepository.findByEmail(oldEmail)

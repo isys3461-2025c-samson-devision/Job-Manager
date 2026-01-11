@@ -37,4 +37,15 @@ public interface JobPostRepository extends MongoRepository<JobPost, String> {
 
     // Published job posts by categories (Internship / Contract)
     List<JobPost> findByIsPublishedTrueAndCategoriesIn(List<JobCategory> categories);
+
+   
+   // Update company name in job posts when company updates it
+   @org.springframework.data.mongodb.repository.Query(
+        value = "{ 'companyId': ?0 }"
+   )
+    @org.springframework.data.mongodb.repository.Update(
+        "{ '$set': { 'companyName': ?1 } }"
+   )
+
+   void updateCompanyNameByCompanyId(String companyId, String companyName);
 }
