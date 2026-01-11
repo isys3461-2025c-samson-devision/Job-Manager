@@ -10,6 +10,7 @@ import {
   getUnreadCount,
   markNotificationRead,
 } from "../api/notificationApi";
+import { hasValidToken } from "../../../infrastructure/http/httpClient";
 
 const NotificationContext = createContext();
 
@@ -26,6 +27,7 @@ export const NotificationProvider = ({ children }) => {
 
   // ✅ fetch notifications ONLY when needed
   const fetchNotifications = useCallback(async () => {
+    if (!hasValidToken()) return;
     if (loading) return;
     setLoading(true);
 
@@ -60,6 +62,7 @@ export const NotificationProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    if (!hasValidToken()) return;
     fetchUnreadCount();
   }, [fetchUnreadCount]);
 
