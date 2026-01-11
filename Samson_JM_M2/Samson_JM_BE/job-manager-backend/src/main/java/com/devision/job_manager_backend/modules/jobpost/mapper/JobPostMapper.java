@@ -49,6 +49,10 @@ public class JobPostMapper {
 
     public void updateEntity(JobPost jobPost, UpdateJobPostRequest request) {
 
+        jobPost.setFresher_flag(
+                request.getFresherFlag() != null ? request.getFresherFlag() : false
+        );
+
         if (request.getTitle() != null) {
             jobPost.setTitle(request.getTitle());
         }
@@ -100,6 +104,8 @@ public class JobPostMapper {
 
     public JobPostSummaryResponse toSummary(JobPost jobPost) {
         return new JobPostSummaryResponse(
+                jobPost.getCompanyId(),
+                jobPost.getCompanyName(),
                 jobPost.getId(),
                 jobPost.getTitle(),
                 jobPost.getDescription(),
@@ -120,6 +126,7 @@ public class JobPostMapper {
         return new JobPostDetailResponse(
                 jobPost.getId(),
                 jobPost.getCompanyId(),
+                jobPost.getCompanyName(),
                 jobPost.getTitle(),
                 jobPost.getDescription(),
                 jobPost.getLocation(),
@@ -133,5 +140,6 @@ public class JobPostMapper {
                 jobPost.getTechnicalSkills(),
                 jobPost.getIsPublished()
         );
+    
     }
 }
