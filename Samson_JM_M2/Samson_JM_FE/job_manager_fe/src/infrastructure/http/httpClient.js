@@ -24,12 +24,19 @@ async function request(method, path, body, options = {}) {
     body: body ? JSON.stringify(body) : undefined,
   });
 
+  if (response.status === 204) {
+    return null;
+  }
+
   if (!response.ok) {
     throw new Error(`HTTP error ${response.status}`);
   }
 
-  if (response.status === 204) {
-    return null;
+  // ✅ Check if response actually has JSON
+  const contentType = response.headers.get("content-type");
+
+  if (!contentType || !contentType.includes("application/json")) {
+    return null; // 👈 THIS is the missing piece
   }
 
   return response.json();
