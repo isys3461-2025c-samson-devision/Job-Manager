@@ -1,6 +1,10 @@
 spring:
   application:
     name: job-manager-backend
+  task:
+    scheduling:
+      pool:
+        size: 2
   data:
     mongodb:
       uri: mongodb+srv://jasonais99_db_user:jasontran2004@managerdb.xadcgas.mongodb.net/

@@ -1,9 +1,11 @@
 package com.devision.job_manager_backend.modules.subscription.repository;
 
+import com.devision.job_manager_backend.modules.subscription.model.PayerType;
 import com.devision.job_manager_backend.modules.subscription.model.SubscriptionModel;
 import com.devision.job_manager_backend.modules.subscription.model.SubscriptionStatus;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SubscriptionRepository
@@ -24,6 +26,12 @@ public interface SubscriptionRepository
         SubscriptionStatus status
 
     );
+
+    List<SubscriptionModel> findAllByStatusAndOwnerType(
+        SubscriptionStatus status,
+        PayerType ownerType
+    );
+
 
     boolean existsByStripeSubscriptionId(String stripeSubscriptionId);
 
