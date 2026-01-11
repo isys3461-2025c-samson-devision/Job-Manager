@@ -11,6 +11,7 @@ export default function SignInPage() {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState(new LoginRequest("", ""));
   const [error, setError] = useState("");
 
@@ -21,8 +22,8 @@ export default function SignInPage() {
     }
 
     try {
-      await login(form); // ✅ ONLY call context
-      navigate("/company/dashboard"); // ✅ redirect
+      await login(form);
+      navigate("/company/dashboard");
     } catch (err) {
       setError("Invalid email or password.");
     }
@@ -32,7 +33,6 @@ export default function SignInPage() {
     <AuthLayout>
       <AuthLogo />
 
-      {/* CARD */}
       <div
         className="p-4 shadow-sm bg-white rounded-4"
         style={{ width: "420px", border: "1px solid #eee" }}
@@ -40,19 +40,50 @@ export default function SignInPage() {
         <h4 className="fw-bold">Welcome Back</h4>
         <p className="text-muted mb-4">Sign in to Continue</p>
 
-        <AuthInput
-          label="Email"
-          type="email"
-          icon="bi-envelope"
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
+        <div className="mb-3">
+          <label className="form-label fw-semibold">Email</label>
+          <div className="input-group">
+            <span className="input-group-text bg-white">
+              <i className="bi bi-envelope" />
+            </span>
+            <input
+              type="email"
+              className="form-control"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              placeholder="Enter your Gmail"
+            />
+          </div>
+        </div>
 
-        <AuthInput
-          label="Password"
-          type="password"
-          icon="bi-lock"
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+        <div className="mb-3">
+          <label className="form-label fw-semibold">Password</label>
+
+          <div className="input-group">
+            <span className="input-group-text bg-white">
+              <i className="bi bi-lock" />
+            </span>
+
+            <input
+              type={showPassword ? "text" : "password"}
+              className="form-control"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              placeholder="Enter your password"
+            />
+
+            <span
+              className="input-group-text bg-white"
+              role="button"
+              onClick={() => setShowPassword((p) => !p)}
+              style={{ cursor: "pointer", color: "#6b7280" }}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              title={showPassword ? "Hide password" : "Show password"}
+            >
+              <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`} />
+            </span>
+          </div>
+        </div>
 
         {error && <p className="text-danger small">{error}</p>}
 
@@ -72,9 +103,10 @@ export default function SignInPage() {
 
         <div className="text-center text-muted mb-3">Or</div>
 
-        <button className="btn btn-light border w-100 d-flex justify-content-center align-items-center"
-        style={{ backgroundColor: "#D5FFD5" }}
-        onClick={() => authService.loginWithGoogle()}
+        <button
+          className="btn btn-light border w-100 d-flex justify-content-center align-items-center"
+          style={{ backgroundColor: "#D5FFD5" }}
+          onClick={() => authService.loginWithGoogle()}
         >
           <i className="bi bi-google me-2"></i>
           Continue with Google

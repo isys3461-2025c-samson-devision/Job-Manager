@@ -5,6 +5,7 @@ import { useContext } from "react";
 import { SubscriptionContext } from "../../subscription/context/SubscriptionContext";
 import { hasValidToken } from "../../../infrastructure/http/httpClient";
 import { localStorageUtil } from "../../../infrastructure/storage/localStorageUtil";
+
 /* -----------------------------
   Helpers
 ------------------------------ */
@@ -588,6 +589,9 @@ export default function CompanyProfile() {
   const [draftPassword, setDraftPassword] = useState({ password: "", confirm: "" });
   const [pendingPassword, setPendingPassword] = useState("");
 
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+
   const [toast, setToast] = useState({ show: false, kind: "success", message: "" });
   const toastTimerRef = useRef(null);
 
@@ -756,6 +760,8 @@ export default function CompanyProfile() {
 
     if (type === "password") {
       setDraftPassword({ password: "", confirm: "" });
+      setShowNewPass(false);
+      setShowConfirmPass(false);
     }
 
     setModal({ open: true, type });
@@ -968,24 +974,56 @@ export default function CompanyProfile() {
           <div className="row g-3">
             <div className="col-12">
               <div style={{ fontWeight: 800, marginBottom: 8 }}>New Password</div>
-              <input
-                type="password"
-                className="form-control"
-                value={draftPassword.password}
-                onChange={(e) => setDraftPassword((prev) => ({ ...prev, password: e.target.value }))}
-                placeholder="New password"
-              />
+
+              <div className="input-group">
+                <input
+                  type={showNewPass ? "text" : "password"}
+                  className="form-control"
+                  value={draftPassword.password}
+                  onChange={(e) =>
+                    setDraftPassword((prev) => ({ ...prev, password: e.target.value }))
+                  }
+                  placeholder="Enter new password"
+                />
+
+                <span
+                  className="input-group-text bg-white"
+                  role="button"
+                  onClick={() => setShowNewPass((pp) => !pp)}
+                  style={{ cursor: "pointer", color: "#6b7280" }}
+                  aria-label={showNewPass ? "Hide password" : "Show password"}
+                  title={showNewPass ? "Hide password" : "Show password"}
+                >
+                  <i className={`bi ${showNewPass ? "bi-eye-slash" : "bi-eye"}`} />
+                </span>
+              </div>
             </div>
 
             <div className="col-12">
               <div style={{ fontWeight: 800, marginBottom: 8 }}>Confirm Password</div>
-              <input
-                type="password"
-                className="form-control"
-                value={draftPassword.confirm}
-                onChange={(e) => setDraftPassword((prev) => ({ ...prev, confirm: e.target.value }))}
-                placeholder="Confirm password"
-              />
+
+              <div className="input-group">
+                <input
+                  type={showConfirmPass ? "text" : "password"}
+                  className="form-control"
+                  value={draftPassword.confirm}
+                  onChange={(e) =>
+                    setDraftPassword((prev) => ({ ...prev, confirm: e.target.value }))
+                  }
+                  placeholder="Confirm new password"
+                />
+
+                <span
+                  className="input-group-text bg-white"
+                  role="button"
+                  onClick={() => setShowConfirmPass((pp) => !pp)}
+                  style={{ cursor: "pointer", color: "#6b7280" }}
+                  aria-label={showConfirmPass ? "Hide password" : "Show password"}
+                  title={showConfirmPass ? "Hide password" : "Show password"}
+                >
+                  <i className={`bi ${showConfirmPass ? "bi-eye-slash" : "bi-eye"}`} />
+                </span>
+              </div>
             </div>
           </div>
         )}
