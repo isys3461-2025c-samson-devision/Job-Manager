@@ -43,6 +43,7 @@ public class CompanyController {
     private CompanyResponse toResponse(Company company) {
         return CompanyResponse.builder()
             .id(company.getId())
+            .userId(company.getUserId())
             .companyName(company.getCompanyName())
             .email(company.getEmail())
             .phoneNumber(company.getPhoneNumber())

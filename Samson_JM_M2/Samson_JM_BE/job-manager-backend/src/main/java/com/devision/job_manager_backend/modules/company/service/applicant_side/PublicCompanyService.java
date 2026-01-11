@@ -20,6 +20,7 @@ public class PublicCompanyService {
         return companyRepository.findAll().stream()
             .map(c -> new PublicCompanySummaryResponse(
                 c.getId(),
+                c.getUserId(),
                 c.getCompanyName(),
                 c.getLogoUrl(),
                 c.getCity(),
@@ -34,6 +35,7 @@ public class PublicCompanyService {
 
         return new PublicCompanyDetailResponse(
             company.getId(),
+            company.getUserId(),
             company.getCompanyName(),
             company.getAboutUs(),
             company.getWhoWeAreLookingFor(),

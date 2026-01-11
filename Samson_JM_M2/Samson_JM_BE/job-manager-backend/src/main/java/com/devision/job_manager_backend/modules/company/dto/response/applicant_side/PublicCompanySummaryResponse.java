@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PublicCompanySummaryResponse {
     private String id;
+    private String userId;
     private String companyName;
     private String logoUrl;
     private String city;

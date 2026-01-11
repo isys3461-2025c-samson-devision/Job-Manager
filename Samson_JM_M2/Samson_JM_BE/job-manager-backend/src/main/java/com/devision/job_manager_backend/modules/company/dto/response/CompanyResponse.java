@@ -9,6 +9,7 @@ import lombok.Getter;
 @Builder
 public class CompanyResponse {
     private String id;
+    private String userId;
     private String companyName;
     private String email;
     private String phoneNumber;
