@@ -23,6 +23,10 @@ public class ApplicantSearchService {
 
     private final JobApplicantProfileClient profileClient;
 
+    public List<JobApplicantProfile> search() {
+        return profileClient.fetchProfiles();
+    }
+
     public List<ApplicantSearchResult> searchApplicants(ApplicantSearchRequest request) {
         List<JobApplicantProfile> profiles = profileClient.fetchProfiles();
         if (profiles == null || profiles.isEmpty()) {
@@ -194,7 +198,7 @@ public class ApplicantSearchService {
                 name,
                 firstName,
                 lastName,
-                null,
+                profile.getEmail(),
                 profile.getPhone(),
                 profile.getAddress(),
                 profile.getCity(),

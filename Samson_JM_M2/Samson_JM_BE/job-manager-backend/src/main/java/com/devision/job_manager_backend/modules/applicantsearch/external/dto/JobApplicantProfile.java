@@ -13,6 +13,7 @@ import lombok.Setter;
 public class JobApplicantProfile {
 
     private String id;
+    private String email;
     private String phone;
     private String address;
     private String city;
@@ -26,6 +27,7 @@ public class JobApplicantProfile {
     private List<WorkExperience> workExperiences;
     private List<Education> education;
     private List<String> employmentTypes;
+
     private String expectedSalary;
 
     @Getter

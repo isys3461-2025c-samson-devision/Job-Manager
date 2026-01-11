@@ -15,6 +15,7 @@ public class ApplicantSearchProfileRequest {
 
     @JsonDeserialize(using = CommaSeparatedListDeserializer.class)
     private List<String> employmentStatuses;
+
     private String country;
     private Double salaryMin;
     private Double salaryMax;

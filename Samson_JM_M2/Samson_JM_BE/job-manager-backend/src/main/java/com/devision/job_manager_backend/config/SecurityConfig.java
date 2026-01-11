@@ -59,6 +59,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/integration/companies/**").permitAll()
                 .requestMatchers("/api/integration/job-posts/**").permitAll()
 
+                .requestMatchers("/api/applicants/**").permitAll()
+
                 // ===== COMPANY =====
                 .requestMatchers("/api/company/**").hasRole("COMPANY")
 
