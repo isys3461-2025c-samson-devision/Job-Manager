@@ -38,7 +38,7 @@ public class PaymentController {
         String companyId = authentication.getName();
 
         return subscriptionRepository
-            .findFirstByOwnerIdAndStatus(companyId, SubscriptionStatus.ACTIVE)
+            .findByOwnerIdAndStatus(companyId, SubscriptionStatus.ACTIVE)
             .map(subscription -> {
                 String payerEmail = subscription.getOwnerEmail();
                 return ResponseEntity.ok(

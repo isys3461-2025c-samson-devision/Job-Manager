@@ -75,6 +75,8 @@ public class PaymentExternalServiceImpl implements PaymentExternalService {
                     .putMetadata("payerEmail", payerEmail)
                     .putMetadata("payerType", PayerType.COMPANY.name())
                     .putMetadata("userId", userId)
+                    .putMetadata("companyId", company.getId())
+
 
                     .addLineItem(
                     SessionCreateParams.LineItem.builder()

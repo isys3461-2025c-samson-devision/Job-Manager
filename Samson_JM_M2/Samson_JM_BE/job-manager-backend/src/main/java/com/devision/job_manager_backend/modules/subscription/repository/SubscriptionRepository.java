@@ -19,13 +19,16 @@ public interface SubscriptionRepository
         SubscriptionStatus status
     );
 
-    Optional<SubscriptionModel> findFirstByOwnerIdAndStatus(
+    Optional<SubscriptionModel> findByOwnerIdAndStatus(
         String ownerId,
         SubscriptionStatus status
+
     );
 
+    boolean existsByStripeSubscriptionId(String stripeSubscriptionId);
+
     default SubscriptionModel findActiveByOwnerId(String ownerId) {
-        return findFirstByOwnerIdAndStatus(
+        return findByOwnerIdAndStatus(
             ownerId,
             SubscriptionStatus.ACTIVE
         ).orElseThrow(() ->

@@ -15,50 +15,55 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
-public class CompanySubscriptionServiceImpl implements CompanySubscriptionService {
+public class CompanySubscriptionServiceImpl
+        implements CompanySubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
 
     @Override
-    public void activateCompanySubscription(String ownerId, String companyEmail) {
+    public void activateCompanySubscription(
+            String ownerId,
+            String payerEmail,
+            String stripeSubscriptionId
+    ) {
 
-        // 1. Expire any existing ACTIVE subscription (safety)
-        Optional<SubscriptionModel> existing =
-                subscriptionRepository.findByOwnerEmailAndStatus(
-                        companyEmail,
-                        SubscriptionStatus.ACTIVE
-                );
+        if (ownerId == null || ownerId.isBlank()) {
+            throw new IllegalStateException("ownerId must not be null");
+        }
 
-        existing.ifPresent(sub -> {
-            sub.setStatus(SubscriptionStatus.EXPIRED);
-            subscriptionRepository.save(sub);
-        });
+        // ✅ Idempotency (VERY IMPORTANT)
+        if (subscriptionRepository.existsByStripeSubscriptionId(stripeSubscriptionId)) {
+            return;
+        }
+
+        // ✅ Expire existing ACTIVE subscription
+        subscriptionRepository
+                .findByOwnerIdAndStatus(ownerId, SubscriptionStatus.ACTIVE)
+                .ifPresent(sub -> {
+                    sub.setStatus(SubscriptionStatus.EXPIRED);
+                    subscriptionRepository.save(sub);
+                });
 
         Instant now = Instant.now();
 
-        // 2. Create new subscription
-        SubscriptionModel newSubscription = SubscriptionModel.builder()
+        SubscriptionModel subscription = SubscriptionModel.builder()
                 .ownerId(ownerId)
-                .ownerEmail(companyEmail)
+                .ownerEmail(payerEmail)
                 .ownerType(PayerType.COMPANY)
+                .stripeSubscriptionId(stripeSubscriptionId)
                 .startDate(now)
                 .endDate(now.plus(30, ChronoUnit.DAYS))
                 .status(SubscriptionStatus.ACTIVE)
                 .build();
 
-        subscriptionRepository.save(newSubscription);
-
-        if (ownerId == null || ownerId.isBlank()) {
-            throw new IllegalStateException("ownerId must not be null when creating subscription");
-        }
-
+        subscriptionRepository.save(subscription);
     }
 
     @Override
     public boolean hasActiveSubscription(String ownerId) {
         return subscriptionRepository
-            .findFirstByOwnerIdAndStatus(ownerId, SubscriptionStatus.ACTIVE)
-            .filter(sub -> sub.getEndDate().isAfter(Instant.now()))
-            .isPresent();
+                .findByOwnerIdAndStatus(ownerId, SubscriptionStatus.ACTIVE)
+                .filter(sub -> sub.getEndDate().isAfter(Instant.now()))
+                .isPresent();
     }
 }

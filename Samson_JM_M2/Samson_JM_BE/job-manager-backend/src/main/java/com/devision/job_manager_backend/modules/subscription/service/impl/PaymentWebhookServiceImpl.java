@@ -39,66 +39,56 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
             throw new RuntimeException("Invalid Stripe webhook signature", e);
         }
 
-        switch (event.getType()) {
-            case "checkout.session.completed" -> handleCheckoutCompleted(payload);
-            case "payment_intent.payment_failed" -> handlePaymentFailed(event);
-            default -> {
-                // ignored
-            }
+        if ("checkout.session.completed".equals(event.getType())) {
+            handleCheckoutCompleted(payload);
         }
     }
 
     private void handleCheckoutCompleted(String payload) {
 
-        JsonObject json = JsonParser.parseString(payload).getAsJsonObject();
-
-        JsonObject session = json
+        JsonObject session = JsonParser.parseString(payload)
+                .getAsJsonObject()
                 .getAsJsonObject("data")
                 .getAsJsonObject("object");
 
-        // 1️⃣ Email (DO NOT trust customer_email)
-        String payerEmail = getNullableString(session, "payer_email");
-
-        // Fallback: metadata email (BEST PRACTICE)
         JsonObject metadata = session.has("metadata")
                 ? session.getAsJsonObject("metadata")
                 : null;
 
+        // ✅ 1. EMAIL (ONLY from metadata)
+        String payerEmail = getNullableString(metadata, "payerEmail");
         if (payerEmail == null) {
-            payerEmail = getNullableString(metadata, "payerEmail");
+            log.warn("Webhook ignored: missing payerEmail metadata");
+            return;
         }
 
-        if (payerEmail == null) {
-            log.warn("Webhook ignored: missing payer email");
-            return; // ❗ NEVER throw
-        }
+        // ✅ 2. PAYER TYPE
+        PayerType payerType = PayerType.valueOf(
+                getNullableString(metadata, "payerType")
+        );
 
-        // 2️⃣ Payer type
-        PayerType payerType = PayerType.COMPANY;
-        String payerTypeRaw = getNullableString(metadata, "payerType");
-        if (payerTypeRaw != null) {
-            payerType = PayerType.valueOf(payerTypeRaw);
-        }
-
-        // 3️⃣ Owner ID
+        // ✅ 3. OWNER ID (THIS is your Mongo key)
         String ownerId = getNullableString(metadata, "userId");
         if (ownerId == null) {
             log.warn("Webhook ignored: missing userId metadata");
             return;
         }
 
-        // 4️⃣ Amount
-        Double amountCents = getNullableDouble(session, "amount_total");
-        double amount = amountCents != null ? amountCents / 100.0 : 0.0;
-
-        // 5️⃣ Session ID
-        String sessionId = getNullableString(session, "id");
-        if (sessionId == null) {
-            log.warn("Webhook ignored: missing session id");
+        // ✅ 4. STRIPE SUBSCRIPTION ID (CRITICAL)
+        String stripeSubscriptionId = getNullableString(session, "subscription");
+        if (stripeSubscriptionId == null) {
+            log.warn("Webhook ignored: missing Stripe subscription ID");
             return;
         }
 
-        // 6️⃣ Record payment (idempotent)
+        // ✅ 5. AMOUNT
+        Double amountCents = getNullableDouble(session, "amount_total");
+        double amount = amountCents != null ? amountCents / 100.0 : 0.0;
+
+        // ✅ 6. SESSION ID (idempotency key)
+        String sessionId = getNullableString(session, "id");
+
+        // ✅ 7. RECORD PAYMENT (idempotent)
         paymentInternalService.recordPayment(
                 payerEmail,
                 payerType,
@@ -107,53 +97,40 @@ public class PaymentWebhookServiceImpl implements PaymentWebHookService {
                 sessionId
         );
 
-        // 7️⃣ Activate subscription
+        // ✅ 8. ACTIVATE SUBSCRIPTION (THIS WAS MISSING)
         if (payerType == PayerType.COMPANY) {
-            companySubscriptionService.activateCompanySubscription(ownerId, payerEmail);
+            companySubscriptionService.activateCompanySubscription(
+                    ownerId,
+                    payerEmail,
+                    stripeSubscriptionId
+            );
         } else {
-            applicantSubscriptionService.activateApplicantSubscription(ownerId, payerEmail);
+            applicantSubscriptionService.activateApplicantSubscription(
+                    ownerId,
+                    payerEmail,
+                    stripeSubscriptionId
+            );
         }
 
-        log.info("Stripe checkout completed: sessionId={}, payer={}", sessionId, payerEmail);
-    }
-
-
-
-
-
-
-
-
-
-
-
-    private void handlePaymentFailed(Event event) {
-
-        PaymentIntent intent = (PaymentIntent) event
-                .getDataObjectDeserializer()
-                .getObject()
-                .orElseThrow();
-
-        String sessionId = intent.getMetadata().get("checkout_session_id");
-        paymentInternalService.markPaymentFailed(sessionId);
-
+        log.info(
+            "Subscription activated: ownerId={}, stripeSubId={}",
+            ownerId,
+            stripeSubscriptionId
+        );
     }
 
     // ======================
     // Safe JSON helpers
     // ======================
     private String getNullableString(JsonObject obj, String key) {
-        if (obj == null || !obj.has(key) || obj.get(key).isJsonNull()) {
-            return null;
-        }
-        return obj.get(key).getAsString();
+        return obj != null && obj.has(key) && !obj.get(key).isJsonNull()
+                ? obj.get(key).getAsString()
+                : null;
     }
 
     private Double getNullableDouble(JsonObject obj, String key) {
-        if (obj == null || !obj.has(key) || obj.get(key).isJsonNull()) {
-            return null;
-        }
-        return obj.get(key).getAsDouble();
+        return obj != null && obj.has(key) && !obj.get(key).isJsonNull()
+                ? obj.get(key).getAsDouble()
+                : null;
     }
-
 }

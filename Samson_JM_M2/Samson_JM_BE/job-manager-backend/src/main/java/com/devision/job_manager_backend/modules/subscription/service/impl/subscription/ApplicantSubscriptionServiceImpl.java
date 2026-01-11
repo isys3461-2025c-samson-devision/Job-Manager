@@ -12,33 +12,52 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
-public class ApplicantSubscriptionServiceImpl implements ApplicantSubscriptionService {
+public class ApplicantSubscriptionServiceImpl
+        implements ApplicantSubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
 
     @Override
-    public void activateApplicantSubscription(String ownerId, String applicantEmail) {
+    public void activateApplicantSubscription(
+            String ownerId,
+            String payerEmail,
+            String stripeSubscriptionId
+    ) {
 
-        // expire existing
-        subscriptionRepository.findByOwnerEmailAndStatus(
-                applicantEmail,
-                SubscriptionStatus.ACTIVE
-        ).ifPresent(sub -> {
-            sub.setStatus(SubscriptionStatus.EXPIRED);
-            subscriptionRepository.save(sub);
-        });
+        if (subscriptionRepository.existsByStripeSubscriptionId(stripeSubscriptionId)) {
+            return;
+        }
+
+        subscriptionRepository
+                .findByOwnerIdAndStatus(ownerId, SubscriptionStatus.ACTIVE)
+                .ifPresent(sub -> {
+                    sub.setStatus(SubscriptionStatus.EXPIRED);
+                    subscriptionRepository.save(sub);
+                });
 
         Instant now = Instant.now();
 
-        SubscriptionModel sub = SubscriptionModel.builder()
+        SubscriptionModel subscription = SubscriptionModel.builder()
                 .ownerId(ownerId)
-                .ownerEmail(applicantEmail)
+                .ownerEmail(payerEmail)
                 .ownerType(PayerType.APPLICANT)
+                .stripeSubscriptionId(stripeSubscriptionId)
                 .startDate(now)
                 .endDate(now.plus(30, ChronoUnit.DAYS))
                 .status(SubscriptionStatus.ACTIVE)
                 .build();
 
-        subscriptionRepository.save(sub);
+        subscriptionRepository.save(subscription);
+    }
+
+    @Override
+    public boolean hasActiveSubscription(String applicantUserId) {
+        return subscriptionRepository
+                .findByOwnerIdAndStatus(
+                        applicantUserId,
+                        SubscriptionStatus.ACTIVE
+                )
+                .filter(sub -> sub.getEndDate().isAfter(Instant.now()))
+                .isPresent();
     }
 }
