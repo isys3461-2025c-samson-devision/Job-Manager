@@ -9,6 +9,7 @@ public class PublicCompanySummaryResponse {
     private String id;
     private String userId;
     private String companyName;
+    private String CompanyEmail;
     private String logoUrl;
     private String city;
     private String country;

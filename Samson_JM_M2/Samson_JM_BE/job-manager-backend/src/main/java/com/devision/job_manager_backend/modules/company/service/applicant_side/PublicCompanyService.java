@@ -22,6 +22,7 @@ public class PublicCompanyService {
                 c.getId(),
                 c.getUserId(),
                 c.getCompanyName(),
+                c.getEmail(),
                 c.getLogoUrl(),
                 c.getCity(),
                 c.getCountry()
@@ -37,6 +38,7 @@ public class PublicCompanyService {
             company.getId(),
             company.getUserId(),
             company.getCompanyName(),
+            company.getEmail(),
             company.getAboutUs(),
             company.getWhoWeAreLookingFor(),
             company.getLogoUrl(),

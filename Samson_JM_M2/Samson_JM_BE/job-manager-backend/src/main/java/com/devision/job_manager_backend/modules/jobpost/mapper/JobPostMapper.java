@@ -5,6 +5,7 @@ import com.devision.job_manager_backend.modules.jobpost.dto.request.UpdateJobPos
 import com.devision.job_manager_backend.modules.jobpost.dto.response.JobPostDetailResponse;
 import com.devision.job_manager_backend.modules.jobpost.dto.response.JobPostSummaryResponse;
 import com.devision.job_manager_backend.modules.jobpost.model.JobPost;
+import com.devision.job_manager_backend.modules.company.model.Company;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -106,6 +107,7 @@ public class JobPostMapper {
         return new JobPostSummaryResponse(
                 jobPost.getCompanyId(),
                 jobPost.getCompanyName(),
+                jobPost.getCompanyEmail(),
                 jobPost.getId(),
                 jobPost.getTitle(),
                 jobPost.getDescription(),
@@ -127,6 +129,7 @@ public class JobPostMapper {
                 jobPost.getId(),
                 jobPost.getCompanyId(),
                 jobPost.getCompanyName(),
+                jobPost.getCompanyEmail(),
                 jobPost.getTitle(),
                 jobPost.getDescription(),
                 jobPost.getLocation(),

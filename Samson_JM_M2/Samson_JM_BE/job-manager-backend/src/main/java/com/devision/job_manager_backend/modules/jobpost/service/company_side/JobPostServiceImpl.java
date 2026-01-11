@@ -46,6 +46,7 @@ public class JobPostServiceImpl implements JobPostInternalService {
 
         jobPost.setCompanyId(companyId);
         jobPost.setCompanyName(company.getCompanyName());
+        jobPost.setCompanyEmail(company.getEmail());
         jobPost.setPostedDate(LocalDate.now());
 
         return jobPostMapper.toDetail(

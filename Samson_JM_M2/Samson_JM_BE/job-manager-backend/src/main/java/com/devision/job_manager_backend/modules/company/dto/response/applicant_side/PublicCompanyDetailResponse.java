@@ -9,6 +9,7 @@ public class PublicCompanyDetailResponse {
     private String id;
     private String userId;
     private String companyName;
+    private String companyEmail;
     private String aboutUs;
     private String whoWeAreLookingFor;
     private String logoUrl;

@@ -27,6 +27,8 @@ public class JobPost {
 
     private String companyName;
 
+    private String companyEmail;
+    
     /** Core info */
     private String title;
     private String description;

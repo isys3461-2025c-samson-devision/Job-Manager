@@ -20,6 +20,7 @@ public class JobPostSummaryResponse {
 
     private String companyId;
     private String companyName;
+    private String companyEmail;
 
     private EmploymentType employmentType;
     private List<JobCategory> categories;
@@ -36,6 +37,7 @@ public class JobPostSummaryResponse {
     public JobPostSummaryResponse(
             String companyId,
             String companyName,
+            String companyEmail,
             String id,
             String title,
             String description,
@@ -52,6 +54,7 @@ public class JobPostSummaryResponse {
     ) {
         this.companyId = companyId;
         this.companyName = companyName;
+        this.companyEmail = companyEmail;
         this.id = id;
         this.title = title;
         this.description = description;

@@ -16,6 +16,7 @@ public class JobPostDetailResponse {
     private String id;
     private String companyId;
     private String companyName;
+    private String companyEmail;
 
     private String title;
     private String description;
