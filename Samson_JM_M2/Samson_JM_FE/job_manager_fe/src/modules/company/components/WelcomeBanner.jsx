@@ -1,10 +1,5 @@
-import { useContext } from "react";
-import { AuthContext } from "../../auth/context/AuthContext";
-
-export default function WelcomeBanner() {
-  const {user} = useContext(AuthContext);
-
-  const companyName = user?.companyName || "Company";
+export default function WelcomeBanner({companyName}) {
+  if (!companyName) return null; // or skeleton
 
   return (
     <div

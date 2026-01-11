@@ -7,8 +7,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const token = localStorageUtil.getToken();
     const role = localStorageUtil.getRole();
-    const companyName = localStorageUtil.getCompanyName();
-    return token ? { accessToken: token, role, companyName } : null;
+    // const companyName = localStorageUtil.getCompanyName();
+    return token ? { accessToken: token, role } : null;
   });
 
   const login = async (loginRequest) => {
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 
     localStorageUtil.setToken(authUser.accessToken);
     localStorageUtil.setRole(authUser.role);
-    localStorageUtil.setCompanyName(authUser.companyName);
+    // localStorageUtil.setCompanyName(authUser.companyName);
 
     setUser(authUser);
     return authUser;
@@ -35,12 +35,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ✅ NEW: hydrate auth state (used by OAuth)
-  const hydrateUser = ({ accessToken, role, companyName }) => {
+  const hydrateUser = ({ accessToken, role }) => {
     localStorageUtil.setToken(accessToken);
     localStorageUtil.setRole(role);
-    localStorageUtil.setCompanyName(companyName);
+    // localStorageUtil.setCompanyName(companyName);
 
-    setUser({ accessToken, role, companyName });
+    setUser({ accessToken, role });
   };
 
   const logout = () => {

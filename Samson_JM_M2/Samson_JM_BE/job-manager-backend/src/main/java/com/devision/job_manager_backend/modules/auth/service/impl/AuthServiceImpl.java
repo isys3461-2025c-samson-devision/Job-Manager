@@ -62,7 +62,7 @@ public class AuthServiceImpl implements AuthInternalService {
 
         String token = jwtService.generateToken(auth.getId(), auth.getEmail(), auth.getRole());
 
-        return new AuthResponse(token, auth.getRole(), auth.getCompanyName());
+        return new AuthResponse(token, auth.getRole());
     }
 
     @Override
@@ -106,8 +106,8 @@ public class AuthServiceImpl implements AuthInternalService {
 
         return new AuthResponse(
             accessToken,
-            auth.getRole(),
-            auth.getCompanyName()
+            auth.getRole()
+            // auth.getCompanyName()
         );
     }
 

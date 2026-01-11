@@ -13,9 +13,8 @@ import { getMyCompany } from "../api/companyApi";
 import { localStorageUtil } from "../../../infrastructure/storage/localStorageUtil";
 
 export default function CompanyDashboard() {
-  const [companyName, setCompanyName] = useState(
-    localStorageUtil.getCompanyName() || "Company"
-  );
+  const [companyName, setCompanyName] = useState(null);
+
 
   const [jobPosts, setJobPosts] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -127,7 +126,7 @@ export default function CompanyDashboard() {
       <CompanyHeader />
 
       <div className="container py-4">
-        <WelcomeBanner companyName={companyName} />
+        <WelcomeBanner companyName={companyName || "Company"} />
 
         <div className="d-flex justify-content-between align-items-center mt-4 mb-2">
           <div>
