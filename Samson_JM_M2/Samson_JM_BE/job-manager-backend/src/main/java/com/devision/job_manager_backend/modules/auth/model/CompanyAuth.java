@@ -32,6 +32,10 @@ public class CompanyAuth {
 
     private String role;
 
+    private boolean isActivated;
+
+    private Instant createdAt;
+
     /**
      * Brute-force protection fields:
      * block auth after 5 failed attempts within 60 seconds.

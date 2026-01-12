@@ -20,6 +20,17 @@ spring:
               - openid
               - email
               - profile
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jasonais99@gmail.com
+    password: jfac npza phfy bxri
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 stripe:
   secret-key: sk_test_51ScUfpBB6o3QuzcAussrpixCQfUijPKcU9Eo3feMtV8eieqVV55X4sHNA6YEIRtVZk0AiqpETy0WTdpiypFRwTrw00u95dA9ps
   webhook-secret: whsec_d1d63da6ddd9bda4b242abc1578f7f33c60704a03283cc95f9e5e474f71adf7f
@@ -47,3 +58,7 @@ jobapplicant:
 
   header:
     x-api-key: fc74e7ba6e8b286bb9baef14f7bc59505e3429ce5b4be5bdb029d1a345c500ca2615d271123
+
+app:
+  frontend:
+    verify-url: http://localhost:3000/verify-email

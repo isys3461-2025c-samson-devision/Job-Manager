@@ -38,12 +38,25 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> {})
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType("application/json");
+                    response.getWriter().write("""
+                        {
+                        "error": "Unauthorized",
+                        "message": "Authentication required"
+                        }
+                    """);
+                })
             )
             .authorizeHttpRequests(auth -> auth
 
                 // ===== PUBLIC AUTH / OAUTH =====
                 .requestMatchers(
+                    "/api/auth/verify-email",
                     "/api/auth/**",
                     "/oauth2/**",
                     "/oauth2/authorization/**",

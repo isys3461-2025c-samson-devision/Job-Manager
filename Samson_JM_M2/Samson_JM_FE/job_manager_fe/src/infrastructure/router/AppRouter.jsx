@@ -11,6 +11,7 @@ import SubscriptionPage from "../../modules/subscription/pages/SubscriptionPage"
 import PaymentPage from "../../modules/subscription/pages/PaymentPage";
 import SuccessPaymentPage from "../../modules/subscription/pages/SuccessPaymentPage";
 import CancelPaymentPage from "../../modules/subscription/pages/CancelPaymentPage";
+import VerifyEmailPage from "../../modules/auth/pages/VerifyEmailPage";
 
 export default function AppRouter() {
   return (
@@ -19,6 +20,7 @@ export default function AppRouter() {
         <Route path="/" element={<SplashScreen />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/oauth/success" element={<OAuthSuccessPage />} />
         <Route path="/oauth/complete-profile" element={<CompleteProfilePage />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />

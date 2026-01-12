@@ -5,24 +5,33 @@ import com.devision.job_manager_backend.modules.auth.dto.request.OAuthCompleteRe
 import com.devision.job_manager_backend.modules.auth.dto.request.RegisterRequest;
 import com.devision.job_manager_backend.modules.auth.dto.response.AuthResponse;
 import com.devision.job_manager_backend.modules.auth.model.CompanyAuth;
+import com.devision.job_manager_backend.modules.auth.model.EmailVerificationToken;
 import com.devision.job_manager_backend.modules.auth.repository.CompanyAuthRepository;
+import com.devision.job_manager_backend.modules.auth.service.external.EmailService;
 import com.devision.job_manager_backend.modules.auth.service.internal.AuthInternalService;
 import com.devision.job_manager_backend.modules.company.model.Company;
 import com.devision.job_manager_backend.modules.company.repository.CompanyRepository;
+import com.devision.job_manager_backend.modules.auth.repository.EmailVerificationTokenRepository;
 import com.devision.job_manager_backend.security.JwtService;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthInternalService {
 
     private final CompanyAuthRepository companyAuthRepository;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+    private final EmailService emailService;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService; // ✅ INJECTED
@@ -32,6 +41,8 @@ public class AuthServiceImpl implements AuthInternalService {
 
     @Override
     public void registerCompany(RegisterRequest request) {
+
+        String token = UUID.randomUUID().toString();
 
         if (companyAuthRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered");
@@ -47,11 +58,28 @@ public class AuthServiceImpl implements AuthInternalService {
         auth.setPhoneNumber(request.getPhoneNumber());
         auth.setCountry(request.getCountry());
 
+        auth.setActivated(false);
+        auth.setCreatedAt(Instant.now());
+
         auth.setFailedLoginCount(0);
         auth.setFirstFailedAt(null);
         auth.setLockUntil(null);
 
         companyAuthRepository.save(auth);
+
+        emailVerificationTokenRepository.save(
+            new EmailVerificationToken(
+                null,
+                token,
+                auth.getId(),
+                auth.getEmail(),
+                Instant.now().plus(24, ChronoUnit.HOURS)
+            )
+        );
+        
+        emailService.sendVerificationEmail(auth.getEmail(), token);
+
+
     }
 
     @Override
@@ -69,6 +97,13 @@ public class AuthServiceImpl implements AuthInternalService {
                     "Company account is deactivated"
             );
         }
+
+        if (!auth.isActivated()) {
+            throw new RuntimeException(
+                "Please verify your email before logging in"
+            );
+        }
+
 
         Instant now = Instant.now();
 

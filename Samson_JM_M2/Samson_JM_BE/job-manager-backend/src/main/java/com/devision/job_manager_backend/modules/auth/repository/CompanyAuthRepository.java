@@ -10,7 +10,14 @@ public interface CompanyAuthRepository
 
     Optional<CompanyAuth> findByEmail(String email);
 
+    Optional<CompanyAuth> findById(String id);
+
     boolean existsByEmail(String email);
 
     boolean existsByRole(String role);
+
+    boolean existsByIsActivated(boolean isActivated);
+
+
 }
+
