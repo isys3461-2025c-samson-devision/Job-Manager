@@ -66,7 +66,8 @@ public class SecurityConfig {
 
                 // ===== JA - PUBLIC =====
                 .requestMatchers("/api/companies/**").permitAll()
-                .requestMatchers("/api/jobposts/**").permitAll()   // 👈 PUBLIC
+                .requestMatchers("/api/jobposts/**").permitAll()   
+                .requestMatchers("/api/search").permitAll()
 
                 // ===== WEBHOOK =====
                 .requestMatchers("/api/payments/webhook/**").permitAll()

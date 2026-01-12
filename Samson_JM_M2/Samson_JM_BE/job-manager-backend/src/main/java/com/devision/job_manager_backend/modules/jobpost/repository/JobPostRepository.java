@@ -2,6 +2,7 @@ package com.devision.job_manager_backend.modules.jobpost.repository;
 
 import com.devision.job_manager_backend.modules.jobpost.model.*;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -48,4 +49,23 @@ public interface JobPostRepository extends MongoRepository<JobPost, String> {
    )
 
    void updateCompanyNameByCompanyId(String companyId, String companyName);
+
+   @Query("""
+   {
+   isPublished: true,
+   $or: [
+      { title:       { $regex: ?0, $options: 'i' } },
+      { description: { $regex: ?0, $options: 'i' } },
+      { location:    { $regex: ?0, $options: 'i' } },
+      { companyName: { $regex: ?0, $options: 'i' } },
+
+      { technicalSkills: { $regex: ?0, $options: 'i' } },
+      { categories:      { $regex: ?0, $options: 'i' } }
+   ]
+   }
+   """)
+   List<JobPost> searchJobPosts(String keyword);
+
+
+
 }
