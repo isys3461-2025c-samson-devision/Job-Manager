@@ -30,6 +30,7 @@ public class Company {
     private String street;
     private String city;
     private String country;
+    private Boolean isActivated;
 
     //Public profile content
     private String aboutUs;

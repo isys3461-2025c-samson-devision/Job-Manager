@@ -3,8 +3,12 @@ package com.devision.job_manager_backend.modules.company.service;
 import java.time.Instant;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.devision.job_manager_backend.modules.auth.model.CompanyAuth;
 import com.devision.job_manager_backend.modules.auth.repository.CompanyAuthRepository;
@@ -44,6 +48,7 @@ public class CompanyService {
                     .companyName(auth.getCompanyName())
                     .phoneNumber(auth.getPhoneNumber())
                     .country(auth.getCountry())
+                    .isActivated(true)
                     .createdAt(now)
                     .updatedAt(now)
                     .build();
@@ -51,6 +56,22 @@ public class CompanyService {
                 return companyRepository.save(company);
             });
     }
+
+    @Transactional
+    public void setActivation(String userId, boolean isActivated) {
+        Company company = companyRepository.findByUserId(userId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Company not found"
+            ));
+
+
+        company.setIsActivated(isActivated);
+        company.setUpdatedAt(Instant.now());
+
+        companyRepository.save(company);
+    }
+
 
     public Company updateCompany(String userId, UpdateCompanyRequest request) {
 

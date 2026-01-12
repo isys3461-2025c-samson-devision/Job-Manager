@@ -59,6 +59,16 @@ public class AuthServiceImpl implements AuthInternalService {
 
         CompanyAuth auth = companyAuthRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        
+        Company company = companyRepository.findByUserId(auth.getId())
+                .orElseThrow(() -> new RuntimeException("Company profile not found"));
+
+        if (!Boolean.TRUE.equals(company.getIsActivated())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Company account is deactivated"
+            );
+        }
 
         Instant now = Instant.now();
 

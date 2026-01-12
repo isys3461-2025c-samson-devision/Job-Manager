@@ -50,6 +50,7 @@ public class CompanyController {
             .street(company.getStreet())
             .city(company.getCity())
             .country(company.getCountry())
+            .isActivated(company.getIsActivated())
             .aboutUs(company.getAboutUs())
             .whoWeAreLookingFor(company.getWhoWeAreLookingFor())
             .logoUrl(company.getLogoUrl())

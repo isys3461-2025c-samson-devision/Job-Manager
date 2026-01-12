@@ -16,6 +16,7 @@ public class CompanyResponse {
     private String street;
     private String city;
     private String country;
+    private Boolean isActivated;
     private String aboutUs;
     private String whoWeAreLookingFor;
     private String logoUrl;

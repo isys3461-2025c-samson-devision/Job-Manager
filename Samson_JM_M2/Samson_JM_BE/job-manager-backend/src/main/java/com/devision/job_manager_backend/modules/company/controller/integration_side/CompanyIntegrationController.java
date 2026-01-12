@@ -58,4 +58,17 @@ public class CompanyIntegrationController {
         companyRepository.deleteByUserId(userId);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{userId}/deactivate")
+    public ResponseEntity<Void> deactivate(@PathVariable String userId) {
+        companyService.setActivation(userId, false);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{userId}/activate")
+    public ResponseEntity<Void> activate(@PathVariable String userId) {
+        companyService.setActivation(userId, true);
+        return ResponseEntity.noContent().build();
+    }
+
 }
