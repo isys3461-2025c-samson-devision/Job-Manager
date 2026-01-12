@@ -5,6 +5,7 @@ import com.devision.job_manager_backend.modules.jobpost.dto.request.UpdateJobPos
 import com.devision.job_manager_backend.modules.jobpost.dto.response.JobPostDetailResponse;
 import com.devision.job_manager_backend.modules.jobpost.dto.response.JobPostSummaryResponse;
 import com.devision.job_manager_backend.modules.jobpost.service.company_side.JobPostInternalService;
+import com.devision.job_manager_backend.modules.jobpost.dto.response.JobPostApplicantResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -111,4 +112,19 @@ public class CompanyJobPostController {
         jobPostService.setPublishStatus(companyId, jobPostId, publish);
         return ResponseEntity.noContent().build();
     }
+
+    //=========================
+    // APPLICANTS
+    //=========================
+    @GetMapping("/{jobPostId}/applicants")
+public ResponseEntity<List<JobPostApplicantResponse>> getApplicantsByJobPost(
+        Authentication authentication,
+        @PathVariable String jobPostId
+) {
+    String companyId = authentication.getName();
+    return ResponseEntity.ok(
+            jobPostService.getApplicantsByJobPost(companyId, jobPostId)
+    );
+}
+
 }

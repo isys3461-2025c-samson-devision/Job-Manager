@@ -19,4 +19,7 @@ public interface JobPostInternalService {
     // applicant side
     List<JobPostSummaryResponse> getPublicJobPosts(JobPostFilterRequest filter);
     JobPostDetailResponse getPublicJobPostDetail(String jobPostId);
+
+    // applications
+    List<JobPostApplicantResponse> getApplicantsByJobPost(String companyId, String jobPostId);
 }

@@ -17,7 +17,15 @@ import com.devision.job_manager_backend.modules.jobpost.dto.response.JobPostSumm
 import com.devision.job_manager_backend.modules.jobpost.mapper.JobPostMapper;
 import com.devision.job_manager_backend.modules.jobpost.model.JobPost;
 import com.devision.job_manager_backend.modules.jobpost.model.SalaryType;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
+
+import com.devision.job_manager_backend.modules.jobpost.dto.response.JobPostApplicantResponse;
+import com.devision.job_manager_backend.modules.jobpost.controller.integration_side.ApplicationByJobResponse;
 import com.devision.job_manager_backend.modules.jobpost.repository.JobPostRepository;
+
+import org.springframework.http.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +34,34 @@ public class JobPostServiceImpl implements JobPostInternalService {
     private final JobPostRepository jobPostRepository;
     private final JobPostMapper jobPostMapper;
     private final CompanyService companyService;
+
+    private final RestTemplate restTemplate;
+
+    @Value("${application-service.base-url}")
+    private String applicationServiceBaseUrl;
+
+    @Value("${application-service.auth-token:}")
+    private String apiKey;
+
+    public ApplicationByJobResponse fetchApps(String jobPostId) {
+        String url = applicationServiceBaseUrl + "/application/job/" + jobPostId;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-key", apiKey);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<ApplicationByJobResponse> resp = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                ApplicationByJobResponse.class
+        );
+
+        return resp.getBody();
+    }
+
 
     /* =========================
        COMPANY SIDE
@@ -204,4 +240,36 @@ public class JobPostServiceImpl implements JobPostInternalService {
             throw new IllegalArgumentException("Salary range requires min and max");
         }
     }
+
+    @Override
+    public List<JobPostApplicantResponse> getApplicantsByJobPost(String companyId, String jobPostId) {
+
+        // 1) ownership check (reuse logic y chang các hàm khác)
+        JobPost jobPost = jobPostRepository.findByIdAndCompanyId(jobPostId, companyId);
+        if (jobPost == null) {
+            throw new RuntimeException("Job post not found or not owned by company");
+        }
+
+        // 2) call application-service
+        String url = applicationServiceBaseUrl + "/application/job/" + jobPostId;
+
+        ApplicationByJobResponse res = restTemplate.getForObject(url, ApplicationByJobResponse.class);
+        if (res == null || !res.isSuccess() || res.getData() == null) {
+            return List.of();
+        }
+
+        // 3) filter safety by companyId (vì response có companyId)
+        return res.getData().stream()
+                .filter(x -> companyId.equals(x.getCompanyId()))
+                .map(x -> new JobPostApplicantResponse(
+                        x.getId(),
+                        x.getAuthId(),
+                        x.getStatus(),
+                        x.getCreatedAt(),
+                        x.getCvUrl(),
+                        x.getCoverLetterUrl()
+                ))
+                .toList();
+    }
+
 }
