@@ -1,0 +1,16 @@
+Test with Transaction payment
+stripe listen --forward-to localhost:8080/api/payments/webhook/stripe
+
+BE
+./mvnw spring-boot:run
+
+FE
+npm start
+
+Database: MongoDB
+
+Run JA BE
+For Applicants with CV and CoverLetter
+API GATEWAY - EURUKA Server - job-post-service - media-service - application-service
+For all Applicants
+service auth - profile - search-profile
